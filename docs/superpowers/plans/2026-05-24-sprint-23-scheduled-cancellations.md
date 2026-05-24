@@ -71,11 +71,11 @@
 - Modify: `README.md`
 - Modify: `docs/superpowers/plans/2026-05-24-sprint-23-scheduled-cancellations.md`
 
-- [ ] Update README with S23 command and behavior.
-- [ ] Push branch and check it out on `/opt/billing`.
-- [ ] Run Laravel Pint and full Laravel tests on `/opt/billing`.
-- [ ] Run Go checks on `/opt/billing`.
-- [ ] Run Docker Compose config/build and secret scan.
-- [ ] Verify `/admin/ops-health`, scheduled task route behavior, and `/up` smoke behavior.
+- [x] Update README with S23 command and behavior.
+- [x] Push branch and check it out on `/opt/billing`.
+- [x] Run Laravel Pint and full Laravel tests on `/opt/billing`.
+- [x] Run Go checks on `/opt/billing`.
+- [x] Run Docker Compose config/build and secret scan.
+- [x] Verify `/admin/ops-health`, scheduled task route behavior, and `/up` smoke behavior.
 - [ ] Mark verification steps complete in this plan, commit, and push.
 - [ ] Open PR to `develop`, wait for CI, merge, delete feature branch, and deploy `/opt/billing`.

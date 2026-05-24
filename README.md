@@ -259,6 +259,15 @@ Routes:
 
 Customers can request immediate or period-end cancellation for active services. Local services are cancelled immediately; provider-backed services queue an idempotent provider cancel action and keep the service active until the provider action succeeds. Cancellation requests are audited in `service_cancellations`. Admins with `wallets.adjust` can credit service refunds from the service runbook, recorded in ledger entries with `source_type=service_refund`.
 
+## Sprint 23 Scheduled Cancellation Execution
+
+Commands:
+
+- `php artisan service-cancellations:process-scheduled`
+- `php artisan scheduled-tasks:run service_cancellations_process_scheduled`
+
+Due period-end cancellation requests are processed automatically. Local services are marked `cancelled` when their `expires_at` has passed; provider-backed services queue an idempotent provider cancel action and keep the service active until the provider worker succeeds. Successful provider cancel jobs now complete the linked `service_cancellations` row, and the scheduled processor is visible in ops health, scheduled task runs, and ops alerts.
+
 ## Sprint 25 Ops Incident Workbench
 
 Routes:
