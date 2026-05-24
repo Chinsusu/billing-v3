@@ -2,8 +2,10 @@
 
 namespace Database\Seeders;
 
+use App\Models\Invoice;
 use App\Models\Product;
 use App\Models\User;
+use App\Models\Wallet;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
 
@@ -24,6 +26,23 @@ class DatabaseSeeder extends Seeder
             ['name' => 'Billing Customer', 'password' => Hash::make('Password123!')]
         );
         $customer->assignRole('customer');
+        Wallet::firstOrCreate(
+            ['user_id' => $customer->id, 'currency' => 'VND'],
+            ['balance_amount' => 0]
+        );
+        Invoice::firstOrCreate(
+            ['invoice_number' => 'INV-20260524-0001'],
+            [
+                'user_id' => $customer->id,
+                'status' => 'open',
+                'total_amount' => 99000,
+                'currency' => 'VND',
+                'description' => 'Seed invoice for Sprint 2 wallet payment validation.',
+                'lines' => [
+                    ['description' => 'Vietnam Proxy 30 Days', 'amount' => 99000],
+                ],
+            ]
+        );
 
         Product::firstOrCreate(
             ['code' => 'proxy-vn-30d'],

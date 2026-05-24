@@ -4,7 +4,7 @@ Sprint 1 foundation for a Proxy/VPS billing and provisioning platform.
 
 ## Stack
 
-- `apps/backend-laravel`: Laravel control-plane with session auth, RBAC, dashboards, and product catalog.
+- `apps/backend-laravel`: Laravel control-plane with session auth, RBAC, dashboards, product catalog, wallet, invoices, and bank webhook sandbox.
 - `apps/worker-go`: Go data-plane worker skeleton.
 - `infra/docker-compose.dev.yml`: local PostgreSQL, RabbitMQ, Redis, and Mailpit.
 - `.github/workflows/ci.yml`: backend, worker, infra, and secret-scan checks.
@@ -34,6 +34,33 @@ Routes:
 - `GET /products`
 - `GET /admin`
 - `GET /admin/products`
+
+## Sprint 2 Finance
+
+Routes:
+
+- `GET /wallet`
+- `POST /wallet/top-ups`
+- `GET /wallet/top-ups/{paymentIntent}`
+- `GET /invoices/{invoice}`
+- `POST /invoices/{invoice}/pay`
+- `GET /admin/invoices`, `POST /admin/invoices`
+- `GET /admin/payment-events`
+- `POST /webhooks/bank/sandbox`
+
+Sandbox webhook payload:
+
+```json
+{
+  "reference": "TOPUP-20260524-ABCDEFGH",
+  "amount": 150000,
+  "currency": "VND",
+  "transaction_id": "BANK-TXN-0001",
+  "paid_at": "2026-05-24T09:00:00+07:00"
+}
+```
+
+Sign the exact JSON body with HMAC-SHA256 and send the hex digest in `X-Billing-Signature` using `BANK_SANDBOX_WEBHOOK_SECRET`.
 
 Seeded accounts after `php artisan db:seed`:
 
