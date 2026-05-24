@@ -27,3 +27,8 @@ Schedule::command('scheduled-tasks:run provider_actions_recover_stuck')
     ->everyFiveMinutes()
     ->withoutOverlapping()
     ->name('provider_actions_recover_stuck');
+
+Schedule::command('scheduled-tasks:run ops_alerts_evaluate')
+    ->everyMinute()
+    ->withoutOverlapping()
+    ->name('ops_alerts_evaluate');

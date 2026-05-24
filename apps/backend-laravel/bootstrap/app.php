@@ -1,5 +1,6 @@
 <?php
 
+use App\Console\Commands\EvaluateOpsAlertsCommand;
 use App\Console\Commands\ExpireServicesCommand;
 use App\Console\Commands\RecoverStuckProviderActionJobsCommand;
 use App\Console\Commands\RunScheduledTaskCommand;
@@ -21,6 +22,7 @@ return Application::configure(basePath: dirname(__DIR__))
     )
     ->withCommands([
         ExpireServicesCommand::class,
+        EvaluateOpsAlertsCommand::class,
         RecoverStuckProviderActionJobsCommand::class,
         RunScheduledTaskCommand::class,
         SmokeProvisioningRuntimeCommand::class,
