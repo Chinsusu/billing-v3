@@ -7,6 +7,7 @@ use App\Models\ProviderActionJob;
 use App\Models\ProvisioningJob;
 use App\Models\ScheduledTaskRun;
 use App\Models\Service;
+use Carbon\CarbonInterface;
 
 class OpsHealthSnapshot
 {
@@ -33,7 +34,7 @@ class OpsHealthSnapshot
         ];
     }
 
-    private function taskHealth($now): array
+    private function taskHealth(CarbonInterface $now): array
     {
         return collect(self::TASKS)->mapWithKeys(function (int $freshMinutes, string $task) use ($now): array {
             $lastRun = ScheduledTaskRun::where('task', $task)->latest('started_at')->first();
