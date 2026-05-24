@@ -5,6 +5,7 @@ namespace App\Services\Provisioning\Drivers;
 use App\Models\ProvisioningJob;
 use App\Models\ProvisioningProviderAccount;
 use App\Services\Provisioning\JsonPath;
+use App\Services\Provisioning\ProvisioningExecutionRecorder;
 use App\Services\Provisioning\ProvisioningResult;
 use Illuminate\Http\Client\PendingRequest;
 use Illuminate\Support\Facades\Http;
@@ -12,7 +13,10 @@ use RuntimeException;
 
 class GenericHttpProvisioningDriver
 {
-    public function __construct(private readonly JsonPath $jsonPath) {}
+    public function __construct(
+        private readonly JsonPath $jsonPath,
+        private readonly ProvisioningExecutionRecorder $recorder,
+    ) {}
 
     public function execute(ProvisioningJob $job, ProvisioningProviderAccount $account): ProvisioningResult
     {
@@ -22,13 +26,24 @@ class GenericHttpProvisioningDriver
             throw new RuntimeException('Provider account endpoint is not configured.');
         }
 
-        $response = $this->pendingRequest($account)->post($url, $this->requestBody($job, $account, $provider));
+        $requestBody = $this->requestBody($job, $account, $provider);
+        $log = $this->recorder->startForJob($job, $account, 'provision_service', $account->driver, $url, $requestBody);
+        $startedAt = microtime(true);
+
+        $response = $this->pendingRequest($account)->post($url, $requestBody);
+        $durationMs = $this->recorder->durationSince($startedAt);
+        $data = $response->json();
+        $data = is_array($data) ? $data : [];
+
         if (! $response->successful()) {
+            $this->recorder->failure($log, $durationMs, 'provider_http_error', "Provider returned HTTP {$response->status()}.", $response->status(), $data);
+
             throw new RuntimeException("Provider returned HTTP {$response->status()}.");
         }
 
-        $data = $response->json();
-        if (! is_array($data)) {
+        if ($data === []) {
+            $this->recorder->failure($log, $durationMs, 'provider_invalid_json', 'Provider returned invalid JSON.', $response->status());
+
             throw new RuntimeException('Provider returned invalid JSON.');
         }
 
@@ -37,12 +52,18 @@ class GenericHttpProvisioningDriver
         $config = $this->jsonPath->get($data, $account->response_config_path);
 
         if (! is_string($externalId) || $externalId === '') {
+            $this->recorder->failure($log, $durationMs, 'provider_missing_external_id', 'Provider response did not include an external id.', $response->status(), $data);
+
             throw new RuntimeException('Provider response did not include an external id.');
         }
 
         if (! in_array(strtolower((string) $status), ['active', 'processed', 'success'], true)) {
+            $this->recorder->failure($log, $durationMs, 'provider_unsupported_status', "Provider returned unsupported status {$status}.", $response->status(), $data);
+
             throw new RuntimeException("Provider returned unsupported status {$status}.");
         }
+
+        $this->recorder->success($log, $durationMs, $response->status(), $data);
 
         return new ProvisioningResult(
             status: 'processed',

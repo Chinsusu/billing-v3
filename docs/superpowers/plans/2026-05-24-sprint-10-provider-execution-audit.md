@@ -46,12 +46,12 @@
 - Modify: `apps/backend-laravel/app/Models/Service.php`
 - Modify: `apps/backend-laravel/app/Models/ProvisioningProviderAccount.php`
 
-- [ ] Add log table with nullable job/service/provider account foreign keys.
-- [ ] Add model casts for request/response payload JSON.
-- [ ] Add relationships from jobs, services, and provider accounts to logs.
-- [ ] Add redactor tests through feature tests using secret-like payload fields.
-- [ ] Run targeted Laravel audit tests and verify failures move to missing execution code.
-- [ ] Commit audit model slice.
+- [x] Add log table with nullable job/service/provider account foreign keys.
+- [x] Add model casts for request/response payload JSON.
+- [x] Add relationships from jobs, services, and provider accounts to logs.
+- [x] Add redactor tests through feature tests using secret-like payload fields.
+- [x] Run targeted Laravel audit tests and verify failures move to missing execution code.
+- [x] Commit audit model slice.
 
 ### Task 4: Laravel Executor Logging And Provider Account Test Harness
 
@@ -65,13 +65,13 @@
 - Modify: `apps/backend-laravel/routes/web.php`
 - Modify: `apps/backend-laravel/resources/views/admin/provisioning-provider-accounts/index.blade.php`
 
-- [ ] Record success/failure logs for sandbox executor calls.
-- [ ] Record success/failure logs for generic HTTP executor calls.
-- [ ] Normalize errors to codes such as `provider_http_error`, `provider_invalid_json`, `provider_missing_external_id`, and `provider_unsupported_status`.
-- [ ] Add provider account test service and controller.
-- [ ] Add test button to provider account admin index.
-- [ ] Run provider account test harness and executor audit tests until green.
-- [ ] Commit executor logging and test harness slice.
+- [x] Record success/failure logs for sandbox executor calls.
+- [x] Record success/failure logs for generic HTTP executor calls.
+- [x] Normalize errors to codes such as `provider_http_error`, `provider_invalid_json`, `provider_missing_external_id`, and `provider_unsupported_status`.
+- [x] Add provider account test service and controller.
+- [x] Add test button to provider account admin index.
+- [x] Run provider account test harness and executor audit tests until green.
+- [x] Commit executor logging and test harness slice.
 
 ### Task 5: Admin Provisioning Job Detail
 

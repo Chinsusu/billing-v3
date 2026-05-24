@@ -26,7 +26,7 @@ class ProvisioningExecutor
         }
 
         return match ($driver) {
-            'sandbox' => $this->sandboxDriver->execute($job),
+            'sandbox' => $this->sandboxDriver->execute($job, $account),
             'generic_http' => $this->genericHttpDriver->execute($job, $account ?? throw new RuntimeException('Generic HTTP provider account is required.')),
             default => throw new RuntimeException("Unsupported provisioning driver {$driver}."),
         };
