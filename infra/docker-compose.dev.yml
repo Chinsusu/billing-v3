@@ -97,7 +97,8 @@ services:
       dockerfile: Dockerfile.dev
     container_name: billing_v3_scheduler
     working_dir: /app
-    command: ["sh", "-lc", "composer install --no-interaction --prefer-dist && if [ ! -f .env ] || ! grep -q '^DB_CONNECTION=pgsql$' .env; then old_key=$(grep '^APP_KEY=' .env 2>/dev/null | cut -d= -f2-); cp .env.compose.example .env; if [ -n \"$$old_key\" ]; then sed -i \"s|^APP_KEY=.*|APP_KEY=$$old_key|\" .env; else php artisan key:generate --ansi --force; fi; fi && php artisan config:clear && php artisan migrate --force && php artisan schedule:work"]
+    command: ["sh", "-lc", "composer install --no-interaction --prefer-dist && if [ ! -f .env ] || ! grep -q '^DB_CONNECTION=pgsql$' .env; then old_key=$(grep '^APP_KEY=' .env 2>/dev/null | cut -d= -f2-); cp .env.compose.example .env; if [ -n \"$$old_key\" ]; then sed -i \"s|^APP_KEY=.*|APP_KEY=$$old_key|\" .env; else php artisan key:generate --ansi --force; fi; fi && php artisan config:clear && php artisan migrate --force && exec php artisan schedule:work"]
+    restart: unless-stopped
     environment:
       APP_ENV: local
       APP_DEBUG: "true"
