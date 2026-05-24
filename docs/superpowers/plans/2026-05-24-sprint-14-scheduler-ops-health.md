@@ -1109,7 +1109,7 @@ git push origin feature/sprint-14-scheduler-ops-health
 - Modify: `README.md`
 - Modify: `docs/superpowers/plans/2026-05-24-sprint-14-scheduler-ops-health.md`
 
-- [ ] Update README with S14 scheduler and ops health routes/commands.
+- [x] Update README with S14 scheduler and ops health routes/commands.
 
 Add section:
 

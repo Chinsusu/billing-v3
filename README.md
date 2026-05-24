@@ -173,6 +173,19 @@ Overdue provider-backed services with a configured suspend path are queued as `s
 
 The provider action worker processes `suspend`, `cancel`, and `sync` jobs through Laravel, where encrypted provider secrets are available. Failed attempts are requeued with backoff until `max_attempts`, then marked `failed`. Stale `processing` jobs can be recovered with `provider-actions:recover-stuck`. Admins can inspect provider action jobs and retry failed jobs from `/admin/provider-action-jobs`.
 
+## Sprint 14 Scheduler Ops Health
+
+Routes and commands:
+
+- `GET /admin/ops-health`
+- `php artisan scheduled-tasks:run bank_sync_payments`
+- `php artisan scheduled-tasks:run provider_actions_work`
+- `php artisan scheduled-tasks:run services_expire`
+- `php artisan scheduled-tasks:run provider_actions_recover_stuck`
+- `php artisan schedule:work`
+
+The dev Compose runtime includes a `scheduler` service that runs Laravel `schedule:work`. It records each scheduled command execution in `scheduled_task_runs` and lets admins inspect scheduler freshness, queue counts, failed jobs, overdue services, and enabled bank integrations from `/admin/ops-health`.
+
 ## Sprint 8 Shared Postgres Runtime
 
 The dev Compose runtime runs Laravel and the worker against the same Postgres database:
