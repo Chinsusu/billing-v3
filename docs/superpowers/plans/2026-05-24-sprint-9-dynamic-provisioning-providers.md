@@ -52,14 +52,14 @@
 - Modify: `apps/backend-laravel/database/seeders/DatabaseSeeder.php`
 - Modify: `apps/backend-laravel/resources/views/admin/dashboard.blade.php`
 
-- [ ] Add `provisioning_provider_accounts.manage` permission and assign it to `super_admin` and `ops_admin`.
-- [ ] Add model fillable fields and encrypted `api_key` cast.
-- [ ] Implement `api_key_last_four` handling when secret is present.
-- [ ] Seed a `sandbox` provider account with driver `sandbox`, no API key, enabled.
-- [ ] Implement admin index/create/edit/update routes and views.
-- [ ] Ensure views never render raw `api_key`.
-- [ ] Run provider account admin tests and fix failures.
-- [ ] Commit provider account admin slice.
+- [x] Add `provisioning_provider_accounts.manage` permission and assign it to `super_admin` and `ops_admin`.
+- [x] Add model fillable fields and encrypted `api_key` cast.
+- [x] Implement `api_key_last_four` handling when secret is present.
+- [x] Seed a `sandbox` provider account with driver `sandbox`, no API key, enabled.
+- [x] Implement admin index/create/edit/update routes and views.
+- [x] Ensure views never render raw `api_key`.
+- [x] Run provider account admin tests and fix failures.
+- [x] Commit provider account admin slice.
 
 ### Task 4: Product Mapping And Checkout Snapshot
 
