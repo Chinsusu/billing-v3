@@ -14,4 +14,13 @@ class OpsAlertEventController extends Controller
             'events' => OpsAlertEvent::with('rule')->latest('last_seen_at')->paginate(30),
         ]);
     }
+
+    public function show(OpsAlertEvent $opsAlertEvent): View
+    {
+        $opsAlertEvent->load(['rule', 'acknowledgedBy', 'resolvedBy']);
+
+        return view('admin.ops-alert-events.show', [
+            'event' => $opsAlertEvent,
+        ]);
+    }
 }

@@ -10,12 +10,13 @@
                 <tr>
                     <td>{{ $event->status }}</td>
                     <td>{{ $event->severity }}</td>
-                    <td>{{ $event->title }}</td>
+                    <td><a href="/admin/ops-alert-events/{{ $event->id }}">{{ $event->title }}</a></td>
                     <td>{{ $event->message }}</td>
                     <td>{{ $event->rule?->name ?? '-' }}</td>
                     <td>{{ $event->last_seen_at?->toDateTimeString() ?? '-' }}</td>
                     <td>{{ $event->delivery_status ?? '-' }} {{ $event->delivery_error ? '('.$event->delivery_error.')' : '' }}</td>
                     <td>
+                        <a class="button secondary" href="/admin/ops-alert-events/{{ $event->id }}">View</a>
                         @if ($event->status === 'open')
                             <form method="POST" action="/admin/ops-alert-events/{{ $event->id }}/acknowledge" style="display:inline">
                                 @csrf
