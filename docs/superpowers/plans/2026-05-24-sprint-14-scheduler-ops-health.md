@@ -44,9 +44,11 @@ Use this test file:
 namespace Tests\Feature;
 
 use App\Models\ScheduledTaskRun;
+use App\Services\Scheduler\ScheduledTaskRegistry;
 use App\Services\Scheduler\ScheduledTaskRunner;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Artisan;
+use RuntimeException;
 use Tests\TestCase;
 
 class ScheduledTaskRunTest extends TestCase
@@ -78,8 +80,9 @@ class ScheduledTaskRunTest extends TestCase
 
             return 0;
         });
+        $this->bindScheduledTasks(['test_success' => 'test:scheduled-task-succeeds']);
 
-        $exitCode = app(ScheduledTaskRunner::class)->run('test_success', 'test:scheduled-task-succeeds');
+        $exitCode = app(ScheduledTaskRunner::class)->run('test_success');
 
         $this->assertSame(0, $exitCode);
         $this->assertSame(1, ScheduledTaskRun::count());
@@ -111,8 +114,9 @@ class ScheduledTaskRunTest extends TestCase
 
             return 9;
         });
+        $this->bindScheduledTasks(['test_failure' => 'test:scheduled-task-fails']);
 
-        $exitCode = app(ScheduledTaskRunner::class)->run('test_failure', 'test:scheduled-task-fails');
+        $exitCode = app(ScheduledTaskRunner::class)->run('test_failure');
 
         $this->assertSame(9, $exitCode);
         $this->assertSame(1, ScheduledTaskRun::count());
@@ -126,6 +130,52 @@ class ScheduledTaskRunTest extends TestCase
         $this->assertNotNull($run->started_at);
         $this->assertNotNull($run->finished_at);
         $this->assertGreaterThanOrEqual($run->started_at, $run->finished_at);
+    }
+
+    public function test_runner_records_exception_output_and_truncates_snippets(): void
+    {
+        $outputPrefix = 'scheduled task emitted before exception ';
+        $errorPrefix = 'scheduled task exception message ';
+        $output = $outputPrefix . str_repeat('o', 4100);
+        $error = $errorPrefix . str_repeat('e', 4100);
+
+        Artisan::command('test:scheduled-task-throws', function () use ($output, $error): int {
+            $this->info($output);
+
+            throw new RuntimeException($error);
+        });
+        $this->bindScheduledTasks(['test_exception' => 'test:scheduled-task-throws']);
+
+        $exitCode = app(ScheduledTaskRunner::class)->run('test_exception');
+
+        $this->assertSame(1, $exitCode);
+        $this->assertSame(1, ScheduledTaskRun::count());
+        $run = ScheduledTaskRun::firstOrFail();
+        $this->assertSame('test_exception', $run->task);
+        $this->assertSame('test:scheduled-task-throws', $run->command);
+        $this->assertSame('failed', $run->status);
+        $this->assertSame(1, $run->exit_code);
+        $this->assertSame(4000, strlen($run->output));
+        $this->assertSame(4000, strlen($run->error));
+        $this->assertStringContainsString($outputPrefix, $run->output);
+        $this->assertStringContainsString($errorPrefix, $run->error);
+    }
+
+    private function bindScheduledTasks(array $tasks): void
+    {
+        $this->app->instance(ScheduledTaskRegistry::class, new class($tasks) extends ScheduledTaskRegistry {
+            /**
+             * @param array<string, string> $tasks
+             */
+            public function __construct(private readonly array $tasks)
+            {
+            }
+
+            public function all(): array
+            {
+                return $this->tasks;
+            }
+        });
     }
 }
 ```
@@ -272,16 +322,29 @@ namespace App\Services\Scheduler;
 
 use App\Models\ScheduledTaskRun;
 use Illuminate\Support\Facades\Artisan;
+use InvalidArgumentException;
+use Symfony\Component\Console\Output\BufferedOutput;
 use Throwable;
 
 class ScheduledTaskRunner
 {
     private const SNIPPET_LIMIT = 4000;
 
-    public function run(string $task, string $command): int
+    public function __construct(private readonly ScheduledTaskRegistry $registry)
     {
+    }
+
+    public function run(string $task): int
+    {
+        $command = $this->registry->commandFor($task);
+
+        if ($command === null) {
+            throw new InvalidArgumentException("Unknown scheduled task {$task}.");
+        }
+
         $startedAt = now();
         $started = microtime(true);
+        $outputBuffer = new BufferedOutput;
 
         $run = ScheduledTaskRun::create([
             'task' => $task,
@@ -291,8 +354,8 @@ class ScheduledTaskRunner
         ]);
 
         try {
-            $exitCode = Artisan::call($command);
-            $output = $this->snippet(Artisan::output());
+            $exitCode = Artisan::call($command, [], $outputBuffer);
+            $output = $this->snippet($outputBuffer->fetch());
             $error = $exitCode === 0 ? null : "Command exited with code {$exitCode}.";
 
             $run->forceFill([
@@ -311,7 +374,7 @@ class ScheduledTaskRunner
                 'finished_at' => now(),
                 'duration_ms' => (int) round((microtime(true) - $started) * 1000),
                 'exit_code' => 1,
-                'output' => $this->snippet(Artisan::output()),
+                'output' => $this->snippet($outputBuffer->fetch()),
                 'error' => $this->snippet($exception->getMessage()),
             ])->save();
 
@@ -360,7 +423,7 @@ class RunScheduledTaskCommand extends Command
             return self::FAILURE;
         }
 
-        return $runner->run($task, $command);
+        return $runner->run($task);
     }
 }
 ```
@@ -387,7 +450,7 @@ Run:
 ssh --% root@10.1.1.124 "cd /opt/billing && git fetch origin feature/sprint-14-scheduler-ops-health && git reset --hard origin/feature/sprint-14-scheduler-ops-health && docker compose -f infra/docker-compose.dev.yml exec -T backend sh -lc 'php artisan migrate --force && APP_ENV=testing php artisan test --filter=ScheduledTaskRunTest'"
 ```
 
-Expected: PASS with 4 tests.
+Expected: PASS with 5 tests.
 
 - [x] Commit implementation.
 

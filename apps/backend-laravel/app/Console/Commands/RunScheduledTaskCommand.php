@@ -23,6 +23,6 @@ class RunScheduledTaskCommand extends Command
             return self::FAILURE;
         }
 
-        return $runner->run($task, $command);
+        return $runner->run($task);
     }
 }
