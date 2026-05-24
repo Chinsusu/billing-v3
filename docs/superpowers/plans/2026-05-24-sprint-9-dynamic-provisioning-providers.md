@@ -75,15 +75,15 @@
 - Modify: `apps/backend-laravel/database/seeders/DatabaseSeeder.php`
 - Modify: `apps/backend-laravel/app/Services/Orders/OrderCheckoutService.php`
 
-- [ ] Add nullable product mapping columns: `provider_account_id`, `provider_plan_code`, `provider_region`, `provider_provision_path`, `provider_options`.
-- [ ] Cast `provider_options` to array and add relationship to `ProvisioningProviderAccount`.
-- [ ] Validate product provider fields and JSON options.
-- [ ] Pass provider accounts to product create/edit views.
-- [ ] Store provider mapping from product forms.
-- [ ] Assign seeded products to the seeded sandbox account.
-- [ ] In checkout, snapshot provider mapping into job payload, falling back to sandbox account when product mapping is blank.
-- [ ] Run product and checkout targeted tests and fix failures.
-- [ ] Commit product mapping slice.
+- [x] Add nullable product mapping columns: `provider_account_id`, `provider_plan_code`, `provider_region`, `provider_provision_path`, `provider_options`.
+- [x] Cast `provider_options` to array and add relationship to `ProvisioningProviderAccount`.
+- [x] Validate product provider fields and JSON options.
+- [x] Pass provider accounts to product create/edit views.
+- [x] Store provider mapping from product forms.
+- [x] Assign seeded products to the seeded sandbox account.
+- [x] In checkout, snapshot provider mapping into job payload, falling back to sandbox account when product mapping is blank.
+- [x] Run product and checkout targeted tests and fix failures.
+- [x] Commit product mapping slice.
 
 ### Task 5: Laravel Internal Executor And Drivers
 
