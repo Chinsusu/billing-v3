@@ -2,6 +2,10 @@
 @section('content')
 <div class="panel">
     <h1>Ops Health</h1>
+    <p>
+        <a class="button secondary" href="/admin/scheduled-task-runs">Scheduled Task Runs</a>
+        <a class="button secondary" href="/admin/ops-alert-events">Ops Alert Events</a>
+    </p>
     <div class="grid">
         <div class="panel">
             <strong>{{ $provisioningQueue['status'] }}</strong><br>
@@ -35,9 +39,15 @@
         <tbody>
             @foreach ($tasks as $task => $health)
                 <tr>
-                    <td>{{ $task }}</td>
+                    <td><a href="/admin/scheduled-task-runs?task={{ $task }}">{{ $task }}</a></td>
                     <td>{{ $health['status'] }}</td>
-                    <td>{{ $health['lastRun']?->started_at?->toDateTimeString() ?? '-' }}</td>
+                    <td>
+                        @if ($health['lastRun'])
+                            <a href="/admin/scheduled-task-runs/{{ $health['lastRun']->id }}">{{ $health['lastRun']->started_at?->toDateTimeString() ?? '-' }}</a>
+                        @else
+                            -
+                        @endif
+                    </td>
                     <td>{{ $health['lastRun']?->duration_ms ?? '-' }}</td>
                     <td>{{ $health['lastRun']?->exit_code ?? '-' }}</td>
                     <td>{{ $health['message'] }}</td>

@@ -23,6 +23,7 @@
         <a class="button secondary" href="/admin/provisioning-jobs">Provisioning Jobs</a>
         <a class="button secondary" href="/admin/ops-health">Ops Health</a>
         <a class="button secondary" href="/admin/ops-alert-events">Ops Alerts</a>
+        <a class="button secondary" href="/admin/scheduled-task-runs">Scheduled Task Runs</a>
     </p>
 </div>
 @endsection
