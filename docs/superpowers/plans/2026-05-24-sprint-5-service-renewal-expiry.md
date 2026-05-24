@@ -295,7 +295,7 @@ docker run --rm -v /opt/billing/apps/worker-go:/app -w /app golang:1.26.3 go tes
 - [x] Run Docker compose config and secret scan.
 - [x] Commit implementation.
 - [x] Push `feature/sprint-5-service-renewal-expiry`.
-- [ ] Open PR to `develop`.
-- [ ] Wait for GitHub CI.
-- [ ] Merge after CI passes.
-- [ ] Update `/opt/billing` on the dev server, run migrations, seed, and recreate backend container.
+- [x] Open PR to `develop`.
+- [x] Wait for GitHub CI.
+- [x] Merge after CI passes.
+- [x] Update `/opt/billing` on the dev server, run migrations, seed, and recreate backend container.
