@@ -16,7 +16,7 @@ class ServiceProviderCancelController extends Controller
         ProviderActionJobDispatcher $providerActionJobs,
     ): RedirectResponse
     {
-        if (! $providerActions->hasConfiguredAction($service, 'cancel')) {
+        if (!$providerActions->hasConfiguredAction($service, 'cancel')) {
             return redirect('/admin/services')->withErrors(['provider' => 'Provider cancel path is not configured.']);
         }
 

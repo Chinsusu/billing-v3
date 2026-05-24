@@ -16,7 +16,7 @@ class ServiceProviderSyncController extends Controller
         ProviderActionJobDispatcher $providerActionJobs,
     ): RedirectResponse
     {
-        if (! $providerActions->hasConfiguredAction($service, 'sync')) {
+        if (!$providerActions->hasConfiguredAction($service, 'sync')) {
             return redirect('/admin/services')->withErrors(['provider' => 'Provider sync path is not configured.']);
         }
 
