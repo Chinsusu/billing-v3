@@ -17,20 +17,20 @@
 - Create: `docs/superpowers/plans/2026-05-24-sprint-24-provider-callbacks.md`
 
 - [x] Save S24 design spec and implementation plan.
-- [ ] Commit docs before production code changes.
+- [x] Commit docs before production code changes.
 
 ### Task 2: RED Tests
 
 **Files:**
 - Create: `apps/backend-laravel/tests/Feature/ProviderCallbackIntakeTest.php`
 
-- [ ] Add valid signed cancel callback reconciliation test.
-- [ ] Add duplicate provider event id idempotency assertion.
-- [ ] Add invalid signature rejection test.
-- [ ] Add unmatched callback audit test.
-- [ ] Add admin callback config write-only secret test.
-- [ ] Add admin service runbook callback history test.
-- [ ] Run targeted test on `/opt/billing` and verify RED.
+- [x] Add valid signed cancel callback reconciliation test.
+- [x] Add duplicate provider event id idempotency assertion.
+- [x] Add invalid signature rejection test.
+- [x] Add unmatched callback audit test.
+- [x] Add admin callback config write-only secret test.
+- [x] Add admin service runbook callback history test.
+- [x] Run targeted test on `/opt/billing` and verify RED.
 - [ ] Commit RED tests.
 
 ### Task 3: Schema and Provider Account Config
