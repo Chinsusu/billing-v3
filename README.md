@@ -76,6 +76,15 @@ docker run --rm --network host -v "$PWD/apps/worker-go:/app" -w /app golang:1.26
 
 S4 uses the sandbox processor only: pending jobs are claimed, services are marked `active` with a sandbox external ID on success, and failed jobs can be requeued by an admin without resetting attempts.
 
+## Sprint 5 Service Lifecycle
+
+Routes and commands:
+
+- `POST /services/{service}/renew`
+- `php artisan services:expire`
+
+Customers can renew active services from wallet balance. Renewal debits the wallet with source type `service_renewal`, extends `expires_at`, and stores renewal audit metadata on the service. The expiry command marks overdue active services as `expired`; provider renew/suspend API calls are still out of scope.
+
 Sandbox webhook payload:
 
 ```json

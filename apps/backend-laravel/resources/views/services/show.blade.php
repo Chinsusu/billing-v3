@@ -11,6 +11,12 @@
         <div><strong>Provisioned</strong><br>{{ $service->provisioned_at?->format('Y-m-d H:i') ?? '-' }}</div>
         <div><strong>Expires</strong><br>{{ $service->expires_at?->format('Y-m-d H:i') ?? '-' }}</div>
     </div>
+    @if ($service->status === 'active')
+        <form method="POST" action="/services/{{ $service->id }}/renew" style="margin-top:16px">
+            @csrf
+            <button type="submit">Renew</button>
+        </form>
+    @endif
 </div>
 
 <div class="panel">
