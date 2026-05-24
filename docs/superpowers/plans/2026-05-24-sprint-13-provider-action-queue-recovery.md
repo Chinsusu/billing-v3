@@ -24,10 +24,10 @@
 **Files:**
 - Create: `apps/backend-laravel/tests/Feature/ProviderActionJobQueueTest.php`
 
-- [ ] Add test that dispatching `suspend` creates a `provider_action_jobs` row with service, user, provider account, action, status `pending`, attempts `0`, max attempts `3`, idempotency key, and payload context.
-- [ ] Add test that dispatching the same idempotency key twice returns one job.
-- [ ] Run targeted Laravel test on `/opt/billing` and verify failure is missing model/table/dispatcher.
-- [ ] Commit RED queue schema tests.
+- [x] Add test that dispatching `suspend` creates a `provider_action_jobs` row with service, user, provider account, action, status `pending`, attempts `0`, max attempts `3`, idempotency key, and payload context.
+- [x] Add test that dispatching the same idempotency key twice returns one job.
+- [x] Run targeted Laravel test on `/opt/billing` and verify failure is missing model/table/dispatcher.
+- [x] Commit RED queue schema tests.
 
 ### Task 3: Implement Provider Action Job Schema And Dispatcher
 
@@ -38,12 +38,12 @@
 - Modify: `apps/backend-laravel/app/Models/Service.php`
 - Modify: `apps/backend-laravel/app/Models/ProvisioningProviderAccount.php`
 
-- [ ] Add `provider_action_jobs` migration with UUID primary key, service/user/provider account foreign keys, action/status/attempts/max attempts/idempotency/payload/available/processed/last error columns and indexes.
-- [ ] Add `ProviderActionJob` model with fillable fields, casts, and relationships.
-- [ ] Add relationships from service and provider account to action jobs.
-- [ ] Implement dispatcher with idempotent `enqueue`.
-- [ ] Run queue schema tests until green.
-- [ ] Commit provider action job schema slice.
+- [x] Add `provider_action_jobs` migration with UUID primary key, service/user/provider account foreign keys, action/status/attempts/max attempts/idempotency/payload/available/processed/last error columns and indexes.
+- [x] Add `ProviderActionJob` model with fillable fields, casts, and relationships.
+- [x] Add relationships from service and provider account to action jobs.
+- [x] Implement dispatcher with idempotent `enqueue`.
+- [x] Run queue schema tests until green.
+- [x] Commit provider action job schema slice.
 
 ### Task 4: RED Tests For Provider Action Worker Processing
 
