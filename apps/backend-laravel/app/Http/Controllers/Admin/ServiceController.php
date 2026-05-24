@@ -14,4 +14,19 @@ class ServiceController extends Controller
             'services' => Service::with('user')->latest()->paginate(20),
         ]);
     }
+
+    public function show(Service $service): View
+    {
+        return view('admin.services.show', [
+            'service' => $service->load([
+                'user',
+                'order',
+                'orderItem',
+                'product',
+                'provisioningJobs' => fn ($query) => $query->latest(),
+                'providerActionJobs' => fn ($query) => $query->latest(),
+                'provisioningExecutionLogs' => fn ($query) => $query->latest(),
+            ]),
+        ]);
+    }
 }
