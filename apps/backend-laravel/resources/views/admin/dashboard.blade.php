@@ -23,6 +23,7 @@
         <a class="button secondary" href="/admin/provisioning-jobs">Provisioning Jobs</a>
         @can('notifications.manage')
             <a class="button secondary" href="/admin/notification-events">Notification Events</a>
+            <a class="button secondary" href="/admin/notification-templates">Notification Templates</a>
         @endcan
         <a class="button secondary" href="/admin/ops-health">Ops Health</a>
         <a class="button secondary" href="/admin/ops-alert-events">Ops Alerts</a>

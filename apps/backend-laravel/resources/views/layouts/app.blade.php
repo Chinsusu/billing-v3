@@ -33,6 +33,7 @@
             <a href="/invoices">Invoices</a>
             <a href="/orders">Orders</a>
             <a href="/services">Services</a>
+            <a href="/notification-preferences">Notifications</a>
             @can('admin.access')<a href="/admin">Admin</a>@endcan
             <form method="POST" action="/logout" style="display:inline">@csrf<button type="submit" style="background:transparent;border:0;padding:0;text-decoration:underline">Logout</button></form>
         @else
