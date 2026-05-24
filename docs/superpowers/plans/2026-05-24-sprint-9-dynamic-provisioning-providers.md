@@ -123,14 +123,14 @@
 - Modify: `infra/docker-compose.dev.yml`
 - Modify: `README.md`
 
-- [ ] Add config fields for `BACKEND_INTERNAL_URL`, `INTERNAL_PROVISIONING_TOKEN`, and `PROVISIONING_EXECUTOR_TIMEOUT`.
-- [ ] Replace pure sandbox processor with HTTP internal executor client.
-- [ ] Preserve a unit-testable constructor for processor dependencies.
-- [ ] Add Go tests for token header, success mapping, non-2xx retryable error, and invalid JSON error.
-- [ ] Wire `cmd/worker` to use Laravel internal executor processor.
-- [ ] Add worker Compose env: `BACKEND_INTERNAL_URL=http://backend:8000`, `INTERNAL_PROVISIONING_TOKEN=local-internal-provisioning-token`.
-- [ ] Run Go targeted tests and full `go test ./...`.
-- [ ] Commit Go worker client slice.
+- [x] Add config fields for `BACKEND_INTERNAL_URL`, `INTERNAL_PROVISIONING_TOKEN`, and `PROVISIONING_EXECUTOR_TIMEOUT`.
+- [x] Replace pure sandbox processor with HTTP internal executor client.
+- [x] Preserve a unit-testable constructor for processor dependencies.
+- [x] Add Go tests for token header, success mapping, non-2xx retryable error, and invalid JSON error.
+- [x] Wire `cmd/worker` to use Laravel internal executor processor.
+- [x] Add worker Compose env: `BACKEND_INTERNAL_URL=http://backend:8000`, `INTERNAL_PROVISIONING_TOKEN=local-internal-provisioning-token`.
+- [x] Run Go targeted tests and full `go test ./...`.
+- [x] Commit Go worker client slice.
 
 ### Task 7: Runtime Smoke And Full Verification
 
