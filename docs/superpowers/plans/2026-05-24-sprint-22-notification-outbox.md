@@ -112,4 +112,4 @@
 - [x] Run Docker Compose config/build and secret scan.
 - [x] Verify `/admin/notification-events`, `/admin/ops-health`, and `/up` smoke behavior.
 - [x] Mark verification steps complete in this plan, commit, and push.
-- [ ] Open PR to `develop`, wait for CI, merge, delete feature branch, and deploy `/opt/billing`.
+- [x] Open PR to `develop`, wait for CI, merge, delete feature branch, and deploy `/opt/billing`.
