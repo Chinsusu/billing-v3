@@ -24,13 +24,13 @@
 **Files:**
 - Create: `apps/backend-laravel/tests/Feature/ServiceCancellationFlowTest.php`
 
-- [ ] Add customer local immediate cancellation test.
-- [ ] Add customer provider-backed cancellation queue/idempotency test.
-- [ ] Add end-of-period cancellation test.
-- [ ] Add authorization/status guard tests.
-- [ ] Add admin service refund credit test.
-- [ ] Run targeted test on `/opt/billing` and verify RED.
-- [ ] Commit RED tests.
+- [x] Add customer local immediate cancellation test.
+- [x] Add customer provider-backed cancellation queue/idempotency test.
+- [x] Add end-of-period cancellation test.
+- [x] Add authorization/status guard tests.
+- [x] Add admin service refund credit test.
+- [x] Run targeted test on `/opt/billing` and verify RED.
+- [x] Commit RED tests.
 
 ### Task 3: Cancellation Schema And Model
 
@@ -39,10 +39,10 @@
 - Create: `apps/backend-laravel/app/Models/ServiceCancellation.php`
 - Modify: `apps/backend-laravel/app/Models/Service.php`
 
-- [ ] Add cancellation audit table.
-- [ ] Add model casts/relationships.
-- [ ] Add `Service::cancellations()` relationship.
-- [ ] Commit schema/model slice.
+- [x] Add cancellation audit table.
+- [x] Add model casts/relationships.
+- [x] Add `Service::cancellations()` relationship.
+- [x] Commit schema/model slice.
 
 ### Task 4: Customer Cancellation Flow
 
@@ -51,14 +51,14 @@
 - Modify: `apps/backend-laravel/routes/web.php`
 - Modify: `apps/backend-laravel/resources/views/services/show.blade.php`
 
-- [ ] Validate mode and reason.
-- [ ] Enforce ownership and active status.
-- [ ] Reuse existing open cancellation request idempotently.
-- [ ] Queue provider cancel job when configured.
-- [ ] Mark local service cancelled when no provider cancel path exists.
-- [ ] Render cancellation form and history.
-- [ ] Run cancellation tests until GREEN except refund.
-- [ ] Commit customer cancellation slice.
+- [x] Validate mode and reason.
+- [x] Enforce ownership and active status.
+- [x] Reuse existing open cancellation request idempotently.
+- [x] Queue provider cancel job when configured.
+- [x] Mark local service cancelled when no provider cancel path exists.
+- [x] Render cancellation form and history.
+- [x] Run cancellation tests until GREEN except refund.
+- [x] Commit customer cancellation slice.
 
 ### Task 5: Admin Refund Credit
 
@@ -67,12 +67,12 @@
 - Modify: `apps/backend-laravel/routes/web.php`
 - Modify: `apps/backend-laravel/resources/views/admin/services/show.blade.php`
 
-- [ ] Validate amount, currency, reason, and optional reference.
-- [ ] Credit customer wallet with source type `service_refund`.
-- [ ] Store actor and service metadata in ledger entry.
-- [ ] Add refund credit form to admin service runbook.
-- [ ] Run `ServiceCancellationFlowTest` until GREEN.
-- [ ] Commit refund slice.
+- [x] Validate amount, currency, reason, and optional reference.
+- [x] Credit customer wallet with source type `service_refund`.
+- [x] Store actor and service metadata in ledger entry.
+- [x] Add refund credit form to admin service runbook.
+- [x] Run `ServiceCancellationFlowTest` until GREEN.
+- [x] Commit refund slice.
 
 ### Task 6: Documentation, Verification, PR, Deploy
 

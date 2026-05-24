@@ -230,6 +230,15 @@ Routes:
 
 Admin service detail now provides a service runbook with customer, product, order, provisioning jobs, provider action jobs, and redacted execution log context. Customer service detail shows provider action history and execution status summaries without raw provider request/response payloads.
 
+## Sprint 21 Service Cancellation
+
+Routes:
+
+- `POST /services/{service}/cancel`
+- `POST /admin/services/{service}/refund-credit`
+
+Customers can request immediate or period-end cancellation for active services. Local services are cancelled immediately; provider-backed services queue an idempotent provider cancel action and keep the service active until the provider action succeeds. Cancellation requests are audited in `service_cancellations`. Admins with `wallets.adjust` can credit service refunds from the service runbook, recorded in ledger entries with `source_type=service_refund`.
+
 ## Sprint 8 Shared Postgres Runtime
 
 The dev Compose runtime runs Laravel and the worker against the same Postgres database:
