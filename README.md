@@ -211,6 +211,16 @@ Routes:
 
 Admins and finance users can search customers, inspect wallet balances, recent ledger entries, invoices, orders, and services, then apply audited manual wallet adjustments when they have `wallets.adjust`. Support users can view customers through `customers.view` without adjustment access. Manual adjustments are recorded as `ledger_entries` with `source_type=admin_wallet_adjustment` and actor metadata.
 
+## Sprint 18 Customer Billing Activity
+
+Routes:
+
+- `GET /orders`
+- `GET /invoices`
+- `GET /wallet/top-ups`
+
+Customer dashboard now shows wallet balance, open invoice count, active service count, recent invoices, recent orders, recent services, and recent wallet top-ups. Customer history pages are scoped to the authenticated user and link to the existing order, invoice, and QR top-up detail pages.
+
 ## Sprint 8 Shared Postgres Runtime
 
 The dev Compose runtime runs Laravel and the worker against the same Postgres database:

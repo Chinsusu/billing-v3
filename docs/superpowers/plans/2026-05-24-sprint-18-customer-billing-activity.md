@@ -24,13 +24,13 @@
 **Files:**
 - Create: `apps/backend-laravel/tests/Feature/CustomerBillingActivityTest.php`
 
-- [ ] Add tests for customer order index scoping.
-- [ ] Add tests for customer invoice index scoping.
-- [ ] Add tests for customer top-up index scoping.
-- [ ] Add tests for customer dashboard snapshot and links.
-- [ ] Add tests that guests are redirected from new history pages.
-- [ ] Run targeted test on `/opt/billing` and verify RED.
-- [ ] Commit RED tests.
+- [x] Add tests for customer order index scoping.
+- [x] Add tests for customer invoice index scoping.
+- [x] Add tests for customer top-up index scoping.
+- [x] Add tests for customer dashboard snapshot and links.
+- [x] Add tests that guests are redirected from new history pages.
+- [x] Run targeted test on `/opt/billing` and verify RED.
+- [x] Commit RED tests.
 
 ### Task 3: Customer Index Controllers And Routes
 
@@ -40,12 +40,12 @@
 - Modify: `apps/backend-laravel/app/Http/Controllers/WalletTopUpController.php`
 - Modify: `apps/backend-laravel/routes/web.php`
 
-- [ ] Add `OrderController@index`.
-- [ ] Add `InvoiceController@index`.
-- [ ] Add `WalletTopUpController@index`.
-- [ ] Add `GET /orders`, `GET /invoices`, and `GET /wallet/top-ups` routes.
-- [ ] Ensure all queries are scoped to the authenticated user.
-- [ ] Commit controller/route slice.
+- [x] Add `OrderController@index`.
+- [x] Add `InvoiceController@index`.
+- [x] Add `WalletTopUpController@index`.
+- [x] Add `GET /orders`, `GET /invoices`, and `GET /wallet/top-ups` routes.
+- [x] Ensure all queries are scoped to the authenticated user.
+- [x] Commit controller/route slice.
 
 ### Task 4: Customer Views And Dashboard
 
@@ -57,13 +57,13 @@
 - Modify: `apps/backend-laravel/resources/views/dashboard.blade.php`
 - Modify: `apps/backend-laravel/resources/views/layouts/app.blade.php`
 
-- [ ] Render customer order table with links to detail.
-- [ ] Render customer invoice table with links to detail/payment.
-- [ ] Render wallet top-up table with links to QR/detail.
-- [ ] Add dashboard counts and recent activity.
-- [ ] Add customer nav links.
-- [ ] Run `CustomerBillingActivityTest` until GREEN.
-- [ ] Commit view/dashboard slice.
+- [x] Render customer order table with links to detail.
+- [x] Render customer invoice table with links to detail/payment.
+- [x] Render wallet top-up table with links to QR/detail.
+- [x] Add dashboard counts and recent activity.
+- [x] Add customer nav links.
+- [x] Run `CustomerBillingActivityTest` until GREEN.
+- [x] Commit view/dashboard slice.
 
 ### Task 5: Documentation, Verification, PR, Deploy
 
