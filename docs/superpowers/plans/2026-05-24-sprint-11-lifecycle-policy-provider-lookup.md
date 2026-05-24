@@ -65,13 +65,13 @@
 - Modify: `apps/backend-laravel/tests/Feature/ProvisioningInternalExecutorTest.php`
 - Modify: `apps/backend-laravel/tests/Feature/ProvisioningExecutionAuditTest.php`
 
-- [ ] Add generic HTTP executor test where provision succeeds, then lifecycle lookup returns `ordered_at` and `expires_at`.
-- [ ] Assert executor JSON includes parsed ISO `ordered_at` and `expires_at`.
-- [ ] Assert two HTTP calls are sent: provision path then lookup path with `{external_id}` substituted.
-- [ ] Assert lookup creates a second `provisioning_execution_logs` row with action `provider_lifecycle_lookup`.
-- [ ] Add lookup failure test returning 500 and assert executor returns 422 with `provider_lifecycle_http_error` logged.
-- [ ] Run targeted Laravel tests and verify failures are missing lookup implementation/result fields.
-- [ ] Commit provider lookup RED tests.
+- [x] Add generic HTTP executor test where provision succeeds, then lifecycle lookup returns `ordered_at` and `expires_at`.
+- [x] Assert executor JSON includes parsed ISO `ordered_at` and `expires_at`.
+- [x] Assert two HTTP calls are sent: provision path then lookup path with `{external_id}` substituted.
+- [x] Assert lookup creates a second `provisioning_execution_logs` row with action `provider_lifecycle_lookup`.
+- [x] Add lookup failure test returning 500 and assert executor returns 422 with `provider_lifecycle_http_error` logged.
+- [x] Run targeted Laravel tests and verify failures are missing lookup implementation/result fields.
+- [x] Commit provider lookup RED tests.
 
 ### Task 5: Laravel Provider Lookup Implementation
 
