@@ -2,6 +2,7 @@
 @section('content')
 <div class="panel">
     <h1>Services</h1>
+    <p><a href="/admin/provider-action-jobs">Provider Action Jobs</a></p>
     <table>
         <thead><tr><th>Customer</th><th>Product</th><th>Type</th><th>Status</th><th>Expires</th><th>Actions</th></tr></thead>
         <tbody>
@@ -16,6 +17,10 @@
                         <form method="POST" action="/admin/services/{{ $service->id }}/sync-provider" style="display:inline">
                             @csrf
                             <button class="button secondary" type="submit">Sync Provider</button>
+                        </form>
+                        <form method="POST" action="/admin/services/{{ $service->id }}/cancel-provider" style="display:inline">
+                            @csrf
+                            <button class="button secondary" type="submit">Cancel Provider</button>
                         </form>
                     </td>
                 </tr>
