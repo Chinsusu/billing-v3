@@ -11,6 +11,7 @@ use App\Models\User;
 use Database\Seeders\RolesAndPermissionsSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
 use Tests\TestCase;
 
 class ProvisioningOperationsTest extends TestCase
@@ -158,7 +159,7 @@ class ProvisioningOperationsTest extends TestCase
             'last_error' => 'Provider returned HTTP 401.',
         ]);
         DB::table('provisioning_execution_logs')->insert([
-            'id' => (string) \Illuminate\Support\Str::uuid(),
+            'id' => (string) Str::uuid(),
             'provisioning_job_id' => $job->id,
             'service_id' => $service->id,
             'provider_account_id' => null,
