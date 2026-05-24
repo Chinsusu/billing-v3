@@ -66,18 +66,25 @@ class AdminOpsHealthTest extends TestCase
             'output' => 'Provider action jobs processed=0 failed=0.',
         ]);
 
-        $this->actingAs($admin)
-            ->get('/admin/ops-health')
-            ->assertOk()
+        $response = $this->actingAs($admin)->get('/admin/ops-health');
+
+        $response->assertOk()
             ->assertSee('Ops Health')
             ->assertSee('provider_actions_work')
             ->assertSee('success')
             ->assertSee('Provisioning Queue')
             ->assertSee('failed: 1')
             ->assertSee('Provider Action Queue')
-            ->assertSee('pending: 1')
-            ->assertSeeInOrder(['Overdue Active Services', '1'])
-            ->assertSeeInOrder(['Enabled Bank Integrations', '1']);
+            ->assertSee('pending: 1');
+
+        $this->assertMatchesRegularExpression(
+            '/<strong>\s*1\s*<\/strong>\s*<br>\s*Overdue Active Services/',
+            $response->getContent()
+        );
+        $this->assertMatchesRegularExpression(
+            '/<strong>\s*1\s*<\/strong>\s*<br>\s*Enabled Bank Integrations/',
+            $response->getContent()
+        );
     }
 
     public function test_ops_health_warns_when_scheduled_task_is_stale(): void
