@@ -83,7 +83,7 @@ Routes and commands:
 - `POST /services/{service}/renew`
 - `php artisan services:expire`
 
-Customers can renew active services from wallet balance. Renewal debits the wallet with source type `service_renewal`, extends `expires_at`, and stores renewal audit metadata on the service. The expiry command marks overdue active services as `expired`; provider renew/suspend API calls are still out of scope.
+Customers can renew active services from wallet balance. Renewal debits the wallet with source type `service_renewal`, extends `expires_at`, and stores renewal audit metadata on the service. Provider lifecycle API calls are added in Sprint 12.
 
 ## Sprint 6 Private Bank Integration
 
@@ -141,6 +141,20 @@ Routes:
 - `POST /internal/provisioning/jobs/{provisioningJob}/execute`
 
 Admins can define multiple provider accounts with the same driver shape but different endpoint/API key values, then map each product to a provider account, plan code, region, provision path, and JSON options. Secrets are encrypted by Laravel and never sent to the Go worker. The worker only claims jobs and calls the Laravel internal executor with `INTERNAL_PROVISIONING_TOKEN`.
+
+## Sprint 12 Provider Lifecycle Actions
+
+Routes and commands:
+
+- `POST /services/{service}/renew`
+- `POST /admin/services/{service}/sync-provider`
+- `php artisan services:expire`
+
+Products can define provider action paths for renew, suspend, cancel, and sync. Paths support placeholders such as `{external_id}`, `{service_id}`, `{product_code}`, `{plan_code}`, and `{region}`.
+
+Provider-backed renewal calls the configured renew endpoint before wallet debit. If the provider returns an expiry at the configured lifecycle `expires_at` JSON path, that provider date becomes the local service expiry; if provider renew fails, the wallet is not debited and local expiry is unchanged.
+
+The expiry command calls the configured suspend endpoint before marking an overdue active service as `expired`. If provider suspend fails, the service remains active and the command returns a non-zero exit code. Admins can sync a service from the provider with the admin services table; sync updates local status and expiry when the provider response includes them. All provider lifecycle actions write redacted `provisioning_execution_logs` rows.
 
 ## Sprint 8 Shared Postgres Runtime
 

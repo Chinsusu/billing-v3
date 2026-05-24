@@ -51,6 +51,10 @@ class UpdateProductRequest extends FormRequest
             'provider_lifecycle_expires_at_path' => ['nullable', 'required_if:lifecycle_source,provider_response,provider_lookup', 'string', 'max:160'],
             'provider_lifecycle_date_format' => ['required', Rule::in(['iso8601', 'unix_seconds', 'unix_ms'])],
             'provider_lifecycle_timezone' => ['required', 'timezone'],
+            'provider_renew_path' => ['nullable', 'string', 'max:255', 'starts_with:/'],
+            'provider_suspend_path' => ['nullable', 'string', 'max:255', 'starts_with:/'],
+            'provider_cancel_path' => ['nullable', 'string', 'max:255', 'starts_with:/'],
+            'provider_sync_path' => ['nullable', 'string', 'max:255', 'starts_with:/'],
         ];
     }
 }

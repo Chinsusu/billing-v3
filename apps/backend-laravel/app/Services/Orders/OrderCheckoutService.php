@@ -26,6 +26,7 @@ class OrderCheckoutService
             $product->loadMissing('providerAccount');
             $providerAccount = $product->providerAccount ?: ProvisioningProviderAccount::where('slug', 'sandbox')->first();
             $lifecyclePolicy = $this->lifecyclePolicy->forProduct($product);
+            $providerSnapshot = $this->providerSnapshot($product, $providerAccount);
             $expiresAt = $this->lifecyclePolicy->expiresAt(now(), $lifecyclePolicy);
 
             $order = Order::create([
@@ -81,6 +82,7 @@ class OrderCheckoutService
                 'meta' => [
                     'duration_days' => $product->duration_days,
                     'lifecycle_policy' => $lifecyclePolicy,
+                    'provider' => $providerSnapshot,
                 ],
                 'expires_at' => $expiresAt,
             ]);
@@ -106,7 +108,7 @@ class OrderCheckoutService
                         'duration_days' => $product->duration_days,
                         'config' => $product->config ?? [],
                         'lifecycle_policy' => $lifecyclePolicy,
-                        'provider' => $this->providerSnapshot($product, $providerAccount),
+                        'provider' => $providerSnapshot,
                     ],
                 ],
                 'available_at' => now(),
@@ -130,6 +132,10 @@ class OrderCheckoutService
             'plan_code' => $product->provider_plan_code,
             'region' => $product->provider_region,
             'provision_path' => $product->provider_provision_path ?: $providerAccount?->provision_path,
+            'renew_path' => $product->provider_renew_path,
+            'suspend_path' => $product->provider_suspend_path,
+            'cancel_path' => $product->provider_cancel_path,
+            'sync_path' => $product->provider_sync_path,
             'options' => $product->provider_options ?? [],
         ];
     }

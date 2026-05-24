@@ -1,0 +1,148 @@
+# Sprint 12 Provider Lifecycle Actions Implementation Plan
+
+> **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
+
+**Goal:** Connect service renew, expiry suspension, cancellation-ready actions, and admin sync to configurable provider HTTP endpoints.
+
+**Architecture:** Laravel remains the provider control plane because it owns encrypted provider secrets and audit logging. Products store plan-specific action paths, checkout snapshots non-secret provider action config into services, and a focused provider action service executes authenticated HTTP calls with redacted execution logs. Go worker behavior is unchanged.
+
+**Tech Stack:** Laravel 13, PostgreSQL migrations, Laravel HTTP client fakes, Blade admin views, PHPUnit/Pest-style Laravel feature tests, existing Go worker smoke verification.
+
+---
+
+### Task 1: Commit Plan And Prepare Branch
+
+**Files:**
+- Create: `docs/superpowers/plans/2026-05-24-sprint-12-provider-lifecycle-actions.md`
+
+- [x] Save the S12 implementation plan.
+- [x] Scan the plan for placeholders, contradictions, and vague scope.
+- [x] Commit the plan before code changes.
+
+### Task 2: RED Tests For Product Action Config
+
+**Files:**
+- Modify: `apps/backend-laravel/tests/Feature/ProductLifecyclePolicyTest.php`
+- Modify: `apps/backend-laravel/tests/Feature/OrderCheckoutFlowTest.php`
+
+- [x] Add a product admin test that posts `provider_renew_path`, `provider_suspend_path`, `provider_cancel_path`, and `provider_sync_path`, then asserts they are stored.
+- [x] Add a checkout test proving `services.meta.provider` snapshots provider action paths.
+- [x] Run targeted Laravel tests on `/opt/billing` and verify failures are missing product columns/request fields/snapshot fields.
+- [x] Commit RED config tests.
+
+### Task 3: Implement Product Action Config
+
+**Files:**
+- Create: `apps/backend-laravel/database/migrations/2026_05_24_110000_add_provider_action_paths_to_products_table.php`
+- Modify: `apps/backend-laravel/app/Models/Product.php`
+- Modify: `apps/backend-laravel/database/factories/ProductFactory.php`
+- Modify: `apps/backend-laravel/app/Http/Requests/StoreProductRequest.php`
+- Modify: `apps/backend-laravel/app/Http/Requests/UpdateProductRequest.php`
+- Modify: `apps/backend-laravel/app/Http/Controllers/Admin/ProductController.php`
+- Modify: `apps/backend-laravel/resources/views/admin/products/_form.blade.php`
+- Modify: `apps/backend-laravel/app/Services/Orders/OrderCheckoutService.php`
+
+- [x] Add nullable product action path columns for renew, suspend, cancel, and sync.
+- [x] Add model fillable/factory defaults.
+- [x] Validate action paths as nullable strings that start with `/`.
+- [x] Save action paths from admin product forms.
+- [x] Include action paths in checkout service provider snapshots and provisioning job provider payloads.
+- [x] Run config tests until green.
+- [x] Commit product action config slice.
+
+### Task 4: RED Tests For Provider Renewal
+
+**Files:**
+- Modify: `apps/backend-laravel/tests/Feature/ServiceRenewalLifecycleTest.php`
+
+- [x] Add test: customer renewal calls provider renew with auth, idempotency key, external id, and action payload.
+- [x] Assert provider-returned expiry overrides local calculated expiry.
+- [x] Assert wallet debit and renewal meta are written only after provider success.
+- [x] Assert `provisioning_execution_logs` records `provider_service_renew`.
+- [x] Add test: provider renewal failure leaves wallet balance, ledger, and service expiry unchanged.
+- [x] Run renewal tests on `/opt/billing` and verify failures are missing provider action implementation.
+- [x] Commit RED renewal tests.
+
+### Task 5: Implement Provider Action Service And Renewal Integration
+
+**Files:**
+- Create: `apps/backend-laravel/app/Services/Provisioning/ProviderServiceActionResult.php`
+- Create: `apps/backend-laravel/app/Services/Provisioning/ProviderServiceActionService.php`
+- Modify: `apps/backend-laravel/app/Services/Provisioning/ProvisioningExecutionRecorder.php`
+- Modify: `apps/backend-laravel/app/Services/Services/ServiceRenewalService.php`
+- Modify: `apps/backend-laravel/app/Http/Controllers/ServiceRenewalController.php`
+
+- [x] Add `ProviderServiceActionResult` with `status`, `expiresAt`, and `response`.
+- [x] Add recorder method for service-scoped execution logs.
+- [x] Add provider action service that resolves provider config, renders placeholders, sends authenticated HTTP, parses optional expiry, and records audit logs.
+- [x] Inject provider action service into renewal.
+- [x] For configured renew paths, call provider renew before debit and use provider expiry when returned.
+- [x] Convert provider action failures to session errors on service renew page.
+- [x] Run renewal tests until green.
+- [x] Commit provider renewal slice.
+
+### Task 6: RED Tests For Expiry Suspension
+
+**Files:**
+- Modify: `apps/backend-laravel/tests/Feature/ServiceRenewalLifecycleTest.php`
+
+- [x] Add test: `services:expire` calls provider suspend before marking overdue service expired.
+- [x] Assert suspend audit log action is `provider_service_suspend`.
+- [x] Add test: provider suspend failure leaves overdue service active and command exits non-zero.
+- [x] Run expiry tests on `/opt/billing` and verify failures are missing suspend implementation.
+- [x] Commit RED expiry suspend tests.
+
+### Task 7: Implement Expiry Suspension
+
+**Files:**
+- Modify: `apps/backend-laravel/app/Console/Commands/ExpireServicesCommand.php`
+
+- [x] Inject provider action service into `services:expire`.
+- [x] Call provider suspend for overdue services with configured suspend path.
+- [x] Mark local expired only when provider suspend succeeds or no suspend path is configured.
+- [x] Count failures, print `Expired X services. Failed Y services.`, and return non-zero when any provider suspend fails.
+- [x] Run expiry tests until green.
+- [x] Commit expiry suspension slice.
+
+### Task 8: RED Tests For Admin Provider Sync
+
+**Files:**
+- Create: `apps/backend-laravel/tests/Feature/AdminServiceProviderSyncTest.php`
+
+- [x] Add test: admin posts `/admin/services/{service}/sync-provider`, provider sync GET updates local status and expiry.
+- [x] Assert sync audit log action is `provider_service_sync`.
+- [x] Assert admin services index shows the sync form/button.
+- [x] Run admin sync test and verify failure is missing route/controller/view implementation.
+- [x] Commit RED admin sync tests.
+
+### Task 9: Implement Admin Provider Sync
+
+**Files:**
+- Create: `apps/backend-laravel/app/Http/Controllers/Admin/ServiceProviderSyncController.php`
+- Modify: `apps/backend-laravel/routes/web.php`
+- Modify: `apps/backend-laravel/resources/views/admin/services/index.blade.php`
+
+- [x] Add admin sync controller that calls provider action service `sync`.
+- [x] Update service status from provider status when present.
+- [x] Update `expires_at` from provider expiry when present.
+- [x] Add route protected by existing `services.view` permission.
+- [x] Add sync button to admin services table.
+- [x] Run admin sync tests until green.
+- [x] Commit admin sync slice.
+
+### Task 10: Full Verification, Docs, PR, Deploy
+
+**Files:**
+- Modify: `README.md`
+- Modify: `docs/superpowers/plans/2026-05-24-sprint-12-provider-lifecycle-actions.md`
+
+- [x] Update README with S12 provider lifecycle action routes and behavior.
+- [x] Push branch and check it out on `/opt/billing`.
+- [x] Recreate backend and run migrations.
+- [x] Run Laravel Pint and full Laravel tests on `/opt/billing`.
+- [x] Run Go `go fmt ./...`, `go vet ./...`, and `go test ./...` on `/opt/billing`.
+- [x] Run Docker Compose config/build and secret scan.
+- [x] Run `php artisan runtime:smoke-provisioning --timeout=30`.
+- [x] Mark plan verification complete, commit, and push.
+- [ ] Open PR to `develop`, wait for CI, merge, delete feature branch.
+- [ ] Pull `develop` on `/opt/billing`, recreate backend and worker, run smoke, and verify `/products`, `/admin/products`, `/admin/services`, and worker state.

@@ -12,6 +12,7 @@ use App\Http\Controllers\Admin\ProvisioningJobRetryController;
 use App\Http\Controllers\Admin\ProvisioningProviderAccountController;
 use App\Http\Controllers\Admin\ProvisioningProviderAccountTestController;
 use App\Http\Controllers\Admin\ServiceController as AdminServiceController;
+use App\Http\Controllers\Admin\ServiceProviderSyncController;
 use App\Http\Controllers\Auth\AuthenticatedSessionController;
 use App\Http\Controllers\Auth\RegisteredUserController;
 use App\Http\Controllers\BankWebhookSandboxController;
@@ -81,6 +82,7 @@ Route::middleware('auth')->group(function (): void {
         Route::post('/provisioning-provider-accounts/{provisioningProviderAccount}/test', ProvisioningProviderAccountTestController::class)->middleware('permission:provisioning_provider_accounts.manage')->name('provisioning-provider-accounts.test');
         Route::get('/orders', [AdminOrderController::class, 'index'])->middleware('permission:orders.view')->name('orders.index');
         Route::get('/services', [AdminServiceController::class, 'index'])->middleware('permission:services.view')->name('services.index');
+        Route::post('/services/{service}/sync-provider', ServiceProviderSyncController::class)->middleware('permission:services.view')->name('services.sync-provider');
         Route::get('/provisioning-jobs', [ProvisioningJobController::class, 'index'])->middleware('permission:provisioning_jobs.view')->name('provisioning-jobs.index');
         Route::get('/provisioning-jobs/{provisioningJob}', [ProvisioningJobController::class, 'show'])->middleware('permission:provisioning_jobs.view')->name('provisioning-jobs.show');
         Route::post('/provisioning-jobs/{provisioningJob}/retry', ProvisioningJobRetryController::class)->middleware('permission:provisioning_jobs.view')->name('provisioning-jobs.retry');

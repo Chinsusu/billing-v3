@@ -5,6 +5,7 @@ namespace App\Services\Provisioning;
 use App\Models\ProvisioningExecutionLog;
 use App\Models\ProvisioningJob;
 use App\Models\ProvisioningProviderAccount;
+use App\Models\Service;
 
 class ProvisioningExecutionRecorder
 {
@@ -42,6 +43,27 @@ class ProvisioningExecutionRecorder
             'provider_account_id' => $account->id,
             'action' => $action,
             'driver' => $account->driver,
+            'endpoint' => $endpoint,
+            'status' => 'pending',
+            'duration_ms' => 0,
+            'request_payload' => $this->redactor->redact($requestPayload),
+            'response_payload' => [],
+        ]);
+    }
+
+    public function startForService(
+        Service $service,
+        ?ProvisioningProviderAccount $account,
+        string $action,
+        string $driver,
+        ?string $endpoint,
+        array $requestPayload = [],
+    ): ProvisioningExecutionLog {
+        return ProvisioningExecutionLog::create([
+            'service_id' => $service->id,
+            'provider_account_id' => $account?->id,
+            'action' => $action,
+            'driver' => $driver,
             'endpoint' => $endpoint,
             'status' => 'pending',
             'duration_ms' => 0,

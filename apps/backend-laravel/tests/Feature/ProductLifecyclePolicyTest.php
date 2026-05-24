@@ -55,6 +55,10 @@ class ProductLifecyclePolicyTest extends TestCase
             'provider_lifecycle_expires_at_path' => 'data.expires_at',
             'provider_lifecycle_date_format' => 'iso8601',
             'provider_lifecycle_timezone' => 'Asia/Ho_Chi_Minh',
+            'provider_renew_path' => '/api/services/{external_id}/renew',
+            'provider_suspend_path' => '/api/services/{external_id}/suspend',
+            'provider_cancel_path' => '/api/services/{external_id}/cancel',
+            'provider_sync_path' => '/api/services/{external_id}',
         ])->assertRedirect('/admin/products');
 
         $product = Product::where('code', 'vps-provider-a-monthly')->firstOrFail();
@@ -66,5 +70,9 @@ class ProductLifecyclePolicyTest extends TestCase
         $this->assertSame('data.expires_at', $product->provider_lifecycle_expires_at_path);
         $this->assertSame('iso8601', $product->provider_lifecycle_date_format);
         $this->assertSame('Asia/Ho_Chi_Minh', $product->provider_lifecycle_timezone);
+        $this->assertSame('/api/services/{external_id}/renew', $product->provider_renew_path);
+        $this->assertSame('/api/services/{external_id}/suspend', $product->provider_suspend_path);
+        $this->assertSame('/api/services/{external_id}/cancel', $product->provider_cancel_path);
+        $this->assertSame('/api/services/{external_id}', $product->provider_sync_path);
     }
 }

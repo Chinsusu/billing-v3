@@ -69,6 +69,10 @@ class ProductController extends Controller
         $attributes['provider_lifecycle_path'] = $this->nullableString($attributes['provider_lifecycle_path'] ?? null);
         $attributes['provider_lifecycle_ordered_at_path'] = $this->nullableString($attributes['provider_lifecycle_ordered_at_path'] ?? null);
         $attributes['provider_lifecycle_expires_at_path'] = $this->nullableString($attributes['provider_lifecycle_expires_at_path'] ?? null);
+        $attributes['provider_renew_path'] = $this->nullableString($attributes['provider_renew_path'] ?? null);
+        $attributes['provider_suspend_path'] = $this->nullableString($attributes['provider_suspend_path'] ?? null);
+        $attributes['provider_cancel_path'] = $this->nullableString($attributes['provider_cancel_path'] ?? null);
+        $attributes['provider_sync_path'] = $this->nullableString($attributes['provider_sync_path'] ?? null);
 
         return $attributes;
     }

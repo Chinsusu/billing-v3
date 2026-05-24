@@ -2,23 +2,29 @@
 
 namespace App\Services\Services;
 
+use App\Exceptions\InsufficientWalletBalance;
 use App\Models\Service;
 use App\Models\User;
+use App\Models\Wallet;
 use App\Services\Finance\WalletService;
+use App\Services\Provisioning\ProviderServiceActionService;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
+use RuntimeException;
 
 class ServiceRenewalService
 {
     public function __construct(
         private readonly WalletService $walletService,
         private readonly ServiceLifecyclePolicy $lifecyclePolicy,
+        private readonly ProviderServiceActionService $providerActions,
     ) {}
 
     public function renew(Service $service, User $user): Service
     {
-        return DB::transaction(function () use ($service, $user): Service {
+        $providerError = null;
+        $renewedService = DB::transaction(function () use ($service, $user, &$providerError): Service {
             $lockedService = Service::with(['orderItem', 'product'])
                 ->whereKey($service->id)
                 ->lockForUpdate()
@@ -60,14 +66,34 @@ class ServiceRenewalService
             $baseExpiresAt = $oldExpiresAt->greaterThan(now()) ? $oldExpiresAt : now();
             $newExpiresAt = $this->lifecyclePolicy->expiresAt($baseExpiresAt, $policy);
             $wallet = $this->walletService->walletFor($user, $currency);
+            $lockedWallet = Wallet::whereKey($wallet->id)->lockForUpdate()->firstOrFail();
+            if ($lockedWallet->balance_amount < $amount) {
+                throw new InsufficientWalletBalance('Wallet balance is not enough to pay this invoice.');
+            }
+
+            $idempotencyKey = "service-renewal:{$lockedService->id}:{$oldExpiresAt->toISOString()}";
+            try {
+                $providerResult = $this->providerActions->execute($lockedService, 'renew', $idempotencyKey, [
+                    'old_expires_at' => $oldExpiresAt->toISOString(),
+                    'candidate_expires_at' => $newExpiresAt->toISOString(),
+                ]);
+            } catch (RuntimeException $exception) {
+                $providerError = $exception->getMessage();
+
+                return $lockedService->refresh();
+            }
+
+            if ($providerResult?->expiresAt !== null) {
+                $newExpiresAt = $providerResult->expiresAt;
+            }
 
             $this->walletService->debit(
-                $wallet,
+                $lockedWallet,
                 $amount,
                 $currency,
                 'service_renewal',
                 $lockedService->id,
-                "service-renewal:{$lockedService->id}:{$oldExpiresAt->toISOString()}",
+                $idempotencyKey,
                 "Renew {$lockedService->product_name}",
                 [
                     'old_expires_at' => $oldExpiresAt->toISOString(),
@@ -92,5 +118,11 @@ class ServiceRenewalService
 
             return $lockedService->refresh();
         });
+
+        if ($providerError !== null) {
+            throw ValidationException::withMessages(['provider' => $providerError]);
+        }
+
+        return $renewedService;
     }
 }
