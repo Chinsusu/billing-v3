@@ -3,6 +3,7 @@
 use App\Console\Commands\EvaluateOpsAlertsCommand;
 use App\Console\Commands\ExpirePaymentIntentsCommand;
 use App\Console\Commands\ExpireServicesCommand;
+use App\Console\Commands\ProcessScheduledServiceCancellationsCommand;
 use App\Console\Commands\RecoverStuckProviderActionJobsCommand;
 use App\Console\Commands\RunScheduledTaskCommand;
 use App\Console\Commands\SmokeProvisioningRuntimeCommand;
@@ -25,6 +26,7 @@ return Application::configure(basePath: dirname(__DIR__))
         ExpirePaymentIntentsCommand::class,
         ExpireServicesCommand::class,
         EvaluateOpsAlertsCommand::class,
+        ProcessScheduledServiceCancellationsCommand::class,
         RecoverStuckProviderActionJobsCommand::class,
         RunScheduledTaskCommand::class,
         SmokeProvisioningRuntimeCommand::class,
