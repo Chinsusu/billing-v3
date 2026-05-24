@@ -17,6 +17,7 @@ use App\Http\Controllers\OrderController;
 use App\Http\Controllers\ProductCatalogController;
 use App\Http\Controllers\ProductOrderController;
 use App\Http\Controllers\ServiceController;
+use App\Http\Controllers\ServiceRenewalController;
 use App\Http\Controllers\WalletController;
 use App\Http\Controllers\WalletTopUpController;
 use Illuminate\Support\Facades\Route;
@@ -44,6 +45,7 @@ Route::middleware('auth')->group(function (): void {
     Route::get('/orders/{order}', [OrderController::class, 'show'])->name('orders.show');
     Route::get('/services', [ServiceController::class, 'index'])->name('services.index');
     Route::get('/services/{service}', [ServiceController::class, 'show'])->name('services.show');
+    Route::post('/services/{service}/renew', ServiceRenewalController::class)->name('services.renew');
 
     Route::middleware('permission:admin.access')->prefix('admin')->name('admin.')->group(function (): void {
         Route::get('/', AdminDashboardController::class)->name('dashboard');
