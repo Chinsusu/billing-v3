@@ -6,6 +6,7 @@ use App\Http\Controllers\Admin\OrderController as AdminOrderController;
 use App\Http\Controllers\Admin\PaymentEventController;
 use App\Http\Controllers\Admin\ProductController;
 use App\Http\Controllers\Admin\ProvisioningJobController;
+use App\Http\Controllers\Admin\ProvisioningJobRetryController;
 use App\Http\Controllers\Admin\ServiceController as AdminServiceController;
 use App\Http\Controllers\Auth\AuthenticatedSessionController;
 use App\Http\Controllers\Auth\RegisteredUserController;
@@ -42,6 +43,7 @@ Route::middleware('auth')->group(function (): void {
     Route::post('/products/{product}/order', [ProductOrderController::class, 'store'])->name('products.order');
     Route::get('/orders/{order}', [OrderController::class, 'show'])->name('orders.show');
     Route::get('/services', [ServiceController::class, 'index'])->name('services.index');
+    Route::get('/services/{service}', [ServiceController::class, 'show'])->name('services.show');
 
     Route::middleware('permission:admin.access')->prefix('admin')->name('admin.')->group(function (): void {
         Route::get('/', AdminDashboardController::class)->name('dashboard');
@@ -57,5 +59,6 @@ Route::middleware('auth')->group(function (): void {
         Route::get('/orders', [AdminOrderController::class, 'index'])->middleware('permission:orders.view')->name('orders.index');
         Route::get('/services', [AdminServiceController::class, 'index'])->middleware('permission:services.view')->name('services.index');
         Route::get('/provisioning-jobs', [ProvisioningJobController::class, 'index'])->middleware('permission:provisioning_jobs.view')->name('provisioning-jobs.index');
+        Route::post('/provisioning-jobs/{provisioningJob}/retry', ProvisioningJobRetryController::class)->middleware('permission:provisioning_jobs.view')->name('provisioning-jobs.retry');
     });
 });
