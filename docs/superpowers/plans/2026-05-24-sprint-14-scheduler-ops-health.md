@@ -1128,7 +1128,7 @@ Routes and commands:
 The dev Compose runtime includes a `scheduler` service that runs Laravel `schedule:work`. It records each scheduled command execution in `scheduled_task_runs` and lets admins inspect scheduler freshness, queue counts, failed jobs, overdue services, and enabled bank integrations from `/admin/ops-health`.
 ```
 
-- [ ] Push branch and check it out on `/opt/billing`.
+- [x] Push branch and check it out on `/opt/billing`.
 
 Run:
 
@@ -1137,7 +1137,7 @@ git push origin feature/sprint-14-scheduler-ops-health
 ssh --% root@10.1.1.124 "cd /opt/billing && git fetch origin feature/sprint-14-scheduler-ops-health && git reset --hard origin/feature/sprint-14-scheduler-ops-health"
 ```
 
-- [ ] Recreate backend, worker, and scheduler; run migrations.
+- [x] Recreate backend, worker, and scheduler; run migrations.
 
 Run:
 
@@ -1147,7 +1147,7 @@ ssh --% root@10.1.1.124 "cd /opt/billing && docker compose -f infra/docker-compo
 
 Expected: backend is healthy; worker and scheduler are running.
 
-- [ ] Run Laravel Pint and full Laravel tests on `/opt/billing`.
+- [x] Run Laravel Pint and full Laravel tests on `/opt/billing`.
 
 Run:
 
@@ -1157,7 +1157,7 @@ ssh --% root@10.1.1.124 "cd /opt/billing && docker compose -f infra/docker-compo
 
 Expected: Pint passes and all Laravel tests pass.
 
-- [ ] Run Go checks on `/opt/billing`.
+- [x] Run Go checks on `/opt/billing`.
 
 Run:
 
@@ -1167,7 +1167,7 @@ ssh --% root@10.1.1.124 "cd /opt/billing && docker run --rm -v /opt/billing/apps
 
 Expected: Go fmt/vet/test pass.
 
-- [ ] Run Docker Compose config/build and secret scan.
+- [x] Run Docker Compose config/build and secret scan.
 
 Run:
 
@@ -1178,17 +1178,17 @@ ssh --% root@10.1.1.124 "cd /opt/billing && if git grep -n PAYOS_API_KEY -- . ':
 
 Expected: both commands exit 0.
 
-- [ ] Run scheduler command smoke and runtime smoke.
+- [x] Run scheduler command smoke and runtime smoke.
 
 Run:
 
 ```bash
-ssh --% root@10.1.1.124 "cd /opt/billing && docker compose -f infra/docker-compose.dev.yml exec -T backend sh -lc 'php artisan scheduled-tasks:run provider_actions_work && php artisan runtime:smoke-provisioning --timeout=30'"
+ssh --% root@10.1.1.124 "cd /opt/billing && docker compose -f infra/docker-compose.dev.yml exec -T backend sh -lc 'php artisan migrate --force && php artisan db:seed --class=DatabaseSeeder --force && php artisan scheduled-tasks:run provider_actions_work && php artisan runtime:smoke-provisioning --timeout=30'"
 ```
 
 Expected: scheduled task run exits 0 and runtime smoke provisions a service.
 
-- [ ] Verify deployed routes and services on branch.
+- [x] Verify deployed routes and services on branch.
 
 Run:
 
