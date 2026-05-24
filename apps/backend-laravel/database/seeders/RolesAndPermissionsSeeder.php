@@ -19,6 +19,9 @@ class RolesAndPermissionsSeeder extends Seeder
             'products.create',
             'products.update',
             'products.delete',
+            'invoices.view',
+            'invoices.create',
+            'payment_events.view',
         ];
 
         foreach ($permissions as $permission) {
@@ -28,9 +31,9 @@ class RolesAndPermissionsSeeder extends Seeder
         $superAdmin = Role::findOrCreate('super_admin');
         $superAdmin->syncPermissions($permissions);
 
-        Role::findOrCreate('ops_admin')->syncPermissions(['admin.access', 'products.view', 'products.create', 'products.update']);
+        Role::findOrCreate('ops_admin')->syncPermissions(['admin.access', 'products.view', 'products.create', 'products.update', 'invoices.view', 'invoices.create', 'payment_events.view']);
         Role::findOrCreate('support')->syncPermissions(['admin.access', 'products.view']);
-        Role::findOrCreate('finance')->syncPermissions(['admin.access']);
+        Role::findOrCreate('finance')->syncPermissions(['admin.access', 'invoices.view', 'invoices.create', 'payment_events.view']);
         Role::findOrCreate('customer');
         Role::findOrCreate('reseller');
     }

@@ -3,6 +3,8 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Models\Invoice;
+use App\Models\PaymentEvent;
 use App\Models\Product;
 use Illuminate\View\View;
 
@@ -13,6 +15,8 @@ class AdminDashboardController extends Controller
         return view('admin.dashboard', [
             'productCount' => Product::count(),
             'activeProductCount' => Product::active()->count(),
+            'openInvoiceCount' => Invoice::where('status', 'open')->count(),
+            'paymentEventCount' => PaymentEvent::count(),
         ]);
     }
 }

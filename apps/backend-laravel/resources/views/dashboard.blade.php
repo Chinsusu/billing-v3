@@ -2,6 +2,7 @@
 @section('content')
 <div class="panel">
     <h1>Customer Dashboard</h1>
-    <p class="muted">Wallet, services, invoices, and orders will appear here in later sprints.</p>
+    <p class="muted">Wallet funding and invoice payment are available in Sprint 2.</p>
+    <p><a class="button" href="/wallet">Open Wallet</a></p>
 </div>
 @endsection
