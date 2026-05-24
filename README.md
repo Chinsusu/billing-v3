@@ -85,6 +85,18 @@ Routes and commands:
 
 Customers can renew active services from wallet balance. Renewal debits the wallet with source type `service_renewal`, extends `expires_at`, and stores renewal audit metadata on the service. The expiry command marks overdue active services as `expired`; provider renew/suspend API calls are still out of scope.
 
+## Sprint 6 Private Bank Integration
+
+Routes and commands:
+
+- `GET /admin/bank-integrations`
+- `POST /admin/bank-integrations`
+- `PUT /admin/bank-integrations/{bankIntegration}`
+- `POST /admin/bank-integrations/{bankIntegration}/test`
+- `php artisan bank:sync-payments`
+
+Admins configure private bank endpoints and credentials in the backend UI. API keys and webhook secrets are encrypted at rest and never rendered back to the browser. The sync command expects the configured transaction endpoint to return a JSON `transactions` array with `transaction_id`, `reference`, `amount`, `currency`, and `paid_at`.
+
 Sandbox webhook payload:
 
 ```json

@@ -37,7 +37,7 @@ class PrivateBankPaymentSyncTest extends TestCase
         ]);
 
         Http::fake([
-            'bank.example.test/api/transactions' => Http::response([
+            'https://bank.example.test/api/transactions' => Http::response([
                 'transactions' => [[
                     'transaction_id' => 'PRIVATE-TXN-0001',
                     'reference' => 'TOPUP-PRIVATE-1',
@@ -98,7 +98,7 @@ class PrivateBankPaymentSyncTest extends TestCase
         ]);
 
         Http::fake([
-            'bank.example.test/api/transactions' => Http::response([
+            'https://bank.example.test/api/transactions' => Http::response([
                 'transactions' => [
                     [
                         'transaction_id' => 'PRIVATE-TXN-UNMATCHED',

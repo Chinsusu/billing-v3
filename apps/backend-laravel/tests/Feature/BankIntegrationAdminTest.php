@@ -35,7 +35,7 @@ class BankIntegrationAdminTest extends TestCase
         $this->assertSame('1234', $integration->api_key_last_four);
         $this->assertSame('5678', $integration->webhook_secret_last_four);
 
-        $raw = DB::table('bank_integrations')->whereKey($integration->id)->first();
+        $raw = DB::table('bank_integrations')->where('id', $integration->id)->first();
         $this->assertStringNotContainsString('private-api-secret-1234', $raw->api_key);
         $this->assertStringNotContainsString('webhook-secret-5678', $raw->webhook_secret);
 
@@ -102,7 +102,7 @@ class BankIntegrationAdminTest extends TestCase
         ]);
 
         Http::fake([
-            'bank.example.test/api/transactions' => Http::response(['transactions' => []]),
+            'https://bank.example.test/api/transactions' => Http::response(['transactions' => []]),
         ]);
 
         $this->actingAs($admin)
