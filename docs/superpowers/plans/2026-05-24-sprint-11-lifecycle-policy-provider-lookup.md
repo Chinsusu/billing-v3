@@ -81,14 +81,14 @@
 - Modify: `apps/backend-laravel/app/Services/Provisioning/Drivers/GenericHttpProvisioningDriver.php`
 - Modify: `apps/backend-laravel/app/Services/Provisioning/Drivers/SandboxProvisioningDriver.php`
 
-- [ ] Add nullable `orderedAt` and `expiresAt` to `ProvisioningResult::toArray()`.
-- [ ] Add date parser supporting `iso8601`, `unix_seconds`, and `unix_ms`.
-- [ ] Add provider response date extraction for `lifecycle_source=provider_response`.
-- [ ] Add provider lookup GET request for `lifecycle_source=provider_lookup`.
-- [ ] Audit lookup success/failure with `ProvisioningExecutionRecorder`.
-- [ ] Fail lookup with normalized lifecycle error codes.
-- [ ] Run provider lookup tests until green.
-- [ ] Commit Laravel provider lookup slice.
+- [x] Add nullable `orderedAt` and `expiresAt` to `ProvisioningResult::toArray()`.
+- [x] Add date parser supporting `iso8601`, `unix_seconds`, and `unix_ms`.
+- [x] Add provider response date extraction for `lifecycle_source=provider_response`.
+- [x] Add provider lookup GET request for `lifecycle_source=provider_lookup`.
+- [x] Audit lookup success/failure with `ProvisioningExecutionRecorder`.
+- [x] Fail lookup with normalized lifecycle error codes.
+- [x] Run provider lookup tests until green.
+- [x] Commit Laravel provider lookup slice.
 
 ### Task 6: Go Worker Date Persistence
 
