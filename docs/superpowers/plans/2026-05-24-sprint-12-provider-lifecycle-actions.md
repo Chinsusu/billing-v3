@@ -136,13 +136,13 @@
 - Modify: `README.md`
 - Modify: `docs/superpowers/plans/2026-05-24-sprint-12-provider-lifecycle-actions.md`
 
-- [ ] Update README with S12 provider lifecycle action routes and behavior.
-- [ ] Push branch and check it out on `/opt/billing`.
-- [ ] Recreate backend and run migrations.
-- [ ] Run Laravel Pint and full Laravel tests on `/opt/billing`.
-- [ ] Run Go `go fmt ./...`, `go vet ./...`, and `go test ./...` on `/opt/billing`.
-- [ ] Run Docker Compose config/build and secret scan.
-- [ ] Run `php artisan runtime:smoke-provisioning --timeout=30`.
-- [ ] Mark plan verification complete, commit, and push.
+- [x] Update README with S12 provider lifecycle action routes and behavior.
+- [x] Push branch and check it out on `/opt/billing`.
+- [x] Recreate backend and run migrations.
+- [x] Run Laravel Pint and full Laravel tests on `/opt/billing`.
+- [x] Run Go `go fmt ./...`, `go vet ./...`, and `go test ./...` on `/opt/billing`.
+- [x] Run Docker Compose config/build and secret scan.
+- [x] Run `php artisan runtime:smoke-provisioning --timeout=30`.
+- [x] Mark plan verification complete, commit, and push.
 - [ ] Open PR to `develop`, wait for CI, merge, delete feature branch.
 - [ ] Pull `develop` on `/opt/billing`, recreate backend and worker, run smoke, and verify `/products`, `/admin/products`, `/admin/services`, and worker state.
