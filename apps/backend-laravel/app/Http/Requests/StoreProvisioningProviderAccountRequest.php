@@ -29,6 +29,11 @@ class StoreProvisioningProviderAccountRequest extends FormRequest
             'response_external_id_path' => ['required', 'string', 'max:120'],
             'response_status_path' => ['required', 'string', 'max:120'],
             'response_config_path' => ['nullable', 'string', 'max:120'],
+            'callback_secret' => ['nullable', 'string', 'max:2000'],
+            'callback_event_id_path' => ['required', 'string', 'max:120'],
+            'callback_external_id_path' => ['required', 'string', 'max:120'],
+            'callback_action_path' => ['required', 'string', 'max:120'],
+            'callback_status_path' => ['required', 'string', 'max:120'],
         ];
     }
 }

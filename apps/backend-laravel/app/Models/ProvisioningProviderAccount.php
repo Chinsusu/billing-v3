@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
-#[Fillable(['slug', 'name', 'driver', 'base_url', 'provision_path', 'auth_type', 'auth_header_name', 'api_key', 'api_key_last_four', 'enabled', 'timeout_seconds', 'request_template', 'response_external_id_path', 'response_status_path', 'response_config_path', 'last_tested_at', 'last_test_status', 'last_test_error', 'created_by_id', 'updated_by_id'])]
+#[Fillable(['slug', 'name', 'driver', 'base_url', 'provision_path', 'auth_type', 'auth_header_name', 'api_key', 'api_key_last_four', 'callback_secret', 'callback_secret_last_four', 'enabled', 'timeout_seconds', 'request_template', 'response_external_id_path', 'response_status_path', 'response_config_path', 'callback_event_id_path', 'callback_external_id_path', 'callback_action_path', 'callback_status_path', 'last_tested_at', 'last_test_status', 'last_test_error', 'created_by_id', 'updated_by_id'])]
 class ProvisioningProviderAccount extends Model
 {
     use HasUuids;
@@ -16,6 +16,7 @@ class ProvisioningProviderAccount extends Model
     {
         return [
             'api_key' => 'encrypted',
+            'callback_secret' => 'encrypted',
             'enabled' => 'boolean',
             'timeout_seconds' => 'integer',
             'request_template' => 'array',
@@ -36,6 +37,11 @@ class ProvisioningProviderAccount extends Model
     public function providerActionJobs(): HasMany
     {
         return $this->hasMany(ProviderActionJob::class, 'provider_account_id');
+    }
+
+    public function callbackEvents(): HasMany
+    {
+        return $this->hasMany(ProviderCallbackEvent::class, 'provider_account_id');
     }
 
     public function endpointUrl(?string $overridePath = null): ?string

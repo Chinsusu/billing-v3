@@ -30,6 +30,10 @@ class ProvisioningProviderAccountController extends Controller
                 'request_template' => [],
                 'response_external_id_path' => 'external_id',
                 'response_status_path' => 'status',
+                'callback_event_id_path' => 'event_id',
+                'callback_external_id_path' => 'external_id',
+                'callback_action_path' => 'action',
+                'callback_status_path' => 'status',
             ]),
         ]);
     }
@@ -58,6 +62,7 @@ class ProvisioningProviderAccountController extends Controller
     private function attributesForSave(array $attributes, ?ProvisioningProviderAccount $existing, User $actor): array
     {
         $apiKey = (string) ($attributes['api_key'] ?? '');
+        $callbackSecret = (string) ($attributes['callback_secret'] ?? '');
         $requestTemplate = (string) ($attributes['request_template'] ?? '');
 
         $data = [
@@ -74,6 +79,10 @@ class ProvisioningProviderAccountController extends Controller
             'response_external_id_path' => $attributes['response_external_id_path'],
             'response_status_path' => $attributes['response_status_path'],
             'response_config_path' => $attributes['response_config_path'] ?? null,
+            'callback_event_id_path' => $attributes['callback_event_id_path'],
+            'callback_external_id_path' => $attributes['callback_external_id_path'],
+            'callback_action_path' => $attributes['callback_action_path'],
+            'callback_status_path' => $attributes['callback_status_path'],
             'updated_by_id' => $actor->id,
         ];
 
@@ -84,6 +93,11 @@ class ProvisioningProviderAccountController extends Controller
         if ($existing === null || $apiKey !== '') {
             $data['api_key'] = $apiKey !== '' ? $apiKey : null;
             $data['api_key_last_four'] = $apiKey !== '' ? substr($apiKey, -4) : null;
+        }
+
+        if ($existing === null || $callbackSecret !== '') {
+            $data['callback_secret'] = $callbackSecret !== '' ? $callbackSecret : null;
+            $data['callback_secret_last_four'] = $callbackSecret !== '' ? substr($callbackSecret, -4) : null;
         }
 
         return $data;

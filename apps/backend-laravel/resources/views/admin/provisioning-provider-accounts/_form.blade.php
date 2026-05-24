@@ -31,5 +31,13 @@
 <label>External ID Path<input name="response_external_id_path" value="{{ old('response_external_id_path', $providerAccount->response_external_id_path ?: 'external_id') }}" required></label>
 <label>Status Path<input name="response_status_path" value="{{ old('response_status_path', $providerAccount->response_status_path ?: 'status') }}" required></label>
 <label>Config Path<input name="response_config_path" value="{{ old('response_config_path', $providerAccount->response_config_path) }}"></label>
+<h2>Provider Callbacks</h2>
+<label>Callback Secret
+    <input type="password" name="callback_secret" autocomplete="new-password" placeholder="{{ $providerAccount->callback_secret_last_four ? 'Configured ...'.$providerAccount->callback_secret_last_four : 'Enter callback secret' }}">
+</label>
+<label>Callback Event ID Path<input name="callback_event_id_path" value="{{ old('callback_event_id_path', $providerAccount->callback_event_id_path ?: 'event_id') }}" required></label>
+<label>Callback External ID Path<input name="callback_external_id_path" value="{{ old('callback_external_id_path', $providerAccount->callback_external_id_path ?: 'external_id') }}" required></label>
+<label>Callback Action Path<input name="callback_action_path" value="{{ old('callback_action_path', $providerAccount->callback_action_path ?: 'action') }}" required></label>
+<label>Callback Status Path<input name="callback_status_path" value="{{ old('callback_status_path', $providerAccount->callback_status_path ?: 'status') }}" required></label>
 <p class="muted">Secret fields are write-only. Leave blank to keep existing values.</p>
 <p><button type="submit">Save Provider Account</button></p>
