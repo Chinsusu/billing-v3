@@ -30,7 +30,7 @@ use Illuminate\Support\Facades\Route;
 Route::get('/', fn () => redirect('/products'));
 Route::get('/products', ProductCatalogController::class)->name('products.index');
 Route::post('/webhooks/bank/sandbox', BankWebhookSandboxController::class)->name('webhooks.bank-sandbox');
-Route::post('/internal/provisioning/jobs/{provisioningJob}/execute', ProvisioningJobExecutionController::class)
+Route::post('/internal/provisioning/jobs/{job}/execute', ProvisioningJobExecutionController::class)
     ->withoutMiddleware([ValidateCsrfToken::class])
     ->name('internal.provisioning-jobs.execute');
 
