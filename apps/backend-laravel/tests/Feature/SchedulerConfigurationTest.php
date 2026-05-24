@@ -12,6 +12,7 @@ class SchedulerConfigurationTest extends TestCase
             ->expectsOutputToContain('scheduled-tasks:run bank_sync_payments')
             ->expectsOutputToContain('scheduled-tasks:run provider_actions_work')
             ->expectsOutputToContain('scheduled-tasks:run services_expire')
+            ->expectsOutputToContain('scheduled-tasks:run service_cancellations_process_scheduled')
             ->expectsOutputToContain('scheduled-tasks:run provider_actions_recover_stuck')
             ->assertExitCode(0);
     }
