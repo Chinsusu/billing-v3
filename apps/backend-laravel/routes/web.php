@@ -2,14 +2,20 @@
 
 use App\Http\Controllers\Admin\AdminDashboardController;
 use App\Http\Controllers\Admin\InvoiceController as AdminInvoiceController;
+use App\Http\Controllers\Admin\OrderController as AdminOrderController;
 use App\Http\Controllers\Admin\PaymentEventController;
 use App\Http\Controllers\Admin\ProductController;
+use App\Http\Controllers\Admin\ProvisioningJobController;
+use App\Http\Controllers\Admin\ServiceController as AdminServiceController;
 use App\Http\Controllers\Auth\AuthenticatedSessionController;
 use App\Http\Controllers\Auth\RegisteredUserController;
 use App\Http\Controllers\BankWebhookSandboxController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\InvoiceController;
+use App\Http\Controllers\OrderController;
 use App\Http\Controllers\ProductCatalogController;
+use App\Http\Controllers\ProductOrderController;
+use App\Http\Controllers\ServiceController;
 use App\Http\Controllers\WalletController;
 use App\Http\Controllers\WalletTopUpController;
 use Illuminate\Support\Facades\Route;
@@ -33,6 +39,9 @@ Route::middleware('auth')->group(function (): void {
     Route::get('/wallet/top-ups/{paymentIntent}', [WalletTopUpController::class, 'show'])->name('wallet.top-ups.show');
     Route::get('/invoices/{invoice}', [InvoiceController::class, 'show'])->name('invoices.show');
     Route::post('/invoices/{invoice}/pay', [InvoiceController::class, 'pay'])->name('invoices.pay');
+    Route::post('/products/{product}/order', [ProductOrderController::class, 'store'])->name('products.order');
+    Route::get('/orders/{order}', [OrderController::class, 'show'])->name('orders.show');
+    Route::get('/services', [ServiceController::class, 'index'])->name('services.index');
 
     Route::middleware('permission:admin.access')->prefix('admin')->name('admin.')->group(function (): void {
         Route::get('/', AdminDashboardController::class)->name('dashboard');
@@ -45,5 +54,8 @@ Route::middleware('auth')->group(function (): void {
         Route::get('/invoices', [AdminInvoiceController::class, 'index'])->middleware('permission:invoices.view')->name('invoices.index');
         Route::post('/invoices', [AdminInvoiceController::class, 'store'])->middleware('permission:invoices.create')->name('invoices.store');
         Route::get('/payment-events', PaymentEventController::class)->middleware('permission:payment_events.view')->name('payment-events.index');
+        Route::get('/orders', [AdminOrderController::class, 'index'])->middleware('permission:orders.view')->name('orders.index');
+        Route::get('/services', [AdminServiceController::class, 'index'])->middleware('permission:services.view')->name('services.index');
+        Route::get('/provisioning-jobs', [ProvisioningJobController::class, 'index'])->middleware('permission:provisioning_jobs.view')->name('provisioning-jobs.index');
     });
 });
