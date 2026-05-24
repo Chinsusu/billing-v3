@@ -1,6 +1,7 @@
 <?php
 
 use App\Console\Commands\ExpireServicesCommand;
+use App\Console\Commands\SmokeProvisioningRuntimeCommand;
 use App\Console\Commands\SyncPrivateBankPaymentsCommand;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
@@ -17,6 +18,7 @@ return Application::configure(basePath: dirname(__DIR__))
     )
     ->withCommands([
         ExpireServicesCommand::class,
+        SmokeProvisioningRuntimeCommand::class,
         SyncPrivateBankPaymentsCommand::class,
     ])
     ->withMiddleware(function (Middleware $middleware): void {
