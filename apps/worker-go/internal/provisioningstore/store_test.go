@@ -3,7 +3,10 @@ package provisioningstore
 import (
 	"context"
 	"database/sql"
+	"database/sql/driver"
+	"encoding/json"
 	"errors"
+	"reflect"
 	"regexp"
 	"testing"
 	"time"
@@ -75,8 +78,35 @@ func TestMarkProcessedActivatesServiceAndMarksJobProcessed(t *testing.T) {
 
 	store := NewStore(db)
 	mock.ExpectBegin()
-	mock.ExpectExec(regexp.QuoteMeta(`update services set status = 'active', external_id = $1, provisioned_at = now(), updated_at = now() where id = $2`)).
-		WithArgs("sandbox-proxy-service-1", "service-1").
+	mock.ExpectExec(regexp.QuoteMeta(`update services set status = 'active', external_id = $1, config = $2, provisioned_at = now(), updated_at = now() where id = $3`)).
+		WithArgs("sandbox-proxy-service-1", jsonObjectArg{want: map[string]any{"ip": "203.0.113.10", "region": "sgp1"}}, "service-1").
+		WillReturnResult(sqlmock.NewResult(0, 1))
+	mock.ExpectExec(regexp.QuoteMeta(`update provisioning_jobs set status = 'processed', processed_at = now(), last_error = null, updated_at = now() where id = $1`)).
+		WithArgs("job-1").
+		WillReturnResult(sqlmock.NewResult(0, 1))
+	mock.ExpectCommit()
+
+	err := store.MarkProcessed(context.Background(), Job{ID: "job-1", ServiceID: "service-1"}, Result{
+		ExternalID: "sandbox-proxy-service-1",
+		Config:     map[string]any{"ip": "203.0.113.10", "region": "sgp1"},
+	})
+
+	if err != nil {
+		t.Fatalf("expected no error, got %v", err)
+	}
+	if err := mock.ExpectationsWereMet(); err != nil {
+		t.Fatal(err)
+	}
+}
+
+func TestMarkProcessedDefaultsNilConfigToEmptyObject(t *testing.T) {
+	db, mock, closeDB := newMockDB(t)
+	defer closeDB()
+
+	store := NewStore(db)
+	mock.ExpectBegin()
+	mock.ExpectExec(regexp.QuoteMeta(`update services set status = 'active', external_id = $1, config = $2, provisioned_at = now(), updated_at = now() where id = $3`)).
+		WithArgs("sandbox-proxy-service-1", jsonObjectArg{want: map[string]any{}}, "service-1").
 		WillReturnResult(sqlmock.NewResult(0, 1))
 	mock.ExpectExec(regexp.QuoteMeta(`update provisioning_jobs set status = 'processed', processed_at = now(), last_error = null, updated_at = now() where id = $1`)).
 		WithArgs("job-1").
@@ -192,4 +222,27 @@ func newMockDB(t *testing.T) (*sql.DB, sqlmock.Sqlmock, func()) {
 	}
 
 	return db, mock, func() { _ = db.Close() }
+}
+
+type jsonObjectArg struct {
+	want map[string]any
+}
+
+func (arg jsonObjectArg) Match(value driver.Value) bool {
+	var bytes []byte
+	switch typed := value.(type) {
+	case []byte:
+		bytes = typed
+	case string:
+		bytes = []byte(typed)
+	default:
+		return false
+	}
+
+	var got map[string]any
+	if err := json.Unmarshal(bytes, &got); err != nil {
+		return false
+	}
+
+	return reflect.DeepEqual(got, arg.want)
 }

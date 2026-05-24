@@ -50,4 +50,9 @@ class Service extends Model
     {
         return $this->hasMany(ProvisioningJob::class);
     }
+
+    public function provisioningExecutionLogs(): HasMany
+    {
+        return $this->hasMany(ProvisioningExecutionLog::class);
+    }
 }

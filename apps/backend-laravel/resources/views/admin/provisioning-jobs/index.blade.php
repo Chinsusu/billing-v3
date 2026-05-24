@@ -8,7 +8,7 @@
             @forelse ($provisioningJobs as $job)
                 <tr>
                     <td>{{ $job->type }}</td>
-                    <td>{{ $job->idempotency_key }}</td>
+                    <td><a href="/admin/provisioning-jobs/{{ $job->id }}">{{ $job->idempotency_key }}</a></td>
                     <td>{{ $job->payload['product']['code'] ?? '-' }}</td>
                     <td>{{ $job->status }}</td>
                     <td>{{ $job->attempts }}</td>
@@ -16,6 +16,7 @@
                     <td>{{ $job->processed_at?->toDateTimeString() ?? '-' }}</td>
                     <td>{{ $job->last_error ?? '-' }}</td>
                     <td>
+                        <a class="button secondary" href="/admin/provisioning-jobs/{{ $job->id }}">View</a>
                         @if ($job->status === 'failed')
                             <form method="POST" action="/admin/provisioning-jobs/{{ $job->id }}/retry">
                                 @csrf

@@ -26,4 +26,5 @@ type Job struct {
 type Result struct {
 	Status     string
 	ExternalID string
+	Config     map[string]any
 }

@@ -15,7 +15,13 @@
                     <td>{{ $account->auth_type }}{{ $account->auth_header_name ? ' ('.$account->auth_header_name.')' : '' }}</td>
                     <td>{{ $account->api_key_last_four ? 'Configured ...'.$account->api_key_last_four : 'Not configured' }}</td>
                     <td>{{ $account->enabled ? 'Enabled' : 'Disabled' }} {{ $account->last_test_status ? '('.$account->last_test_status.')' : '' }}</td>
-                    <td><a class="button secondary" href="/admin/provisioning-provider-accounts/{{ $account->id }}/edit">Edit</a></td>
+                    <td>
+                        <a class="button secondary" href="/admin/provisioning-provider-accounts/{{ $account->id }}/edit">Edit</a>
+                        <form method="POST" action="/admin/provisioning-provider-accounts/{{ $account->id }}/test" style="display:inline">
+                            @csrf
+                            <button type="submit">Test</button>
+                        </form>
+                    </td>
                 </tr>
             @empty
                 <tr><td colspan="8" class="muted">No provisioning provider accounts yet.</td></tr>
