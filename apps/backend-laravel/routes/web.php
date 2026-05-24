@@ -84,7 +84,9 @@ Route::middleware('auth')->group(function (): void {
         Route::delete('/products/{product}', [ProductController::class, 'destroy'])->middleware('permission:products.delete')->name('products.destroy');
         Route::get('/invoices', [AdminInvoiceController::class, 'index'])->middleware('permission:invoices.view')->name('invoices.index');
         Route::post('/invoices', [AdminInvoiceController::class, 'store'])->middleware('permission:invoices.create')->name('invoices.store');
-        Route::get('/payment-events', PaymentEventController::class)->middleware('permission:payment_events.view')->name('payment-events.index');
+        Route::get('/invoices/{invoice}', [AdminInvoiceController::class, 'show'])->middleware('permission:invoices.view')->name('invoices.show');
+        Route::get('/payment-events', [PaymentEventController::class, 'index'])->middleware('permission:payment_events.view')->name('payment-events.index');
+        Route::get('/payment-events/{paymentEvent}', [PaymentEventController::class, 'show'])->middleware('permission:payment_events.view')->name('payment-events.show');
         Route::get('/customers', [CustomerController::class, 'index'])->middleware('permission:customers.view')->name('customers.index');
         Route::get('/customers/{user}', [CustomerController::class, 'show'])->middleware('permission:customers.view')->name('customers.show');
         Route::post('/customers/{user}/wallet-adjustments', CustomerWalletAdjustmentController::class)->middleware('permission:wallets.adjust')->name('customers.wallet-adjustments.store');
@@ -101,6 +103,7 @@ Route::middleware('auth')->group(function (): void {
         Route::put('/provisioning-provider-accounts/{provisioningProviderAccount}', [ProvisioningProviderAccountController::class, 'update'])->middleware('permission:provisioning_provider_accounts.manage')->name('provisioning-provider-accounts.update');
         Route::post('/provisioning-provider-accounts/{provisioningProviderAccount}/test', ProvisioningProviderAccountTestController::class)->middleware('permission:provisioning_provider_accounts.manage')->name('provisioning-provider-accounts.test');
         Route::get('/orders', [AdminOrderController::class, 'index'])->middleware('permission:orders.view')->name('orders.index');
+        Route::get('/orders/{order}', [AdminOrderController::class, 'show'])->middleware('permission:orders.view')->name('orders.show');
         Route::get('/services', [AdminServiceController::class, 'index'])->middleware('permission:services.view')->name('services.index');
         Route::get('/services/{service}', [AdminServiceController::class, 'show'])->middleware('permission:services.view')->name('services.show');
         Route::post('/services/{service}/refund-credit', ServiceRefundCreditController::class)->middleware('permission:wallets.adjust')->name('services.refund-credit');

@@ -67,7 +67,7 @@
         <thead><tr><th>Invoice</th><th>Status</th><th>Total</th></tr></thead>
         <tbody>
             @forelse ($invoices as $invoice)
-                <tr><td>{{ $invoice->invoice_number }}</td><td>{{ $invoice->status }}</td><td>{{ number_format($invoice->total_amount) }} {{ $invoice->currency }}</td></tr>
+                <tr><td><a href="/admin/invoices/{{ $invoice->id }}">{{ $invoice->invoice_number }}</a></td><td>{{ $invoice->status }}</td><td>{{ number_format($invoice->total_amount) }} {{ $invoice->currency }}</td></tr>
             @empty
                 <tr><td colspan="3" class="muted">No invoices yet.</td></tr>
             @endforelse
@@ -81,7 +81,7 @@
         <thead><tr><th>Order</th><th>Status</th><th>Total</th></tr></thead>
         <tbody>
             @forelse ($orders as $order)
-                <tr><td>{{ $order->order_number }}</td><td>{{ $order->status }}</td><td>{{ number_format($order->total_amount) }} {{ $order->currency }}</td></tr>
+                <tr><td><a href="/admin/orders/{{ $order->id }}">{{ $order->order_number }}</a></td><td>{{ $order->status }}</td><td>{{ number_format($order->total_amount) }} {{ $order->currency }}</td></tr>
             @empty
                 <tr><td colspan="3" class="muted">No orders yet.</td></tr>
             @endforelse

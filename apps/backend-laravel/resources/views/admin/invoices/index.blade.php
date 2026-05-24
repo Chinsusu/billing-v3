@@ -16,6 +16,31 @@
 </div>
 
 <div class="panel">
+    <h2>Filter</h2>
+    <form method="GET" action="/admin/invoices">
+        <div class="grid">
+            <div>
+                <label for="status">Status</label>
+                <select id="status" name="status">
+                    <option value="">All statuses</option>
+                    @foreach ($statuses as $status)
+                        <option value="{{ $status }}" @selected($filters['status'] === $status)>{{ $status }}</option>
+                    @endforeach
+                </select>
+            </div>
+            <div>
+                <label for="customer">Customer email</label>
+                <input id="customer" name="customer" value="{{ $filters['customer'] }}">
+            </div>
+        </div>
+        <p>
+            <button type="submit">Filter</button>
+            <a class="button secondary" href="/admin/invoices">Reset</a>
+        </p>
+    </form>
+</div>
+
+<div class="panel">
     <table>
         <thead>
             <tr>
@@ -28,8 +53,8 @@
         <tbody>
             @forelse ($invoices as $invoice)
                 <tr>
-                    <td>{{ $invoice->invoice_number }}</td>
-                    <td>{{ $invoice->user->email }}</td>
+                    <td><a href="/admin/invoices/{{ $invoice->id }}">{{ $invoice->invoice_number }}</a></td>
+                    <td><a href="/admin/customers/{{ $invoice->user_id }}">{{ $invoice->user->email }}</a></td>
                     <td>{{ $invoice->status }}</td>
                     <td>{{ number_format($invoice->total_amount) }} {{ $invoice->currency }}</td>
                 </tr>

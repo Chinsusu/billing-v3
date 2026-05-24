@@ -211,6 +211,16 @@ Routes:
 
 Admins and finance users can search customers, inspect wallet balances, recent ledger entries, invoices, orders, and services, then apply audited manual wallet adjustments when they have `wallets.adjust`. Support users can view customers through `customers.view` without adjustment access. Manual adjustments are recorded as `ledger_entries` with `source_type=admin_wallet_adjustment` and actor metadata.
 
+## Sprint 17 Admin Finance Detail Workbench
+
+Routes:
+
+- `GET /admin/invoices/{invoice}`
+- `GET /admin/orders/{order}`
+- `GET /admin/payment-events/{paymentEvent}`
+
+Admin invoice, order, and payment event lists now support focused filters and link into detail pages. Detail pages expose related customer, invoice line, order item, service, provisioning job, payment event, wallet, and ledger context without adding finance mutations; payment expiry and reconciliation remain separate automation work.
+
 ## Sprint 18 Customer Billing Activity
 
 Routes:
