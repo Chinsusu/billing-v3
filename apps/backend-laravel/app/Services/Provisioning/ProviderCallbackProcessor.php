@@ -7,6 +7,7 @@ use App\Models\ProviderCallbackEvent;
 use App\Models\ProvisioningProviderAccount;
 use App\Models\Service;
 use App\Models\ServiceCancellation;
+use Illuminate\Database\QueryException;
 use Illuminate\Support\Facades\DB;
 
 class ProviderCallbackProcessor
@@ -40,38 +41,56 @@ class ProviderCallbackProcessor
             }
         }
 
-        return DB::transaction(function () use ($account, $payload, $providerEventId, $externalId, $action, $providerStatus): array {
-            $service = $this->findService($account, $externalId);
-            $job = $service instanceof Service && $action !== null
-                ? $this->findProviderActionJob($account, $service, $action)
-                : null;
-            $processingStatus = $service instanceof Service ? 'processed' : 'unmatched';
+        try {
+            return DB::transaction(function () use ($account, $payload, $providerEventId, $externalId, $action, $providerStatus): array {
+                $service = $this->findService($account, $externalId);
+                $job = $service instanceof Service && $action !== null
+                    ? $this->findProviderActionJob($account, $service, $action)
+                    : null;
+                $processingStatus = $service instanceof Service ? 'processed' : 'unmatched';
 
-            $event = ProviderCallbackEvent::create([
-                'provider_account_id' => $account->id,
-                'service_id' => $service?->id,
-                'provider_action_job_id' => $job?->id,
-                'provider_event_id' => $providerEventId,
-                'external_id' => $externalId,
-                'action' => $action,
-                'provider_status' => $providerStatus,
-                'signature_status' => 'valid',
-                'processing_status' => $processingStatus,
-                'payload' => $this->redactor->redact($payload),
-                'processed_at' => now(),
-                'error' => null,
-            ]);
+                $event = ProviderCallbackEvent::create([
+                    'provider_account_id' => $account->id,
+                    'service_id' => $service?->id,
+                    'provider_action_job_id' => $job?->id,
+                    'provider_event_id' => $providerEventId,
+                    'external_id' => $externalId,
+                    'action' => $action,
+                    'provider_status' => $providerStatus,
+                    'signature_status' => 'valid',
+                    'processing_status' => $processingStatus,
+                    'payload' => $this->redactor->redact($payload),
+                    'processed_at' => now(),
+                    'error' => null,
+                ]);
 
-            if ($service instanceof Service) {
-                $this->reconcile($event, $service, $job, $action, $providerStatus);
+                if ($service instanceof Service) {
+                    $this->reconcile($event, $service, $job, $action, $providerStatus);
+                }
+
+                return [
+                    'status' => $processingStatus,
+                    'status_code' => $processingStatus === 'processed' ? 200 : 202,
+                    'event' => $event->refresh(),
+                ];
+            });
+        } catch (QueryException $exception) {
+            if ($providerEventId !== null && $this->isDuplicateProviderEventViolation($exception)) {
+                $existing = ProviderCallbackEvent::where('provider_account_id', $account->id)
+                    ->where('provider_event_id', $providerEventId)
+                    ->first();
+
+                if ($existing instanceof ProviderCallbackEvent) {
+                    return [
+                        'status' => 'duplicate',
+                        'status_code' => 200,
+                        'event' => $existing,
+                    ];
+                }
             }
 
-            return [
-                'status' => $processingStatus,
-                'status_code' => $processingStatus === 'processed' ? 200 : 202,
-                'event' => $event->refresh(),
-            ];
-        });
+            throw $exception;
+        }
     }
 
     private function findService(ProvisioningProviderAccount $account, ?string $externalId): ?Service
@@ -145,7 +164,7 @@ class ProviderCallbackProcessor
                     'processed_at' => now(),
                     'last_error' => "Provider callback status {$providerStatus}.",
                 ])->save();
-            } else {
+            } elseif ($targetStatus !== null) {
                 $job->forceFill([
                     'status' => 'processed',
                     'available_at' => null,
@@ -155,7 +174,7 @@ class ProviderCallbackProcessor
             }
         }
 
-        if ($action === 'cancel') {
+        if ($action === 'cancel' && $targetStatus === 'cancelled') {
             $this->completeCancellations($event, $service, $job);
         }
     }
@@ -212,6 +231,14 @@ class ProviderCallbackProcessor
     private function isFailureStatus(?string $providerStatus): bool
     {
         return in_array($providerStatus, ['failed', 'failure', 'error', 'rejected'], true);
+    }
+
+    private function isDuplicateProviderEventViolation(QueryException $exception): bool
+    {
+        $sqlState = (string) ($exception->errorInfo[0] ?? '');
+
+        return in_array($sqlState, ['23000', '23505'], true)
+            && str_contains($exception->getMessage(), 'provider_callback_events');
     }
 
     private function stringValue(mixed $value): ?string

@@ -120,6 +120,94 @@ class ProviderCallbackIntakeTest extends TestCase
         $this->assertSame(0, DB::table('provider_callback_events')->count());
     }
 
+    public function test_failed_cancel_callback_does_not_complete_service_or_cancellation(): void
+    {
+        $customer = User::factory()->create();
+        $account = $this->providerAccount();
+        $service = $this->providerBackedService($customer, $account, [
+            'status' => 'active',
+            'external_id' => 'provider-cancel-failed-123',
+        ]);
+        $job = ProviderActionJob::create([
+            'service_id' => $service->id,
+            'user_id' => $customer->id,
+            'provider_account_id' => $account->id,
+            'action' => 'cancel',
+            'status' => 'pending',
+            'attempts' => 0,
+            'max_attempts' => 3,
+            'idempotency_key' => "service-cancel:{$service->id}:failed-callback",
+            'payload' => ['context' => []],
+        ]);
+        $cancellation = ServiceCancellation::create([
+            'service_id' => $service->id,
+            'user_id' => $customer->id,
+            'requested_by_id' => $customer->id,
+            'provider_action_job_id' => $job->id,
+            'mode' => 'period_end',
+            'status' => 'queued',
+            'reason' => 'End of term',
+            'meta' => ['provider_action_job_id' => $job->id],
+            'requested_at' => now()->subDay(),
+        ]);
+
+        $this->signedProviderCallback($account, [
+            'event_id' => 'evt-cancel-failed-001',
+            'external_id' => 'provider-cancel-failed-123',
+            'action' => 'cancel',
+            'status' => 'failed',
+        ])->assertOk()->assertJsonPath('status', 'processed');
+
+        $this->assertSame('active', $service->refresh()->status);
+        $this->assertSame('failed', $job->refresh()->status);
+        $this->assertSame('queued', $cancellation->refresh()->status);
+        $this->assertNull($cancellation->completed_at);
+    }
+
+    public function test_pending_cancel_callback_does_not_process_job_or_complete_cancellation(): void
+    {
+        $customer = User::factory()->create();
+        $account = $this->providerAccount();
+        $service = $this->providerBackedService($customer, $account, [
+            'status' => 'active',
+            'external_id' => 'provider-cancel-pending-123',
+        ]);
+        $job = ProviderActionJob::create([
+            'service_id' => $service->id,
+            'user_id' => $customer->id,
+            'provider_account_id' => $account->id,
+            'action' => 'cancel',
+            'status' => 'pending',
+            'attempts' => 0,
+            'max_attempts' => 3,
+            'idempotency_key' => "service-cancel:{$service->id}:pending-callback",
+            'payload' => ['context' => []],
+        ]);
+        $cancellation = ServiceCancellation::create([
+            'service_id' => $service->id,
+            'user_id' => $customer->id,
+            'requested_by_id' => $customer->id,
+            'provider_action_job_id' => $job->id,
+            'mode' => 'period_end',
+            'status' => 'queued',
+            'reason' => 'End of term',
+            'meta' => ['provider_action_job_id' => $job->id],
+            'requested_at' => now()->subDay(),
+        ]);
+
+        $this->signedProviderCallback($account, [
+            'event_id' => 'evt-cancel-pending-001',
+            'external_id' => 'provider-cancel-pending-123',
+            'action' => 'cancel',
+            'status' => 'pending',
+        ])->assertOk()->assertJsonPath('status', 'processed');
+
+        $this->assertSame('active', $service->refresh()->status);
+        $this->assertSame('pending', $job->refresh()->status);
+        $this->assertSame('queued', $cancellation->refresh()->status);
+        $this->assertNull($cancellation->completed_at);
+    }
+
     public function test_unmatched_provider_callback_is_audited_without_service_mutation(): void
     {
         $account = $this->providerAccount();
