@@ -259,6 +259,18 @@ Routes:
 
 Customers can request immediate or period-end cancellation for active services. Local services are cancelled immediately; provider-backed services queue an idempotent provider cancel action and keep the service active until the provider action succeeds. Cancellation requests are audited in `service_cancellations`. Admins with `wallets.adjust` can credit service refunds from the service runbook, recorded in ledger entries with `source_type=service_refund`.
 
+## Sprint 22 Notification Outbox
+
+Routes and commands:
+
+- `GET /admin/notification-events`
+- `GET /admin/notification-events/{notificationEvent}`
+- `POST /admin/notification-events/{notificationEvent}/retry`
+- `php artisan notifications:send --limit=50`
+- `php artisan scheduled-tasks:run notifications_send`
+
+Customer and operator email notifications are persisted in `notification_events` before delivery. The outbox sends pending rows with retry/backoff, lets admins inspect and retry failed notifications, and queues customer events for wallet credits, paid invoices, provisioned services, renewals, cancellations, and expiry warnings. Provider callback mismatches and exhausted provider action failures notify the configured operator mailbox.
+
 ## Sprint 23 Scheduled Cancellation Execution
 
 Commands:
