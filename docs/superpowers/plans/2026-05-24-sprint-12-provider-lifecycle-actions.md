@@ -109,11 +109,11 @@
 **Files:**
 - Create: `apps/backend-laravel/tests/Feature/AdminServiceProviderSyncTest.php`
 
-- [ ] Add test: admin posts `/admin/services/{service}/sync-provider`, provider sync GET updates local status and expiry.
-- [ ] Assert sync audit log action is `provider_service_sync`.
-- [ ] Assert admin services index shows the sync form/button.
-- [ ] Run admin sync test and verify failure is missing route/controller/view implementation.
-- [ ] Commit RED admin sync tests.
+- [x] Add test: admin posts `/admin/services/{service}/sync-provider`, provider sync GET updates local status and expiry.
+- [x] Assert sync audit log action is `provider_service_sync`.
+- [x] Assert admin services index shows the sync form/button.
+- [x] Run admin sync test and verify failure is missing route/controller/view implementation.
+- [x] Commit RED admin sync tests.
 
 ### Task 9: Implement Admin Provider Sync
 
@@ -122,13 +122,13 @@
 - Modify: `apps/backend-laravel/routes/web.php`
 - Modify: `apps/backend-laravel/resources/views/admin/services/index.blade.php`
 
-- [ ] Add admin sync controller that calls provider action service `sync`.
-- [ ] Update service status from provider status when present.
-- [ ] Update `expires_at` from provider expiry when present.
-- [ ] Add route protected by existing `services.view` permission.
-- [ ] Add sync button to admin services table.
-- [ ] Run admin sync tests until green.
-- [ ] Commit admin sync slice.
+- [x] Add admin sync controller that calls provider action service `sync`.
+- [x] Update service status from provider status when present.
+- [x] Update `expires_at` from provider expiry when present.
+- [x] Add route protected by existing `services.view` permission.
+- [x] Add sync button to admin services table.
+- [x] Run admin sync tests until green.
+- [x] Commit admin sync slice.
 
 ### Task 10: Full Verification, Docs, PR, Deploy
 
