@@ -69,10 +69,12 @@ The command must seed prerequisites through existing data, credit the seeded cus
 
 **Files:**
 - Create: `apps/backend-laravel/Dockerfile.dev`
+- Create: `apps/backend-laravel/.dockerignore`
 - Create: `apps/backend-laravel/.env.compose.example`
 - Modify: `infra/docker-compose.dev.yml`
 
 - [x] Add `Dockerfile.dev` for the backend dev runtime.
+- [x] Add `.dockerignore` so backend Docker builds do not send `.env`, `vendor`, or `node_modules` in the context.
 
 ```dockerfile
 FROM php:8.4-cli
