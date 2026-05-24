@@ -16,10 +16,10 @@
 - Create: `docs/superpowers/specs/2026-05-24-sprint-3-orders-services-design.md`
 - Create: `docs/superpowers/plans/2026-05-24-sprint-3-orders-services.md`
 
-- [ ] Save the approved S3 design.
-- [ ] Save this implementation plan.
-- [ ] Scan both files for placeholders and contradictions.
-- [ ] Commit documentation before code.
+- [x] Save the approved S3 design.
+- [x] Save this implementation plan.
+- [x] Scan both files for placeholders and contradictions.
+- [x] Commit documentation before code.
 
 ### Task 2: Laravel RED Tests
 
@@ -27,11 +27,11 @@
 - Create: `apps/backend-laravel/tests/Feature/OrderCheckoutFlowTest.php`
 - Create: `apps/backend-laravel/tests/Feature/AdminOperationsTest.php`
 
-- [ ] Add tests for successful product order checkout, wallet debit, service creation, and provisioning job creation.
-- [ ] Add tests for insufficient balance rollback and inactive product order protection.
-- [ ] Add tests for customer order/service ownership.
-- [ ] Add tests for admin orders/services/provisioning job visibility.
-- [ ] Run the new tests on the dev server and verify they fail because S3 models/routes do not exist.
+- [x] Add tests for successful product order checkout, wallet debit, service creation, and provisioning job creation.
+- [x] Add tests for insufficient balance rollback and inactive product order protection.
+- [x] Add tests for customer order/service ownership.
+- [x] Add tests for admin orders/services/provisioning job visibility.
+- [x] Run the new tests on the dev server and verify they fail because S3 models/routes do not exist.
 
 ### Task 3: Laravel Domain Implementation
 
@@ -45,11 +45,11 @@
 - Create: `apps/backend-laravel/database/factories/ServiceFactory.php`
 - Create: `apps/backend-laravel/app/Services/Orders/OrderCheckoutService.php`
 
-- [ ] Add migrations with UUID primary keys and user/product foreign keys.
-- [ ] Add models, casts, and relationships.
-- [ ] Add factories for tests.
-- [ ] Implement `OrderCheckoutService::checkout(User $user, Product $product): Order`.
-- [ ] Ensure checkout wraps order, wallet debit, service, and provisioning job writes in one DB transaction.
+- [x] Add migrations with UUID primary keys and user/product foreign keys.
+- [x] Add models, casts, and relationships.
+- [x] Add factories for tests.
+- [x] Implement `OrderCheckoutService::checkout(User $user, Product $product): Order`.
+- [x] Ensure checkout wraps order, wallet debit, service, and provisioning job writes in one DB transaction.
 
 ### Task 4: Laravel Routes Views Permissions
 
@@ -73,11 +73,11 @@
 - Modify: `apps/backend-laravel/routes/web.php`
 - Modify: `README.md`
 
-- [ ] Add customer order/service routes.
-- [ ] Add admin operations routes guarded by new permissions.
-- [ ] Add Blade views and product order button.
-- [ ] Update dashboard and README.
-- [ ] Run S3 Laravel tests and verify they pass.
+- [x] Add customer order/service routes.
+- [x] Add admin operations routes guarded by new permissions.
+- [x] Add Blade views and product order button.
+- [x] Update dashboard and README.
+- [x] Run S3 Laravel tests and verify they pass.
 
 ### Task 5: Go Worker Provisioning Foundation
 
@@ -87,19 +87,19 @@
 - Create: `apps/worker-go/internal/provisioning/processor_test.go`
 - Modify: `apps/worker-go/cmd/worker/main.go`
 
-- [ ] Add failing Go tests for invalid job payloads and successful provision action.
-- [ ] Implement `Job`, `Result`, and `Processor.Process`.
-- [ ] Update worker startup message to include provisioning mode.
-- [ ] Run Go tests and verify they pass.
+- [x] Add failing Go tests for invalid job payloads and successful provision action.
+- [x] Implement `Job`, `Result`, and `Processor.Process`.
+- [x] Update worker startup message to include provisioning mode.
+- [x] Run Go tests and verify they pass.
 
 ### Task 6: Final Verification And Publish
 
 **Files:**
 - Modify: `docs/superpowers/plans/2026-05-24-sprint-3-orders-services.md`
 
-- [ ] Mark plan checklist complete.
-- [ ] Run all Laravel tests.
-- [ ] Run Pint.
-- [ ] Run Go `gofmt`, `go vet`, and `go test`.
-- [ ] Run Docker compose config and secret scan.
-- [ ] Commit, push, open PR to `develop`, wait for CI, merge, and update `/opt/billing`.
+- [x] Mark plan checklist complete.
+- [x] Run all Laravel tests.
+- [x] Run Pint.
+- [x] Run Go `gofmt`, `go vet`, and `go test`.
+- [x] Run Docker compose config and secret scan.
+- [x] Commit, push, open PR to `develop`, wait for CI, merge, and update `/opt/billing`.
