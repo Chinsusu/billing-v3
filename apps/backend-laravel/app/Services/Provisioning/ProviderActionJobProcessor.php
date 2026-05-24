@@ -4,6 +4,7 @@ namespace App\Services\Provisioning;
 
 use App\Models\ProviderActionJob;
 use App\Models\Service;
+use App\Models\ServiceCancellation;
 use Illuminate\Support\Facades\DB;
 use Throwable;
 
@@ -91,6 +92,7 @@ class ProviderActionJobProcessor
         }
 
         $this->applyServiceResult($service, $job->action, $context, $result);
+        $this->completeLinkedCancellation($job, $service, $context);
 
         $job->forceFill([
             'status' => 'processed',
@@ -114,6 +116,11 @@ class ProviderActionJobProcessor
         if ($action === 'cancel') {
             $updates['status'] = 'cancelled';
             $meta['cancelled_at'] = $context['cancelled_at'] ?? now()->toISOString();
+            $meta['cancellation'] = array_merge($meta['cancellation'] ?? [], [
+                'status' => 'completed',
+                'completed_at' => $meta['cancelled_at'],
+                'provider_action_job_id' => $context['provider_action_job_id'] ?? null,
+            ]);
             $updates['meta'] = $meta;
         }
 
@@ -130,6 +137,51 @@ class ProviderActionJobProcessor
         if ($updates !== []) {
             $service->forceFill($updates)->save();
         }
+    }
+
+    private function completeLinkedCancellation(ProviderActionJob $job, Service $service, array $context): void
+    {
+        if ($job->action !== 'cancel') {
+            return;
+        }
+
+        $cancellation = null;
+        $serviceCancellationId = $context['service_cancellation_id'] ?? null;
+
+        if (is_string($serviceCancellationId) && $serviceCancellationId !== '') {
+            $cancellation = ServiceCancellation::whereKey($serviceCancellationId)->first();
+        }
+
+        if (! $cancellation instanceof ServiceCancellation) {
+            $cancellation = ServiceCancellation::where('provider_action_job_id', $job->id)
+                ->whereIn('status', ['queued', 'requested', 'scheduled'])
+                ->latest()
+                ->first();
+        }
+
+        if (! $cancellation instanceof ServiceCancellation) {
+            return;
+        }
+
+        $completedAt = $context['cancelled_at'] ?? now()->toISOString();
+        $meta = $cancellation->meta ?? [];
+        $meta['provider_action_job_id'] = $job->id;
+        $meta['provider_completed_at'] = $completedAt;
+
+        $cancellation->forceFill([
+            'status' => 'completed',
+            'provider_action_job_id' => $job->id,
+            'completed_at' => now(),
+            'meta' => $meta,
+        ])->save();
+
+        $serviceMeta = $service->fresh()?->meta ?? [];
+        $serviceMeta['cancellation'] = array_merge($serviceMeta['cancellation'] ?? [], [
+            'status' => 'completed',
+            'provider_action_job_id' => $job->id,
+            'completed_at' => $completedAt,
+        ]);
+        $service->forceFill(['meta' => $serviceMeta])->save();
     }
 
     private function recordFailure(ProviderActionJob $job, Throwable $exception): void

@@ -28,6 +28,11 @@ Schedule::command('scheduled-tasks:run services_expire')
     ->withoutOverlapping()
     ->name('services_expire');
 
+Schedule::command('scheduled-tasks:run service_cancellations_process_scheduled')
+    ->everyFiveMinutes()
+    ->withoutOverlapping()
+    ->name('service_cancellations_process_scheduled');
+
 Schedule::command('scheduled-tasks:run provider_actions_recover_stuck')
     ->everyFiveMinutes()
     ->withoutOverlapping()

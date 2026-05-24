@@ -277,7 +277,7 @@ class OpsAlertsTest extends TestCase
             'enabled' => true,
         ]);
 
-        foreach (['bank_sync_payments', 'provider_actions_work', 'services_expire', 'provider_actions_recover_stuck'] as $task) {
+        foreach (['bank_sync_payments', 'provider_actions_work', 'services_expire', 'service_cancellations_process_scheduled', 'provider_actions_recover_stuck'] as $task) {
             if (in_array($task, $exceptTasks, true)) {
                 continue;
             }

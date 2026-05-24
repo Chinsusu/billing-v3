@@ -30,7 +30,7 @@
 - [x] Add test for provider action success completing linked cancellation row.
 - [x] Add scheduler registry and schedule-list assertions.
 - [x] Run targeted test on `/opt/billing` and verify RED.
-- [ ] Commit RED tests.
+- [x] Commit RED tests.
 
 ### Task 3: Scheduled Cancellation Processor
 
@@ -39,13 +39,13 @@
 - Create: `apps/backend-laravel/app/Console/Commands/ProcessScheduledServiceCancellationsCommand.php`
 - Modify: `apps/backend-laravel/bootstrap/app.php`
 
-- [ ] Implement due scheduled cancellation query.
-- [ ] Complete local due cancellations.
-- [ ] Queue provider cancel jobs for provider-backed due cancellations.
-- [ ] Make command output deterministic counts.
-- [ ] Register command in Laravel bootstrap.
-- [ ] Run targeted test until command behavior passes.
-- [ ] Commit processor slice.
+- [x] Implement due scheduled cancellation query.
+- [x] Complete local due cancellations.
+- [x] Queue provider cancel jobs for provider-backed due cancellations.
+- [x] Make command output deterministic counts.
+- [x] Register command in Laravel bootstrap.
+- [x] Run targeted test until command behavior passes.
+- [x] Commit processor slice.
 
 ### Task 4: Provider Completion and Ops Registration
 
@@ -57,13 +57,13 @@
 - Modify: `apps/backend-laravel/tests/Feature/OpsAlertsTest.php`
 - Modify: `apps/backend-laravel/tests/Feature/SchedulerConfigurationTest.php`
 
-- [ ] Complete linked cancellation rows after successful provider cancel jobs.
-- [ ] Register `service_cancellations_process_scheduled` in the task registry.
-- [ ] Schedule the processor every five minutes.
-- [ ] Add task health coverage for ops health and alerts.
-- [ ] Update scheduler/ops tests for the new task.
-- [ ] Run targeted tests until provider completion and scheduler assertions pass.
-- [ ] Commit provider/ops slice.
+- [x] Complete linked cancellation rows after successful provider cancel jobs.
+- [x] Register `service_cancellations_process_scheduled` in the task registry.
+- [x] Schedule the processor every five minutes.
+- [x] Add task health coverage for ops health and alerts.
+- [x] Update scheduler/ops tests for the new task.
+- [x] Run targeted tests until provider completion and scheduler assertions pass.
+- [x] Commit provider/ops slice.
 
 ### Task 5: Documentation, Verification, PR, Deploy
 
