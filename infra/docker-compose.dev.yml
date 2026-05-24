@@ -75,6 +75,7 @@ services:
       MAIL_HOST: mailpit
       MAIL_PORT: 1025
       BANK_SANDBOX_WEBHOOK_SECRET: local-bank-sandbox-secret
+      INTERNAL_PROVISIONING_TOKEN: local-internal-provisioning-token
     ports:
       - "8000:8000"
     volumes:

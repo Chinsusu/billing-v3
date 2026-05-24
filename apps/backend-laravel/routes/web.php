@@ -10,6 +10,7 @@ use App\Http\Controllers\Admin\ProductController;
 use App\Http\Controllers\Admin\ProvisioningProviderAccountController;
 use App\Http\Controllers\Admin\ProvisioningJobController;
 use App\Http\Controllers\Admin\ProvisioningJobRetryController;
+use App\Http\Controllers\Internal\ProvisioningJobExecutionController;
 use App\Http\Controllers\Admin\ServiceController as AdminServiceController;
 use App\Http\Controllers\Auth\AuthenticatedSessionController;
 use App\Http\Controllers\Auth\RegisteredUserController;
@@ -23,11 +24,15 @@ use App\Http\Controllers\ServiceController;
 use App\Http\Controllers\ServiceRenewalController;
 use App\Http\Controllers\WalletController;
 use App\Http\Controllers\WalletTopUpController;
+use Illuminate\Foundation\Http\Middleware\ValidateCsrfToken;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', fn () => redirect('/products'));
 Route::get('/products', ProductCatalogController::class)->name('products.index');
 Route::post('/webhooks/bank/sandbox', BankWebhookSandboxController::class)->name('webhooks.bank-sandbox');
+Route::post('/internal/provisioning/jobs/{provisioningJob}/execute', ProvisioningJobExecutionController::class)
+    ->withoutMiddleware([ValidateCsrfToken::class])
+    ->name('internal.provisioning-jobs.execute');
 
 Route::middleware('guest')->group(function (): void {
     Route::get('/register', [RegisteredUserController::class, 'create'])->name('register');
