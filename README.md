@@ -1,10 +1,10 @@
 # Billing v3
 
-Sprint 0 foundation for a Proxy/VPS billing and provisioning platform.
+Sprint 1 foundation for a Proxy/VPS billing and provisioning platform.
 
 ## Stack
 
-- `apps/backend-laravel`: Laravel control-plane skeleton.
+- `apps/backend-laravel`: Laravel control-plane with session auth, RBAC, dashboards, and product catalog.
 - `apps/worker-go`: Go data-plane worker skeleton.
 - `infra/docker-compose.dev.yml`: local PostgreSQL, RabbitMQ, Redis, and Mailpit.
 - `.github/workflows/ci.yml`: backend, worker, infra, and secret-scan checks.
@@ -22,6 +22,27 @@ Start local infrastructure:
 ```bash
 docker compose -f infra/docker-compose.dev.yml up -d
 ```
+
+## Sprint 1 App
+
+Routes:
+
+- `GET /register`, `POST /register`
+- `GET /login`, `POST /login`
+- `POST /logout`
+- `GET /dashboard`
+- `GET /products`
+- `GET /admin`
+- `GET /admin/products`
+
+Seeded accounts after `php artisan db:seed`:
+
+```text
+admin@billing.test / Password123!
+customer@billing.test / Password123!
+```
+
+## Checks
 
 Run checks with Docker toolchains:
 
