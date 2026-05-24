@@ -87,4 +87,4 @@
 - [x] Run Pint.
 - [x] Run Go `gofmt`, `go vet`, and `go test`.
 - [x] Run Docker compose config and secret scan.
-- [ ] Commit, push, open PR to `develop`, wait for CI, merge, migrate/update `/opt/billing`.
+- [x] Commit, push, open PR to `develop`, wait for CI, merge, migrate/update `/opt/billing`.
