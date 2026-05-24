@@ -101,16 +101,16 @@
 - Modify: `apps/backend-laravel/.env.compose.example`
 - Modify: `infra/docker-compose.dev.yml`
 
-- [ ] Add RED tests for invalid internal token, sandbox executor success, and generic HTTP executor success with `Http::fake`.
-- [ ] Add `INTERNAL_PROVISIONING_TOKEN` config and Compose env for backend.
-- [ ] Add internal route `POST /internal/provisioning/jobs/{provisioningJob}/execute` without CSRF.
-- [ ] Implement token validation in the internal controller.
-- [ ] Implement sandbox driver returning `sandbox-{product_type}-{service_id}`.
-- [ ] Implement generic HTTP driver with `none`, `bearer`, and `header` auth.
-- [ ] Implement simple dot-path JSON extraction for response mappings.
-- [ ] Return normalized JSON: `status`, `external_id`, and `config`.
-- [ ] Run executor targeted tests and fix failures.
-- [ ] Commit Laravel executor slice.
+- [x] Add RED tests for invalid internal token, sandbox executor success, and generic HTTP executor success with `Http::fake`.
+- [x] Add `INTERNAL_PROVISIONING_TOKEN` config and Compose env for backend.
+- [x] Add internal route `POST /internal/provisioning/jobs/{provisioningJob}/execute` without CSRF.
+- [x] Implement token validation in the internal controller.
+- [x] Implement sandbox driver returning `sandbox-{product_type}-{service_id}`.
+- [x] Implement generic HTTP driver with `none`, `bearer`, and `header` auth.
+- [x] Implement simple dot-path JSON extraction for response mappings.
+- [x] Return normalized JSON: `status`, `external_id`, and `config`.
+- [x] Run executor targeted tests and fix failures.
+- [x] Commit Laravel executor slice.
 
 ### Task 6: Go Worker Internal Laravel Client
 
