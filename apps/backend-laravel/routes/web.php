@@ -3,6 +3,8 @@
 use App\Http\Controllers\Admin\AdminDashboardController;
 use App\Http\Controllers\Admin\BankIntegrationController;
 use App\Http\Controllers\Admin\BankIntegrationTestController;
+use App\Http\Controllers\Admin\CustomerController;
+use App\Http\Controllers\Admin\CustomerWalletAdjustmentController;
 use App\Http\Controllers\Admin\InvoiceController as AdminInvoiceController;
 use App\Http\Controllers\Admin\OpsAlertEventAcknowledgeController;
 use App\Http\Controllers\Admin\OpsAlertEventController;
@@ -76,6 +78,9 @@ Route::middleware('auth')->group(function (): void {
         Route::get('/invoices', [AdminInvoiceController::class, 'index'])->middleware('permission:invoices.view')->name('invoices.index');
         Route::post('/invoices', [AdminInvoiceController::class, 'store'])->middleware('permission:invoices.create')->name('invoices.store');
         Route::get('/payment-events', PaymentEventController::class)->middleware('permission:payment_events.view')->name('payment-events.index');
+        Route::get('/customers', [CustomerController::class, 'index'])->middleware('permission:customers.view')->name('customers.index');
+        Route::get('/customers/{user}', [CustomerController::class, 'show'])->middleware('permission:customers.view')->name('customers.show');
+        Route::post('/customers/{user}/wallet-adjustments', CustomerWalletAdjustmentController::class)->middleware('permission:wallets.adjust')->name('customers.wallet-adjustments.store');
         Route::get('/bank-integrations', [BankIntegrationController::class, 'index'])->middleware('permission:bank_integrations.manage')->name('bank-integrations.index');
         Route::get('/bank-integrations/create', [BankIntegrationController::class, 'create'])->middleware('permission:bank_integrations.manage')->name('bank-integrations.create');
         Route::post('/bank-integrations', [BankIntegrationController::class, 'store'])->middleware('permission:bank_integrations.manage')->name('bank-integrations.store');
