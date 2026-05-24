@@ -897,7 +897,7 @@ git push origin feature/sprint-14-scheduler-ops-health
 - Modify: `apps/backend-laravel/routes/web.php`
 - Modify: `apps/backend-laravel/resources/views/admin/dashboard.blade.php`
 
-- [ ] Add `OpsHealthSnapshot`.
+- [x] Add `OpsHealthSnapshot`.
 
 Use:
 
@@ -983,7 +983,7 @@ class OpsHealthSnapshot
 }
 ```
 
-- [ ] Add `OpsHealthController`.
+- [x] Add `OpsHealthController`.
 
 Use:
 
@@ -1005,7 +1005,7 @@ class OpsHealthController extends Controller
 }
 ```
 
-- [ ] Add the Blade view.
+- [x] Add the Blade view.
 
 Use:
 
@@ -1061,7 +1061,7 @@ Use:
 @endsection
 ```
 
-- [ ] Add route import and route in `routes/web.php`.
+- [x] Add route import and route in `routes/web.php`.
 
 Add import:
 
@@ -1075,7 +1075,7 @@ Add route inside the admin group:
 Route::get('/ops-health', OpsHealthController::class)->middleware('permission:provisioning_jobs.view')->name('ops-health');
 ```
 
-- [ ] Add dashboard link.
+- [x] Add dashboard link.
 
 Add inside the admin dashboard link paragraph:
 
@@ -1083,7 +1083,7 @@ Add inside the admin dashboard link paragraph:
 <a class="button secondary" href="/admin/ops-health">Ops Health</a>
 ```
 
-- [ ] Run admin ops health tests until GREEN.
+- [x] Run admin ops health tests until GREEN.
 
 Run:
 
@@ -1093,7 +1093,7 @@ ssh --% root@10.1.1.124 "cd /opt/billing && git fetch origin feature/sprint-14-s
 
 Expected: PASS with 4 tests.
 
-- [ ] Commit ops health slice.
+- [x] Commit ops health slice.
 
 Run:
 

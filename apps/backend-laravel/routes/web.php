@@ -4,6 +4,7 @@ use App\Http\Controllers\Admin\AdminDashboardController;
 use App\Http\Controllers\Admin\BankIntegrationController;
 use App\Http\Controllers\Admin\BankIntegrationTestController;
 use App\Http\Controllers\Admin\InvoiceController as AdminInvoiceController;
+use App\Http\Controllers\Admin\OpsHealthController;
 use App\Http\Controllers\Admin\OrderController as AdminOrderController;
 use App\Http\Controllers\Admin\PaymentEventController;
 use App\Http\Controllers\Admin\ProductController;
@@ -89,6 +90,7 @@ Route::middleware('auth')->group(function (): void {
         Route::post('/services/{service}/cancel-provider', ServiceProviderCancelController::class)->middleware('permission:services.view')->name('services.cancel-provider');
         Route::get('/provider-action-jobs', [ProviderActionJobController::class, 'index'])->middleware('permission:provisioning_jobs.view')->name('provider-action-jobs.index');
         Route::post('/provider-action-jobs/{providerActionJob}/retry', ProviderActionJobRetryController::class)->middleware('permission:provisioning_jobs.view')->name('provider-action-jobs.retry');
+        Route::get('/ops-health', OpsHealthController::class)->middleware('permission:provisioning_jobs.view')->name('ops-health');
         Route::get('/provisioning-jobs', [ProvisioningJobController::class, 'index'])->middleware('permission:provisioning_jobs.view')->name('provisioning-jobs.index');
         Route::get('/provisioning-jobs/{provisioningJob}', [ProvisioningJobController::class, 'show'])->middleware('permission:provisioning_jobs.view')->name('provisioning-jobs.show');
         Route::post('/provisioning-jobs/{provisioningJob}/retry', ProvisioningJobRetryController::class)->middleware('permission:provisioning_jobs.view')->name('provisioning-jobs.retry');
