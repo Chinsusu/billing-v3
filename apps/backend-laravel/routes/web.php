@@ -8,6 +8,7 @@ use App\Http\Controllers\Admin\CustomerWalletAdjustmentController;
 use App\Http\Controllers\Admin\InvoiceController as AdminInvoiceController;
 use App\Http\Controllers\Admin\NotificationEventController;
 use App\Http\Controllers\Admin\NotificationEventRetryController;
+use App\Http\Controllers\Admin\NotificationTemplateController;
 use App\Http\Controllers\Admin\OpsAlertEventAcknowledgeController;
 use App\Http\Controllers\Admin\OpsAlertEventController;
 use App\Http\Controllers\Admin\OpsAlertEventResolveController;
@@ -34,6 +35,7 @@ use App\Http\Controllers\BankWebhookSandboxController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\Internal\ProvisioningJobExecutionController;
 use App\Http\Controllers\InvoiceController;
+use App\Http\Controllers\NotificationPreferenceController;
 use App\Http\Controllers\OrderController;
 use App\Http\Controllers\ProductCatalogController;
 use App\Http\Controllers\ProductOrderController;
@@ -78,6 +80,8 @@ Route::middleware('auth')->group(function (): void {
     Route::get('/services/{service}', [ServiceController::class, 'show'])->name('services.show');
     Route::post('/services/{service}/renew', ServiceRenewalController::class)->name('services.renew');
     Route::post('/services/{service}/cancel', ServiceCancellationController::class)->name('services.cancel');
+    Route::get('/notification-preferences', [NotificationPreferenceController::class, 'edit'])->name('notification-preferences.edit');
+    Route::post('/notification-preferences', [NotificationPreferenceController::class, 'update'])->name('notification-preferences.update');
 
     Route::middleware('permission:admin.access')->prefix('admin')->name('admin.')->group(function (): void {
         Route::get('/', AdminDashboardController::class)->name('dashboard');
@@ -120,6 +124,9 @@ Route::middleware('auth')->group(function (): void {
         Route::get('/notification-events', [NotificationEventController::class, 'index'])->middleware('permission:notifications.manage')->name('notification-events.index');
         Route::get('/notification-events/{notificationEvent}', [NotificationEventController::class, 'show'])->middleware('permission:notifications.manage')->name('notification-events.show');
         Route::post('/notification-events/{notificationEvent}/retry', NotificationEventRetryController::class)->middleware('permission:notifications.manage')->name('notification-events.retry');
+        Route::get('/notification-templates', [NotificationTemplateController::class, 'index'])->middleware('permission:notifications.manage')->name('notification-templates.index');
+        Route::get('/notification-templates/{notificationTemplate}/edit', [NotificationTemplateController::class, 'edit'])->middleware('permission:notifications.manage')->name('notification-templates.edit');
+        Route::put('/notification-templates/{notificationTemplate}', [NotificationTemplateController::class, 'update'])->middleware('permission:notifications.manage')->name('notification-templates.update');
         Route::get('/ops-health', OpsHealthController::class)->middleware('permission:provisioning_jobs.view')->name('ops-health');
         Route::get('/scheduled-task-runs', [ScheduledTaskRunController::class, 'index'])->middleware('permission:provisioning_jobs.view')->name('scheduled-task-runs.index');
         Route::get('/scheduled-task-runs/{scheduledTaskRun}', [ScheduledTaskRunController::class, 'show'])->middleware('permission:provisioning_jobs.view')->name('scheduled-task-runs.show');
