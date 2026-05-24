@@ -83,6 +83,9 @@ func TestMarkProcessedActivatesServiceAndMarksJobProcessed(t *testing.T) {
 	mock.ExpectExec(regexp.QuoteMeta(`update services set status = 'active', external_id = $1, config = $2, provisioned_at = coalesce($3, now()), expires_at = coalesce($4, expires_at), updated_at = now() where id = $5`)).
 		WithArgs("sandbox-proxy-service-1", jsonObjectArg{want: map[string]any{"ip": "203.0.113.10", "region": "sgp1"}}, orderedAt, expiresAt, "service-1").
 		WillReturnResult(sqlmock.NewResult(0, 1))
+	mock.ExpectExec(regexp.QuoteMeta(`insert into notification_events (id, user_id, channel, type, recipient_email, subject, body_text, source_type, source_id, idempotency_key, status, attempts, max_attempts, available_at, payload, created_at, updated_at) select $1, services.user_id, 'email', 'service_provisioned', users.email, $2, $3, 'service', services.id, $4, 'pending', 0, 3, now(), $5, now(), now() from services join users on users.id = services.user_id where services.id = $6 on conflict (idempotency_key) do nothing`)).
+		WithArgs(sqlmock.AnyArg(), "Service provisioned", "Your service is active. External ID: sandbox-proxy-service-1.", "service-provisioned:service-1", jsonObjectArg{want: map[string]any{"external_id": "sandbox-proxy-service-1", "provisioning_job_id": "job-1"}}, "service-1").
+		WillReturnResult(sqlmock.NewResult(0, 1))
 	mock.ExpectExec(regexp.QuoteMeta(`update provisioning_jobs set status = 'processed', processed_at = now(), last_error = null, updated_at = now() where id = $1`)).
 		WithArgs("job-1").
 		WillReturnResult(sqlmock.NewResult(0, 1))
@@ -111,6 +114,9 @@ func TestMarkProcessedDefaultsNilConfigToEmptyObject(t *testing.T) {
 	mock.ExpectBegin()
 	mock.ExpectExec(regexp.QuoteMeta(`update services set status = 'active', external_id = $1, config = $2, provisioned_at = coalesce($3, now()), expires_at = coalesce($4, expires_at), updated_at = now() where id = $5`)).
 		WithArgs("sandbox-proxy-service-1", jsonObjectArg{want: map[string]any{}}, nil, nil, "service-1").
+		WillReturnResult(sqlmock.NewResult(0, 1))
+	mock.ExpectExec(regexp.QuoteMeta(`insert into notification_events (id, user_id, channel, type, recipient_email, subject, body_text, source_type, source_id, idempotency_key, status, attempts, max_attempts, available_at, payload, created_at, updated_at) select $1, services.user_id, 'email', 'service_provisioned', users.email, $2, $3, 'service', services.id, $4, 'pending', 0, 3, now(), $5, now(), now() from services join users on users.id = services.user_id where services.id = $6 on conflict (idempotency_key) do nothing`)).
+		WithArgs(sqlmock.AnyArg(), "Service provisioned", "Your service is active. External ID: sandbox-proxy-service-1.", "service-provisioned:service-1", jsonObjectArg{want: map[string]any{"external_id": "sandbox-proxy-service-1", "provisioning_job_id": "job-1"}}, "service-1").
 		WillReturnResult(sqlmock.NewResult(0, 1))
 	mock.ExpectExec(regexp.QuoteMeta(`update provisioning_jobs set status = 'processed', processed_at = now(), last_error = null, updated_at = now() where id = $1`)).
 		WithArgs("job-1").
