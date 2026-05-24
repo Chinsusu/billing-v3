@@ -50,13 +50,13 @@
 **Files:**
 - Modify: `apps/backend-laravel/tests/Feature/ProviderActionJobQueueTest.php`
 
-- [ ] Add test that `provider-actions:work --once` processes a pending suspend job, calls provider suspend, marks service `expired`, and marks job `processed`.
-- [ ] Add test that a failed provider action requeues the job with attempts incremented, status `pending`, and a future `available_at`.
-- [ ] Add test that a failed provider action at max attempts marks the job `failed`.
-- [ ] Add test that a pending sync job updates local service status and expiry from provider.
-- [ ] Add test that a pending cancel job marks the service `cancelled`.
-- [ ] Run targeted test and verify failure is missing processor/command behavior.
-- [ ] Commit RED worker processing tests.
+- [x] Add test that `provider-actions:work --once` processes a pending suspend job, calls provider suspend, marks service `expired`, and marks job `processed`.
+- [x] Add test that a failed provider action requeues the job with attempts incremented, status `pending`, and a future `available_at`.
+- [x] Add test that a failed provider action at max attempts marks the job `failed`.
+- [x] Add test that a pending sync job updates local service status and expiry from provider.
+- [x] Add test that a pending cancel job marks the service `cancelled`.
+- [x] Run targeted test and verify failure is missing processor/command behavior.
+- [x] Commit RED worker processing tests.
 
 ### Task 5: Implement Provider Action Processor And Work Command
 
@@ -64,15 +64,15 @@
 - Create: `apps/backend-laravel/app/Services/Provisioning/ProviderActionJobProcessor.php`
 - Create: `apps/backend-laravel/app/Console/Commands/WorkProviderActionJobsCommand.php`
 
-- [ ] Implement processor claim-next behavior with row locking, status `processing`, and attempts increment.
-- [ ] Execute job through `ProviderServiceActionService`.
-- [ ] Apply success effects: suspend => expired, cancel => cancelled, sync => provider status/expiry.
-- [ ] Mark successful jobs processed.
-- [ ] Requeue failed jobs with 60-second backoff when attempts remain.
-- [ ] Mark failed jobs failed when attempts reach max attempts.
-- [ ] Add `provider-actions:work {--once} {--limit=50}` command.
-- [ ] Run provider action worker tests until green.
-- [ ] Commit provider action worker slice.
+- [x] Implement processor claim-next behavior with row locking, status `processing`, and attempts increment.
+- [x] Execute job through `ProviderServiceActionService`.
+- [x] Apply success effects: suspend => expired, cancel => cancelled, sync => provider status/expiry.
+- [x] Mark successful jobs processed.
+- [x] Requeue failed jobs with 60-second backoff when attempts remain.
+- [x] Mark failed jobs failed when attempts reach max attempts.
+- [x] Add `provider-actions:work {--once} {--limit=50}` command.
+- [x] Run provider action worker tests until green.
+- [x] Commit provider action worker slice.
 
 ### Task 6: RED Tests For Expiry Enqueue And Admin Actions
 
@@ -80,13 +80,13 @@
 - Modify: `apps/backend-laravel/tests/Feature/ServiceRenewalLifecycleTest.php`
 - Create: `apps/backend-laravel/tests/Feature/AdminProviderActionJobTest.php`
 
-- [ ] Update expiry test to expect `services:expire` enqueues provider suspend and leaves provider-backed service active until worker processes it.
-- [ ] Add admin test for posting `/admin/services/{service}/sync-provider` creating a sync action job instead of calling provider immediately.
-- [ ] Add admin test for posting `/admin/services/{service}/cancel-provider` creating a cancel action job.
-- [ ] Add admin test that `/admin/provider-action-jobs` lists jobs.
-- [ ] Add admin test that retrying a failed action job requeues it.
-- [ ] Run targeted tests and verify failure is missing enqueue/retry/list behavior.
-- [ ] Commit RED admin/expiry tests.
+- [x] Update expiry test to expect `services:expire` enqueues provider suspend and leaves provider-backed service active until worker processes it.
+- [x] Add admin test for posting `/admin/services/{service}/sync-provider` creating a sync action job instead of calling provider immediately.
+- [x] Add admin test for posting `/admin/services/{service}/cancel-provider` creating a cancel action job.
+- [x] Add admin test that `/admin/provider-action-jobs` lists jobs.
+- [x] Add admin test that retrying a failed action job requeues it.
+- [x] Run targeted tests and verify failure is missing enqueue/retry/list behavior.
+- [x] Commit RED admin/expiry tests.
 
 ### Task 7: Implement Expiry Enqueue And Admin Actions
 
@@ -100,14 +100,14 @@
 - Modify: `apps/backend-laravel/resources/views/admin/services/index.blade.php`
 - Create: `apps/backend-laravel/resources/views/admin/provider-action-jobs/index.blade.php`
 
-- [ ] Change `services:expire` to enqueue suspend jobs for provider-backed services with suspend path.
-- [ ] Keep local-only expiry for services without suspend action path.
-- [ ] Change admin sync route to enqueue sync jobs.
-- [ ] Add admin cancel route to enqueue cancel jobs.
-- [ ] Add provider action job index and retry route.
-- [ ] Add provider action job link/actions to admin views.
-- [ ] Run expiry and admin provider action tests until green.
-- [ ] Commit admin enqueue/retry slice.
+- [x] Change `services:expire` to enqueue suspend jobs for provider-backed services with suspend path.
+- [x] Keep local-only expiry for services without suspend action path.
+- [x] Change admin sync route to enqueue sync jobs.
+- [x] Add admin cancel route to enqueue cancel jobs.
+- [x] Add provider action job index and retry route.
+- [x] Add provider action job link/actions to admin views.
+- [x] Run expiry and admin provider action tests until green.
+- [x] Commit admin enqueue/retry slice.
 
 ### Task 8: RED Tests And Implementation For Stuck Recovery
 
@@ -115,11 +115,11 @@
 - Modify: `apps/backend-laravel/tests/Feature/ProviderActionJobQueueTest.php`
 - Create: `apps/backend-laravel/app/Console/Commands/RecoverStuckProviderActionJobsCommand.php`
 
-- [ ] Add test that stale processing jobs below max attempts are requeued by `provider-actions:recover-stuck`.
-- [ ] Add test that stale processing jobs at max attempts are marked failed.
-- [ ] Implement recovery command with 5-minute default threshold and output counts.
-- [ ] Run recovery tests until green.
-- [ ] Commit stuck recovery slice.
+- [x] Add test that stale processing jobs below max attempts are requeued by `provider-actions:recover-stuck`.
+- [x] Add test that stale processing jobs at max attempts are marked failed.
+- [x] Implement recovery command with 5-minute default threshold and output counts.
+- [x] Run recovery tests until green.
+- [x] Commit stuck recovery slice.
 
 ### Task 9: Full Verification, PR, Deploy
 
@@ -127,8 +127,8 @@
 - Modify: `README.md`
 - Modify: `docs/superpowers/plans/2026-05-24-sprint-13-provider-action-queue-recovery.md`
 
-- [ ] Update README with S13 provider action queue commands and admin routes.
-- [ ] Push branch and check it out on `/opt/billing`.
+- [x] Update README with S13 provider action queue commands and admin routes.
+- [x] Push branch and check it out on `/opt/billing`.
 - [ ] Recreate backend and run migrations.
 - [ ] Run Laravel Pint and full Laravel tests on `/opt/billing`.
 - [ ] Run Go checks on `/opt/billing` using containerized `go fmt`, `go vet`, and `go test`.
