@@ -49,6 +49,46 @@ services:
       - "1025:1025"
       - "8025:8025"
 
+  backend:
+    build:
+      context: ../apps/backend-laravel
+      dockerfile: Dockerfile.dev
+    container_name: billing_v3_backend
+    working_dir: /app
+    command: ["sh", "-lc", "composer install --no-interaction --prefer-dist && if [ ! -f .env ]; then cp .env.compose.example .env && php artisan key:generate --ansi --force; fi && php artisan config:clear && php artisan migrate --force && php artisan db:seed --force && php artisan serve --host=0.0.0.0 --port=8000"]
+    environment:
+      APP_ENV: local
+      APP_DEBUG: "true"
+      APP_URL: http://localhost:8000
+      DB_CONNECTION: pgsql
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_DATABASE: billing_v3
+      DB_USERNAME: billing
+      DB_PASSWORD: billing_secret
+      DB_SSLMODE: disable
+      SESSION_DRIVER: database
+      QUEUE_CONNECTION: database
+      CACHE_STORE: database
+      REDIS_HOST: redis
+      MAIL_MAILER: smtp
+      MAIL_HOST: mailpit
+      MAIL_PORT: 1025
+      BANK_SANDBOX_WEBHOOK_SECRET: local-bank-sandbox-secret
+    ports:
+      - "8000:8000"
+    volumes:
+      - ../apps/backend-laravel:/app
+    depends_on:
+      postgres:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "curl -fsS http://127.0.0.1:8000/products >/dev/null"]
+      interval: 5s
+      timeout: 5s
+      retries: 30
+      start_period: 90s
+
   worker:
     image: golang:1.26.3
     container_name: billing_v3_worker
@@ -64,6 +104,8 @@ services:
     volumes:
       - ../apps/worker-go:/app
     depends_on:
+      backend:
+        condition: service_healthy
       postgres:
         condition: service_healthy
 

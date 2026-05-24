@@ -1,6 +1,7 @@
 .env
 .env.*
 !.env.example
+!apps/backend-laravel/.env.compose.example
 /vendor/
 /node_modules/
 /.worktrees/
