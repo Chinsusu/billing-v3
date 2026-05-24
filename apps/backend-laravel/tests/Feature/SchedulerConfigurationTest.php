@@ -30,6 +30,18 @@ class SchedulerConfigurationTest extends TestCase
         $this->assertMatchesRegularExpression('/depends_on:.*postgres:\s+condition: service_healthy/s', $scheduler);
     }
 
+    public function test_compose_defines_https_proxy_service(): void
+    {
+        $compose = $this->readComposeFile();
+
+        $proxy = $this->composeServiceBlock($compose, 'proxy');
+
+        $this->assertStringContainsString('container_name: billing_v3_proxy', $proxy);
+        $this->assertStringContainsString('"443:443"', $proxy);
+        $this->assertStringContainsString('./caddy/Caddyfile:/etc/caddy/Caddyfile:ro', $proxy);
+        $this->assertMatchesRegularExpression('/depends_on:.*backend:\s+condition: service_healthy/s', $proxy);
+    }
+
     private function readComposeFile(): string
     {
         $paths = [

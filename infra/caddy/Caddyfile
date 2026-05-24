@@ -1,0 +1,13 @@
+{
+    default_sni 10.1.1.124
+}
+
+http://10.1.1.124, http://localhost, :80 {
+    redir https://{host}{uri} permanent
+}
+
+https://10.1.1.124, https://localhost {
+    tls internal
+    encode gzip
+    reverse_proxy backend:8000
+}

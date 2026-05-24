@@ -49,6 +49,21 @@ services:
       - "1025:1025"
       - "8025:8025"
 
+  proxy:
+    image: caddy:2-alpine
+    container_name: billing_v3_proxy
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./caddy/Caddyfile:/etc/caddy/Caddyfile:ro
+      - billing_v3_caddy_data:/data
+      - billing_v3_caddy_config:/config
+    depends_on:
+      backend:
+        condition: service_healthy
+
   backend:
     build:
       context: ../apps/backend-laravel
@@ -154,3 +169,5 @@ services:
 volumes:
   billing_v3_pg:
   billing_v3_rabbitmq:
+  billing_v3_caddy_data:
+  billing_v3_caddy_config:

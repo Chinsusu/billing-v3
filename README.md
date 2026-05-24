@@ -23,6 +23,8 @@ Start local infrastructure:
 docker compose -f infra/docker-compose.dev.yml up -d
 ```
 
+The dev Compose runtime includes a Caddy proxy on `http://localhost` and `https://localhost`, forwarding to the Laravel backend on port `8000`.
+
 ## Sprint 1 App
 
 Routes:
