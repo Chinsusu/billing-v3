@@ -9,5 +9,5 @@ import (
 
 func main() {
 	cfg := config.Load()
-	fmt.Fprintf(os.Stdout, "billing worker ready log_level=%s\n", cfg.LogLevel)
+	fmt.Fprintf(os.Stdout, "billing worker ready log_level=%s mode=provisioning-sandbox\n", cfg.LogLevel)
 }

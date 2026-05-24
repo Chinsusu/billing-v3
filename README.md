@@ -48,6 +48,19 @@ Routes:
 - `GET /admin/payment-events`
 - `POST /webhooks/bank/sandbox`
 
+## Sprint 3 Operations
+
+Routes:
+
+- `POST /products/{product}/order`
+- `GET /orders/{order}`
+- `GET /services`
+- `GET /admin/orders`
+- `GET /admin/services`
+- `GET /admin/provisioning-jobs`
+
+Customer checkout debits wallet with idempotency key `order-payment:{order_id}`, creates a service in `pending_provision`, and writes a `provision_service` outbox row in `provisioning_jobs`.
+
 Sandbox webhook payload:
 
 ```json

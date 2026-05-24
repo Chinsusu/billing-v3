@@ -7,11 +7,17 @@
         <div class="panel"><strong>{{ $activeProductCount }}</strong><br>Active products</div>
         <div class="panel"><strong>{{ $openInvoiceCount }}</strong><br>Open invoices</div>
         <div class="panel"><strong>{{ $paymentEventCount }}</strong><br>Payment events</div>
+        <div class="panel"><strong>{{ $orderCount }}</strong><br>Orders</div>
+        <div class="panel"><strong>{{ $serviceCount }}</strong><br>Services</div>
+        <div class="panel"><strong>{{ $pendingProvisioningJobCount }}</strong><br>Pending jobs</div>
     </div>
     <p>
         <a class="button" href="/admin/products">Manage Products</a>
         <a class="button secondary" href="/admin/invoices">Invoices</a>
         <a class="button secondary" href="/admin/payment-events">Payment Events</a>
+        <a class="button secondary" href="/admin/orders">Orders</a>
+        <a class="button secondary" href="/admin/services">Services</a>
+        <a class="button secondary" href="/admin/provisioning-jobs">Provisioning Jobs</a>
     </p>
 </div>
 @endsection
