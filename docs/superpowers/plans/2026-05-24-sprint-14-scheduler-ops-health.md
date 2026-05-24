@@ -713,7 +713,7 @@ class AdminOpsHealthTest extends TestCase
     {
         $this->travelTo(Carbon::parse('2026-05-24 09:00:00'));
         $admin = $this->adminUser();
-        $customer = User::factory()->create();
+        $customer = $this->customerUser();
         $service = $this->serviceFor($customer, ['status' => 'active', 'expires_at' => now()->subMinute()]);
         ProvisioningJob::create([
             'order_id' => $service->order_id,
