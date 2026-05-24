@@ -28,7 +28,7 @@
 - Create: `apps/backend-laravel/app/Console/Commands/SmokeProvisioningRuntimeCommand.php`
 - Modify: `apps/backend-laravel/bootstrap/app.php`
 
-- [ ] Add a failing Laravel feature test for the smoke command.
+- [x] Add a failing Laravel feature test for the smoke command.
 
 ```php
 public function test_smoke_command_creates_a_pending_provisioning_job_when_worker_is_not_running(): void
@@ -47,13 +47,13 @@ public function test_smoke_command_creates_a_pending_provisioning_job_when_worke
 }
 ```
 
-- [ ] Run the targeted test on the dev server and verify it fails because the command is not registered.
+- [x] Run the targeted test on the dev server and verify it fails because the command is not registered.
 
 ```bash
 docker run --rm --entrypoint sh -v /opt/billing/apps/backend-laravel:/app -w /app composer:2 -lc 'composer install --no-interaction --prefer-dist >/tmp/composer-install.log && php artisan test --filter=RuntimeSmokeCommandTest'
 ```
 
-- [ ] Implement `SmokeProvisioningRuntimeCommand` with signature `runtime:smoke-provisioning {--timeout=30}`.
+- [x] Implement `SmokeProvisioningRuntimeCommand` with signature `runtime:smoke-provisioning {--timeout=30}`.
 
 ```php
 protected $signature = 'runtime:smoke-provisioning {--timeout=30 : Seconds to wait for the worker daemon}';
@@ -61,9 +61,9 @@ protected $signature = 'runtime:smoke-provisioning {--timeout=30 : Seconds to wa
 
 The command must seed prerequisites through existing data, credit the seeded customer wallet when needed, checkout `proxy-vn-30d`, find the created service and provisioning job, poll until the service is `active`, and return exit code `1` with useful status if timeout expires.
 
-- [ ] Register the command in `bootstrap/app.php` under `->withCommands([...])`.
-- [ ] Run the targeted test again and verify it passes.
-- [ ] Commit the smoke command and test.
+- [x] Register the command in `bootstrap/app.php` under `->withCommands([...])`.
+- [x] Run the targeted test again and verify it passes.
+- [x] Commit the smoke command and test.
 
 ### Task 3: Backend Dev Image And Compose Runtime
 
@@ -72,7 +72,7 @@ The command must seed prerequisites through existing data, credit the seeded cus
 - Create: `apps/backend-laravel/.env.compose.example`
 - Modify: `infra/docker-compose.dev.yml`
 
-- [ ] Add `Dockerfile.dev` for the backend dev runtime.
+- [x] Add `Dockerfile.dev` for the backend dev runtime.
 
 ```dockerfile
 FROM php:8.4-cli
@@ -87,7 +87,7 @@ COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 WORKDIR /app
 ```
 
-- [ ] Add `.env.compose.example` with Postgres, Redis, and Mailpit service names.
+- [x] Add `.env.compose.example` with Postgres, Redis, and Mailpit service names.
 
 ```dotenv
 DB_CONNECTION=pgsql
@@ -102,7 +102,7 @@ MAIL_HOST=mailpit
 MAIL_PORT=1025
 ```
 
-- [ ] Add `backend` service to `infra/docker-compose.dev.yml`.
+- [x] Add `backend` service to `infra/docker-compose.dev.yml`.
 
 ```yaml
 backend:
@@ -135,10 +135,10 @@ backend:
     test: ["CMD-SHELL", "curl -fsS http://127.0.0.1:8000/products >/dev/null"]
 ```
 
-- [ ] Update `worker.depends_on` to wait for `backend` service health in addition to Postgres health.
-- [ ] Run `docker compose -f infra/docker-compose.dev.yml config` on the dev server.
-- [ ] Build the backend image on the dev server.
-- [ ] Commit the Docker runtime changes.
+- [x] Update `worker.depends_on` to wait for `backend` service health in addition to Postgres health.
+- [x] Run `docker compose -f infra/docker-compose.dev.yml config` on the dev server.
+- [x] Build the backend image on the dev server.
+- [x] Commit the Docker runtime changes.
 
 ### Task 4: CI And Documentation
 
@@ -146,47 +146,47 @@ backend:
 - Modify: `.github/workflows/ci.yml`
 - Modify: `README.md`
 
-- [ ] Update the `infra` CI job to build the backend dev image.
+- [x] Update the `infra` CI job to build the backend dev image.
 
 ```yaml
 - run: docker compose -f infra/docker-compose.dev.yml config
 - run: docker compose -f infra/docker-compose.dev.yml build backend
 ```
 
-- [ ] Document S8 runtime commands in `README.md`.
+- [x] Document S8 runtime commands in `README.md`.
 
 ```bash
 docker compose -f infra/docker-compose.dev.yml up -d --build postgres rabbitmq redis mailpit backend worker
 docker compose -f infra/docker-compose.dev.yml exec backend php artisan runtime:smoke-provisioning --timeout=30
 ```
 
-- [ ] Run local diff checks and commit CI/docs updates.
+- [x] Run local diff checks and commit CI/docs updates.
 
 ### Task 5: Dev Server Runtime Verification
 
 **Files:**
 - Modify: `docs/superpowers/plans/2026-05-24-sprint-8-postgres-runtime-worker.md`
 
-- [ ] Push the branch to GitHub.
-- [ ] Checkout the S8 branch on `/opt/billing`.
-- [ ] Stop and remove the old ad-hoc `billing_v3_backend` container.
+- [x] Push the branch to GitHub.
+- [x] Checkout the S8 branch on `/opt/billing`.
+- [x] Stop and remove the old ad-hoc `billing_v3_backend` container.
 
 ```bash
 docker rm -f billing_v3_backend || true
 ```
 
-- [ ] Start full Compose runtime.
+- [x] Start full Compose runtime.
 
 ```bash
 docker compose -f infra/docker-compose.dev.yml up -d --build postgres rabbitmq redis mailpit backend worker
 ```
 
-- [ ] Verify backend and worker containers are running.
-- [ ] Run `php artisan runtime:smoke-provisioning --timeout=30` inside the backend container and verify exit code `0`.
-- [ ] Verify `/products` returns a successful response.
-- [ ] Run Laravel full test suite and Go full test suite on the dev server.
-- [ ] Run Docker Compose config and secret scan.
-- [ ] Mark completed checklist items and commit the plan progress.
+- [x] Verify backend and worker containers are running.
+- [x] Run `php artisan runtime:smoke-provisioning --timeout=30` inside the backend container and verify exit code `0`.
+- [x] Verify `/products` returns a successful response.
+- [x] Run Laravel full test suite and Go full test suite on the dev server.
+- [x] Run Docker Compose config and secret scan.
+- [x] Mark completed checklist items and commit the plan progress.
 
 ### Task 6: PR, CI, Merge, Deploy
 
