@@ -80,6 +80,7 @@ services:
       - "8000:8000"
     volumes:
       - ../apps/backend-laravel:/app
+      - ../infra:/infra:ro
     depends_on:
       postgres:
         condition: service_healthy
@@ -89,6 +90,43 @@ services:
       timeout: 5s
       retries: 30
       start_period: 90s
+
+  scheduler:
+    build:
+      context: ../apps/backend-laravel
+      dockerfile: Dockerfile.dev
+    container_name: billing_v3_scheduler
+    working_dir: /app
+    command: ["sh", "-lc", "composer install --no-interaction --prefer-dist && if [ ! -f .env ] || ! grep -q '^DB_CONNECTION=pgsql$' .env; then old_key=$(grep '^APP_KEY=' .env 2>/dev/null | cut -d= -f2-); cp .env.compose.example .env; if [ -n \"$$old_key\" ]; then sed -i \"s|^APP_KEY=.*|APP_KEY=$$old_key|\" .env; else php artisan key:generate --ansi --force; fi; fi && php artisan config:clear && php artisan migrate --force && exec php artisan schedule:work"]
+    restart: unless-stopped
+    environment:
+      APP_ENV: local
+      APP_DEBUG: "true"
+      APP_URL: http://localhost:8000
+      DB_CONNECTION: pgsql
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_DATABASE: billing_v3
+      DB_USERNAME: billing
+      DB_PASSWORD: billing_secret
+      DB_SSLMODE: disable
+      SESSION_DRIVER: database
+      QUEUE_CONNECTION: database
+      CACHE_STORE: database
+      REDIS_HOST: redis
+      MAIL_MAILER: smtp
+      MAIL_HOST: mailpit
+      MAIL_PORT: 1025
+      BANK_SANDBOX_WEBHOOK_SECRET: local-bank-sandbox-secret
+      INTERNAL_PROVISIONING_TOKEN: local-internal-provisioning-token
+    volumes:
+      - ../apps/backend-laravel:/app
+      - ../infra:/infra:ro
+    depends_on:
+      backend:
+        condition: service_healthy
+      postgres:
+        condition: service_healthy
 
   worker:
     image: golang:1.26.3

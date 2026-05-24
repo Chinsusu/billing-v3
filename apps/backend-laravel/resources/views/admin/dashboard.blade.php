@@ -20,6 +20,7 @@
         <a class="button secondary" href="/admin/orders">Orders</a>
         <a class="button secondary" href="/admin/services">Services</a>
         <a class="button secondary" href="/admin/provisioning-jobs">Provisioning Jobs</a>
+        <a class="button secondary" href="/admin/ops-health">Ops Health</a>
     </p>
 </div>
 @endsection
