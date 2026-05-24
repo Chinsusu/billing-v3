@@ -10,7 +10,7 @@ return new class extends Migration
     {
         Schema::create('wallets', function (Blueprint $table): void {
             $table->uuid('id')->primary();
-            $table->foreignUuid('user_id')->constrained()->cascadeOnDelete();
+            $table->foreignId('user_id')->constrained()->cascadeOnDelete();
             $table->char('currency', 3)->default('VND');
             $table->unsignedBigInteger('balance_amount')->default(0);
             $table->timestamps();
@@ -20,7 +20,7 @@ return new class extends Migration
 
         Schema::create('invoices', function (Blueprint $table): void {
             $table->uuid('id')->primary();
-            $table->foreignUuid('user_id')->constrained()->cascadeOnDelete();
+            $table->foreignId('user_id')->constrained()->cascadeOnDelete();
             $table->string('invoice_number', 40)->unique();
             $table->string('status', 20)->default('open');
             $table->unsignedBigInteger('total_amount');
@@ -36,7 +36,7 @@ return new class extends Migration
 
         Schema::create('payment_intents', function (Blueprint $table): void {
             $table->uuid('id')->primary();
-            $table->foreignUuid('user_id')->constrained()->cascadeOnDelete();
+            $table->foreignId('user_id')->constrained()->cascadeOnDelete();
             $table->foreignUuid('wallet_id')->nullable()->constrained()->nullOnDelete();
             $table->foreignUuid('invoice_id')->nullable()->constrained()->nullOnDelete();
             $table->string('type', 30);
@@ -77,7 +77,7 @@ return new class extends Migration
         Schema::create('ledger_entries', function (Blueprint $table): void {
             $table->uuid('id')->primary();
             $table->foreignUuid('wallet_id')->constrained()->cascadeOnDelete();
-            $table->foreignUuid('user_id')->constrained()->cascadeOnDelete();
+            $table->foreignId('user_id')->constrained()->cascadeOnDelete();
             $table->string('direction', 10);
             $table->unsignedBigInteger('amount');
             $table->char('currency', 3)->default('VND');
