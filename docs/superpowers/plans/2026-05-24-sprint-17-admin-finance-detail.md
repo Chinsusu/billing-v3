@@ -40,12 +40,12 @@
 - Modify: `apps/backend-laravel/resources/views/admin/invoices/index.blade.php`
 - Create: `apps/backend-laravel/resources/views/admin/invoices/show.blade.php`
 
-- [ ] Add status/customer filters to invoice index.
-- [ ] Add show action loading customer, payment events, and ledger context.
-- [ ] Add protected route.
-- [ ] Link invoice rows and customer detail invoice rows to admin invoice detail.
-- [ ] Render invoice metadata, lines, events, and ledger entries.
-- [ ] Commit invoice detail slice.
+- [x] Add status/customer filters to invoice index.
+- [x] Add show action loading customer, payment events, and ledger context.
+- [x] Add protected route.
+- [x] Link invoice rows and customer detail invoice rows to admin invoice detail.
+- [x] Render invoice metadata, lines, events, and ledger entries.
+- [x] Commit invoice detail slice.
 
 ### Task 4: Admin Order Detail
 
@@ -56,12 +56,12 @@
 - Modify: `apps/backend-laravel/resources/views/admin/customers/show.blade.php`
 - Create: `apps/backend-laravel/resources/views/admin/orders/show.blade.php`
 
-- [ ] Add status/customer filters to order index.
-- [ ] Add show action loading customer, items, services, provisioning jobs, and ledger context.
-- [ ] Add protected route.
-- [ ] Link order rows and customer detail order rows to admin order detail.
-- [ ] Render order metadata, items, services, jobs, and ledger entries.
-- [ ] Commit order detail slice.
+- [x] Add status/customer filters to order index.
+- [x] Add show action loading customer, items, services, provisioning jobs, and ledger context.
+- [x] Add protected route.
+- [x] Link order rows and customer detail order rows to admin order detail.
+- [x] Render order metadata, items, services, jobs, and ledger entries.
+- [x] Commit order detail slice.
 
 ### Task 5: Admin Payment Event Detail
 
@@ -71,13 +71,13 @@
 - Modify: `apps/backend-laravel/resources/views/admin/payment-events/index.blade.php`
 - Create: `apps/backend-laravel/resources/views/admin/payment-events/show.blade.php`
 
-- [ ] Convert invokable controller to index/show actions.
-- [ ] Add status/reference filters to payment event index.
-- [ ] Add protected show route.
-- [ ] Link payment event rows to detail.
-- [ ] Render linked intent, wallet, invoice, customer context and payload JSON.
-- [ ] Run targeted test until GREEN.
-- [ ] Commit payment event detail slice.
+- [x] Convert invokable controller to index/show actions.
+- [x] Add status/reference filters to payment event index.
+- [x] Add protected show route.
+- [x] Link payment event rows to detail.
+- [x] Render linked intent, wallet, invoice, customer context and payload JSON.
+- [x] Run targeted test until GREEN.
+- [x] Commit payment event detail slice.
 
 ### Task 6: Documentation, Verification, PR, Deploy
 
@@ -85,11 +85,11 @@
 - Modify: `README.md`
 - Modify: `docs/superpowers/plans/2026-05-24-sprint-17-admin-finance-detail.md`
 
-- [ ] Update README with S17 routes.
-- [ ] Push branch and check it out on `/opt/billing`.
-- [ ] Run Laravel Pint and full Laravel tests on `/opt/billing`.
-- [ ] Run Go checks on `/opt/billing`.
-- [ ] Run Docker Compose config/build and secret scan.
-- [ ] Verify `/admin/invoices`, `/admin/orders`, `/admin/payment-events`, and `/up` smoke behavior.
-- [ ] Mark verification steps complete in this plan, commit, and push.
+- [x] Update README with S17 routes.
+- [x] Push branch and check it out on `/opt/billing`.
+- [x] Run Laravel Pint and full Laravel tests on `/opt/billing`.
+- [x] Run Go checks on `/opt/billing`.
+- [x] Run Docker Compose config/build and secret scan.
+- [x] Verify `/admin/invoices`, `/admin/orders`, `/admin/payment-events`, and `/up` smoke behavior.
+- [x] Mark verification steps complete in this plan, commit, and push.
 - [ ] Open PR to `develop`, wait for CI, merge, delete feature branch, and deploy `/opt/billing`.
