@@ -201,6 +201,16 @@ Routes and commands:
 
 Admins can create enabled `ops_health` alert rules with optional webhook delivery. Webhook URLs and secrets are encrypted at rest and never rendered back to the browser. Alert evaluation persists cooldown-aware events for unhealthy scheduler tasks, queues, overdue services, and missing bank integration coverage; admins can acknowledge or resolve events from `/admin/ops-alert-events`.
 
+## Sprint 16 Customer Wallet Admin
+
+Routes:
+
+- `GET /admin/customers`
+- `GET /admin/customers/{user}`
+- `POST /admin/customers/{user}/wallet-adjustments`
+
+Admins and finance users can search customers, inspect wallet balances, recent ledger entries, invoices, orders, and services, then apply audited manual wallet adjustments when they have `wallets.adjust`. Support users can view customers through `customers.view` without adjustment access. Manual adjustments are recorded as `ledger_entries` with `source_type=admin_wallet_adjustment` and actor metadata.
+
 ## Sprint 8 Shared Postgres Runtime
 
 The dev Compose runtime runs Laravel and the worker against the same Postgres database:

@@ -15,6 +15,7 @@
         <a class="button" href="/admin/products">Manage Products</a>
         <a class="button secondary" href="/admin/invoices">Invoices</a>
         <a class="button secondary" href="/admin/payment-events">Payment Events</a>
+        <a class="button secondary" href="/admin/customers">Customers</a>
         <a class="button secondary" href="/admin/bank-integrations">Bank Integrations</a>
         <a class="button secondary" href="/admin/provisioning-provider-accounts">Provider Accounts</a>
         <a class="button secondary" href="/admin/orders">Orders</a>
