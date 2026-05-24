@@ -137,7 +137,7 @@ git push origin feature/sprint-14-scheduler-ops-health
 - Create: `apps/backend-laravel/app/Console/Commands/RunScheduledTaskCommand.php`
 - Modify: `apps/backend-laravel/bootstrap/app.php`
 
-- [ ] Add the migration.
+- [x] Add the migration.
 
 Use:
 
@@ -177,7 +177,7 @@ return new class extends Migration
 };
 ```
 
-- [ ] Add the model.
+- [x] Add the model.
 
 Use:
 
@@ -207,7 +207,7 @@ class ScheduledTaskRun extends Model
 }
 ```
 
-- [ ] Add the scheduled task registry.
+- [x] Add the scheduled task registry.
 
 Use:
 
@@ -238,7 +238,7 @@ class ScheduledTaskRegistry
 }
 ```
 
-- [ ] Add the runner service.
+- [x] Add the runner service.
 
 Use:
 
@@ -307,7 +307,7 @@ class ScheduledTaskRunner
 }
 ```
 
-- [ ] Add the wrapper command.
+- [x] Add the wrapper command.
 
 Use:
 
@@ -342,7 +342,7 @@ class RunScheduledTaskCommand extends Command
 }
 ```
 
-- [ ] Register `RunScheduledTaskCommand` in `apps/backend-laravel/bootstrap/app.php`.
+- [x] Register `RunScheduledTaskCommand` in `apps/backend-laravel/bootstrap/app.php`.
 
 Add:
 
@@ -356,7 +356,7 @@ And add to `withCommands`:
 RunScheduledTaskCommand::class,
 ```
 
-- [ ] Run the scheduled task tests until GREEN on `/opt/billing`.
+- [x] Run the scheduled task tests until GREEN on `/opt/billing`.
 
 Run:
 
@@ -366,7 +366,7 @@ ssh --% root@10.1.1.124 "cd /opt/billing && git fetch origin feature/sprint-14-s
 
 Expected: PASS with 3 tests.
 
-- [ ] Commit implementation.
+- [x] Commit implementation.
 
 Run:
 
