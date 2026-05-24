@@ -63,11 +63,11 @@
 - Modify: `README.md`
 - Modify: `docs/superpowers/plans/2026-05-24-sprint-20-service-runbook.md`
 
-- [ ] Update README with S20 route.
-- [ ] Push branch and check it out on `/opt/billing`.
-- [ ] Run Laravel Pint and full Laravel tests on `/opt/billing`.
-- [ ] Run Go checks on `/opt/billing`.
-- [ ] Run Docker Compose config/build and secret scan.
-- [ ] Verify `/admin/services/{seed-or-404-safe}` behavior through unauthenticated `/admin/services` returning `302`.
-- [ ] Mark verification steps complete in this plan, commit, and push.
+- [x] Update README with S20 route.
+- [x] Push branch and check it out on `/opt/billing`.
+- [x] Run Laravel Pint and full Laravel tests on `/opt/billing`.
+- [x] Run Go checks on `/opt/billing`.
+- [x] Run Docker Compose config/build and secret scan.
+- [x] Verify `/admin/services/{seed-or-404-safe}` behavior through unauthenticated `/admin/services` returning `302`.
+- [x] Mark verification steps complete in this plan, commit, and push.
 - [ ] Open PR to `develop`, wait for CI, merge, delete feature branch, and deploy `/opt/billing`.
