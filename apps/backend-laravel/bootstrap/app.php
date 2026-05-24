@@ -1,7 +1,7 @@
 <?php
 
-use App\Console\Commands\ExpireServicesCommand;
 use App\Console\Commands\EvaluateOpsAlertsCommand;
+use App\Console\Commands\ExpireServicesCommand;
 use App\Console\Commands\RecoverStuckProviderActionJobsCommand;
 use App\Console\Commands\RunScheduledTaskCommand;
 use App\Console\Commands\SmokeProvisioningRuntimeCommand;
