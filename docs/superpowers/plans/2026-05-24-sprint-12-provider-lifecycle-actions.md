@@ -55,13 +55,13 @@
 **Files:**
 - Modify: `apps/backend-laravel/tests/Feature/ServiceRenewalLifecycleTest.php`
 
-- [ ] Add test: customer renewal calls provider renew with auth, idempotency key, external id, and action payload.
-- [ ] Assert provider-returned expiry overrides local calculated expiry.
-- [ ] Assert wallet debit and renewal meta are written only after provider success.
-- [ ] Assert `provisioning_execution_logs` records `provider_service_renew`.
-- [ ] Add test: provider renewal failure leaves wallet balance, ledger, and service expiry unchanged.
-- [ ] Run renewal tests on `/opt/billing` and verify failures are missing provider action implementation.
-- [ ] Commit RED renewal tests.
+- [x] Add test: customer renewal calls provider renew with auth, idempotency key, external id, and action payload.
+- [x] Assert provider-returned expiry overrides local calculated expiry.
+- [x] Assert wallet debit and renewal meta are written only after provider success.
+- [x] Assert `provisioning_execution_logs` records `provider_service_renew`.
+- [x] Add test: provider renewal failure leaves wallet balance, ledger, and service expiry unchanged.
+- [x] Run renewal tests on `/opt/billing` and verify failures are missing provider action implementation.
+- [x] Commit RED renewal tests.
 
 ### Task 5: Implement Provider Action Service And Renewal Integration
 
@@ -72,14 +72,14 @@
 - Modify: `apps/backend-laravel/app/Services/Services/ServiceRenewalService.php`
 - Modify: `apps/backend-laravel/app/Http/Controllers/ServiceRenewalController.php`
 
-- [ ] Add `ProviderServiceActionResult` with `status`, `expiresAt`, and `response`.
-- [ ] Add recorder method for service-scoped execution logs.
-- [ ] Add provider action service that resolves provider config, renders placeholders, sends authenticated HTTP, parses optional expiry, and records audit logs.
-- [ ] Inject provider action service into renewal.
-- [ ] For configured renew paths, call provider renew before debit and use provider expiry when returned.
-- [ ] Convert provider action failures to session errors on service renew page.
-- [ ] Run renewal tests until green.
-- [ ] Commit provider renewal slice.
+- [x] Add `ProviderServiceActionResult` with `status`, `expiresAt`, and `response`.
+- [x] Add recorder method for service-scoped execution logs.
+- [x] Add provider action service that resolves provider config, renders placeholders, sends authenticated HTTP, parses optional expiry, and records audit logs.
+- [x] Inject provider action service into renewal.
+- [x] For configured renew paths, call provider renew before debit and use provider expiry when returned.
+- [x] Convert provider action failures to session errors on service renew page.
+- [x] Run renewal tests until green.
+- [x] Commit provider renewal slice.
 
 ### Task 6: RED Tests For Expiry Suspension
 
