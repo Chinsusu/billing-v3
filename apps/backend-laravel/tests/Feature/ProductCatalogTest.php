@@ -88,7 +88,7 @@ class ProductCatalogTest extends TestCase
             'provision_path' => '/api/provision',
             'auth_type' => 'bearer',
             'auth_header_name' => null,
-            'api_key' => encrypt('provider-secret-1234'),
+            'api_key' => app('encrypter')->encrypt('provider-secret-1234', false),
             'api_key_last_four' => '1234',
             'enabled' => true,
             'timeout_seconds' => 15,

@@ -28,12 +28,12 @@
 - Modify: `apps/backend-laravel/tests/Feature/ProductCatalogTest.php`
 - Modify: `apps/backend-laravel/tests/Feature/OrderCheckoutFlowTest.php`
 
-- [ ] Add admin test for creating provider account with encrypted secret and masked UI.
-- [ ] Add admin test for updating public provider account config without overwriting blank secret.
-- [ ] Add customer-forbidden test for provider account admin pages.
-- [ ] Add product admin test that stores provider account, plan code, region, provision path, and options JSON.
-- [ ] Add checkout test that snapshots provider mapping into `provisioning_jobs.payload.product.provider`.
-- [ ] Run targeted Laravel tests on `/opt/billing` and verify they fail because tables/routes/fields do not exist.
+- [x] Add admin test for creating provider account with encrypted secret and masked UI.
+- [x] Add admin test for updating public provider account config without overwriting blank secret.
+- [x] Add customer-forbidden test for provider account admin pages.
+- [x] Add product admin test that stores provider account, plan code, region, provision path, and options JSON.
+- [x] Add checkout test that snapshots provider mapping into `provisioning_jobs.payload.product.provider`.
+- [x] Run targeted Laravel tests on `/opt/billing` and verify they fail because tables/routes/fields do not exist.
 
 ### Task 3: Provider Account Model, Migration, Admin UI
 

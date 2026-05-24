@@ -40,7 +40,7 @@ class ProvisioningProviderAccountAdminTest extends TestCase
         $this->assertSame('generic_http', $account->driver);
         $this->assertSame('1234', $account->api_key_last_four);
         $this->assertStringNotContainsString('provider-secret-1234', $account->api_key);
-        $this->assertSame('provider-secret-1234', decrypt($account->api_key));
+        $this->assertSame('provider-secret-1234', app('encrypter')->decrypt($account->api_key, false));
 
         $this->actingAs($admin)
             ->get('/admin/provisioning-provider-accounts')
@@ -64,7 +64,7 @@ class ProvisioningProviderAccountAdminTest extends TestCase
             'provision_path' => '/old/provision',
             'auth_type' => 'bearer',
             'auth_header_name' => null,
-            'api_key' => encrypt('provider-secret-1234'),
+            'api_key' => app('encrypter')->encrypt('provider-secret-1234', false),
             'api_key_last_four' => '1234',
             'enabled' => true,
             'timeout_seconds' => 15,
@@ -99,7 +99,7 @@ class ProvisioningProviderAccountAdminTest extends TestCase
         $this->assertSame('Provider A Updated', $account->name);
         $this->assertFalse((bool) $account->enabled);
         $this->assertSame('1234', $account->api_key_last_four);
-        $this->assertSame('provider-secret-1234', decrypt($account->api_key));
+        $this->assertSame('provider-secret-1234', app('encrypter')->decrypt($account->api_key, false));
     }
 
     public function test_customer_cannot_access_provider_account_admin_pages(): void

@@ -4,6 +4,7 @@ namespace Database\Seeders;
 
 use App\Models\Invoice;
 use App\Models\Product;
+use App\Models\ProvisioningProviderAccount;
 use App\Models\User;
 use App\Models\Wallet;
 use Illuminate\Database\Seeder;
@@ -41,6 +42,22 @@ class DatabaseSeeder extends Seeder
                 'lines' => [
                     ['description' => 'Vietnam Proxy 30 Days', 'amount' => 99000],
                 ],
+            ]
+        );
+
+        $sandboxProvider = ProvisioningProviderAccount::firstOrCreate(
+            ['slug' => 'sandbox'],
+            [
+                'name' => 'Sandbox Provisioning',
+                'driver' => 'sandbox',
+                'auth_type' => 'none',
+                'enabled' => true,
+                'timeout_seconds' => 15,
+                'request_template' => [],
+                'response_external_id_path' => 'external_id',
+                'response_status_path' => 'status',
+                'created_by_id' => $admin->id,
+                'updated_by_id' => $admin->id,
             ]
         );
 
