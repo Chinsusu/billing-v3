@@ -136,5 +136,5 @@
 - [x] Run `php artisan provider-actions:work --once` against an empty/due queue.
 - [x] Run `php artisan runtime:smoke-provisioning --timeout=30`.
 - [x] Mark plan verification complete, commit, and push.
-- [ ] Open PR to `develop`, wait for CI, merge, delete feature branch.
-- [ ] Pull `develop` on `/opt/billing`, recreate backend and worker, run smoke, and verify `/products`, `/admin/services`, `/admin/provider-action-jobs`, backend health, and worker state.
+- [x] Open PR to `develop`, wait for CI, merge, delete feature branch.
+- [x] Pull `develop` on `/opt/billing`, recreate backend and worker, run smoke, and verify `/products`, `/admin/services`, `/admin/provider-action-jobs`, backend health, and worker state.
