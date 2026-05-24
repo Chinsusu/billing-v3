@@ -125,13 +125,13 @@ git push origin feature/sprint-15-ops-alerts
 - Modify: `README.md`
 - Modify: `docs/superpowers/plans/2026-05-24-sprint-15-ops-alerts.md`
 
-- [ ] Update README with S15 routes and command.
-- [ ] Push branch and check it out on `/opt/billing`.
-- [ ] Recreate backend/scheduler and run migrations.
-- [ ] Run Laravel Pint and full Laravel tests on `/opt/billing`.
-- [ ] Run Go checks on `/opt/billing`.
-- [ ] Run Docker Compose config/build and secret scan.
-- [ ] Run smoke: `php artisan scheduled-tasks:run ops_alerts_evaluate`.
-- [ ] Verify `/admin/ops-alert-events` unauthenticated returns `302`.
-- [ ] Mark verification steps complete in this plan, commit, and push.
+- [x] Update README with S15 routes and command.
+- [x] Push branch and check it out on `/opt/billing`.
+- [x] Recreate backend/scheduler and run migrations.
+- [x] Run Laravel Pint and full Laravel tests on `/opt/billing`.
+- [x] Run Go checks on `/opt/billing`.
+- [x] Run Docker Compose config/build and secret scan.
+- [x] Run smoke: `php artisan scheduled-tasks:run ops_alerts_evaluate`.
+- [x] Verify `/admin/ops-alert-events` unauthenticated returns `302`.
+- [x] Mark verification steps complete in this plan, commit, and push.
 - [ ] Open PR to `develop`, wait for CI, merge, delete feature branch, and deploy `/opt/billing`.
