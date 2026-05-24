@@ -14,6 +14,7 @@ class ScheduledTaskRegistry
             'provider_actions_work' => 'provider-actions:work --limit=50',
             'services_expire' => 'services:expire',
             'provider_actions_recover_stuck' => 'provider-actions:recover-stuck',
+            'ops_alerts_evaluate' => 'ops-alerts:evaluate',
         ];
     }
 
