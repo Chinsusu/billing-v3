@@ -16,21 +16,21 @@
 - Create: `docs/superpowers/specs/2026-05-24-sprint-4-provisioning-execution-design.md`
 - Create: `docs/superpowers/plans/2026-05-24-sprint-4-provisioning-execution.md`
 
-- [ ] Save the approved S4 design.
-- [ ] Save this implementation plan.
-- [ ] Scan both files for placeholders and contradictions.
-- [ ] Commit documentation before code.
+- [x] Save the approved S4 design.
+- [x] Save this implementation plan.
+- [x] Scan both files for placeholders and contradictions.
+- [x] Commit documentation before code.
 
 ### Task 2: Laravel RED Tests
 
 **Files:**
 - Create: `apps/backend-laravel/tests/Feature/ProvisioningOperationsTest.php`
 
-- [ ] Add failing tests for customer service detail page showing external ID and provisioning history.
-- [ ] Add failing tests for customer being unable to view another user's service detail.
-- [ ] Add failing tests for admin retrying a failed provisioning job.
-- [ ] Add failing tests that processed provisioning jobs cannot be retried.
-- [ ] Run the new Laravel test file on the dev server and verify it fails on missing routes/controllers.
+- [x] Add failing tests for customer service detail page showing external ID and provisioning history.
+- [x] Add failing tests for customer being unable to view another user's service detail.
+- [x] Add failing tests for admin retrying a failed provisioning job.
+- [x] Add failing tests that processed provisioning jobs cannot be retried.
+- [x] Run the new Laravel test file on the dev server and verify it fails on missing routes/controllers.
 
 ### Task 3: Laravel Implementation
 
@@ -44,11 +44,11 @@
 - Modify: `apps/backend-laravel/routes/web.php`
 - Modify: `README.md`
 
-- [ ] Implement owner-scoped service detail.
-- [ ] Implement retry service for failed jobs only.
-- [ ] Add retry POST route under admin provisioning jobs.
-- [ ] Add retry buttons and service links in Blade views.
-- [ ] Run Laravel S4 tests and verify they pass.
+- [x] Implement owner-scoped service detail.
+- [x] Implement retry service for failed jobs only.
+- [x] Add retry POST route under admin provisioning jobs.
+- [x] Add retry buttons and service links in Blade views.
+- [x] Run Laravel S4 tests and verify they pass.
 
 ### Task 4: Go Worker RED Tests
 
@@ -57,11 +57,11 @@
 - Create: `apps/worker-go/internal/provisioningstore/store_test.go`
 - Create: `apps/worker-go/internal/provisioning/executor_test.go`
 
-- [ ] Add `sqlmock` and `lib/pq` dependencies.
-- [ ] Add failing tests for claiming a pending job.
-- [ ] Add failing tests for successful processing updating service/job records.
-- [ ] Add failing tests for failed processing marking job failed with `last_error`.
-- [ ] Run Go tests and verify they fail because store/executor do not exist.
+- [x] Add `sqlmock` and `lib/pq` dependencies.
+- [x] Add failing tests for claiming a pending job.
+- [x] Add failing tests for successful processing updating service/job records.
+- [x] Add failing tests for failed processing marking job failed with `last_error`.
+- [x] Run Go tests and verify they fail because store/executor do not exist.
 
 ### Task 5: Go Worker Implementation
 
@@ -71,20 +71,20 @@
 - Create: `apps/worker-go/internal/provisioningstore/store.go`
 - Modify: `apps/worker-go/cmd/worker/main.go`
 
-- [ ] Implement provisioning job payload parsing and executor orchestration.
-- [ ] Implement SQL store claim/update methods.
-- [ ] Wire `cmd/worker` to open `DATABASE_URL` with Postgres driver and process one job.
-- [ ] Keep no-job behavior successful and quiet for dev usage.
-- [ ] Run Go tests and verify they pass.
+- [x] Implement provisioning job payload parsing and executor orchestration.
+- [x] Implement SQL store claim/update methods.
+- [x] Wire `cmd/worker` to open `DATABASE_URL` with Postgres driver and process one job.
+- [x] Keep no-job behavior successful and quiet for dev usage.
+- [x] Run Go tests and verify they pass.
 
 ### Task 6: Final Verification And Publish
 
 **Files:**
 - Modify: `docs/superpowers/plans/2026-05-24-sprint-4-provisioning-execution.md`
 
-- [ ] Mark plan checklist complete.
-- [ ] Run all Laravel tests.
-- [ ] Run Pint.
-- [ ] Run Go `gofmt`, `go vet`, and `go test`.
-- [ ] Run Docker compose config and secret scan.
+- [x] Mark plan checklist complete.
+- [x] Run all Laravel tests.
+- [x] Run Pint.
+- [x] Run Go `gofmt`, `go vet`, and `go test`.
+- [x] Run Docker compose config and secret scan.
 - [ ] Commit, push, open PR to `develop`, wait for CI, merge, migrate/update `/opt/billing`.
