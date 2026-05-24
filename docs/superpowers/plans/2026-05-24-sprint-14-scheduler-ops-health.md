@@ -467,7 +467,7 @@ git push origin feature/sprint-14-scheduler-ops-health
 **Files:**
 - Create: `apps/backend-laravel/tests/Feature/SchedulerConfigurationTest.php`
 
-- [ ] Add tests for schedule list and Compose service configuration.
+- [x] Add tests for schedule list and Compose service configuration.
 
 Use:
 
@@ -508,7 +508,7 @@ class SchedulerConfigurationTest extends TestCase
 }
 ```
 
-- [ ] Run the targeted test on `/opt/billing` and verify RED.
+- [x] Run the targeted test on `/opt/billing` and verify RED.
 
 Run:
 
@@ -518,7 +518,7 @@ ssh --% root@10.1.1.124 "cd /opt/billing && docker compose -f infra/docker-compo
 
 Expected: FAIL because schedule entries and scheduler Compose service do not exist.
 
-- [ ] Commit RED tests.
+- [x] Commit RED tests.
 
 Run:
 
