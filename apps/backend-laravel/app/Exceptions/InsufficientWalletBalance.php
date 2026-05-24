@@ -4,6 +4,4 @@ namespace App\Exceptions;
 
 use RuntimeException;
 
-class InsufficientWalletBalance extends RuntimeException
-{
-}
+class InsufficientWalletBalance extends RuntimeException {}

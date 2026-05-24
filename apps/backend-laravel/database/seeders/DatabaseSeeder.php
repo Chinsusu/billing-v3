@@ -2,9 +2,9 @@
 
 namespace Database\Seeders;
 
+use App\Models\Invoice;
 use App\Models\Product;
 use App\Models\User;
-use App\Models\Invoice;
 use App\Models\Wallet;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;

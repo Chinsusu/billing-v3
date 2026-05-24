@@ -7,9 +7,7 @@ use App\Models\LedgerEntry;
 
 class InvoicePaymentService
 {
-    public function __construct(private readonly WalletService $walletService)
-    {
-    }
+    public function __construct(private readonly WalletService $walletService) {}
 
     public function payFromWallet(Invoice $invoice): LedgerEntry
     {

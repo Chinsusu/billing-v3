@@ -6,8 +6,8 @@ use App\Models\PaymentIntent;
 use App\Services\Finance\PaymentIntentService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
-use Illuminate\View\View;
 use Illuminate\Validation\Rule;
+use Illuminate\View\View;
 
 class WalletTopUpController extends Controller
 {

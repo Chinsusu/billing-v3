@@ -8,9 +8,7 @@ use Illuminate\Support\Str;
 
 class PaymentIntentService
 {
-    public function __construct(private readonly WalletService $walletService)
-    {
-    }
+    public function __construct(private readonly WalletService $walletService) {}
 
     public function createWalletTopUp(User $user, int $amount, string $currency = 'VND'): PaymentIntent
     {

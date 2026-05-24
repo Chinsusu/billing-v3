@@ -8,9 +8,7 @@ use Illuminate\Support\Carbon;
 
 class BankWebhookProcessor
 {
-    public function __construct(private readonly WalletService $walletService)
-    {
-    }
+    public function __construct(private readonly WalletService $walletService) {}
 
     public function handle(string $body, ?string $signature): array
     {
