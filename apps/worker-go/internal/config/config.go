@@ -11,6 +11,7 @@ const (
 	defaultProvisioningStuckAfter   = 5 * time.Minute
 	defaultProvisioningMaxAttempts  = 3
 	defaultProvisioningRetryBackoff = time.Minute
+	defaultProvisioningTimeout      = 30 * time.Second
 )
 
 type Config struct {
@@ -21,6 +22,9 @@ type Config struct {
 	ProvisioningStuckAfter   time.Duration
 	ProvisioningMaxAttempts  int
 	ProvisioningRetryBackoff time.Duration
+	BackendInternalURL       string
+	InternalProvisioningToken string
+	ProvisioningExecutorTimeout time.Duration
 }
 
 func Load() Config {
@@ -32,6 +36,9 @@ func Load() Config {
 		ProvisioningStuckAfter:   durationEnvOrDefault("PROVISIONING_STUCK_AFTER", defaultProvisioningStuckAfter),
 		ProvisioningMaxAttempts:  intEnvOrDefault("PROVISIONING_MAX_ATTEMPTS", defaultProvisioningMaxAttempts),
 		ProvisioningRetryBackoff: durationEnvOrDefault("PROVISIONING_RETRY_BACKOFF", defaultProvisioningRetryBackoff),
+		BackendInternalURL:       envOrDefault("BACKEND_INTERNAL_URL", "http://localhost:8000"),
+		InternalProvisioningToken: envOrDefault("INTERNAL_PROVISIONING_TOKEN", "local-internal-provisioning-token"),
+		ProvisioningExecutorTimeout: durationEnvOrDefault("PROVISIONING_EXECUTOR_TIMEOUT", defaultProvisioningTimeout),
 	}
 }
 

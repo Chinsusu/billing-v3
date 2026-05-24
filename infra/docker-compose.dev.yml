@@ -102,6 +102,9 @@ services:
       PROVISIONING_STUCK_AFTER: 5m
       PROVISIONING_MAX_ATTEMPTS: 3
       PROVISIONING_RETRY_BACKOFF: 60s
+      PROVISIONING_EXECUTOR_TIMEOUT: 30s
+      BACKEND_INTERNAL_URL: http://backend:8000
+      INTERNAL_PROVISIONING_TOKEN: local-internal-provisioning-token
     volumes:
       - ../apps/worker-go:/app
     depends_on:
