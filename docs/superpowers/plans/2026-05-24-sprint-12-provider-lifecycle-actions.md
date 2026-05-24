@@ -144,5 +144,5 @@
 - [x] Run Docker Compose config/build and secret scan.
 - [x] Run `php artisan runtime:smoke-provisioning --timeout=30`.
 - [x] Mark plan verification complete, commit, and push.
-- [ ] Open PR to `develop`, wait for CI, merge, delete feature branch.
-- [ ] Pull `develop` on `/opt/billing`, recreate backend and worker, run smoke, and verify `/products`, `/admin/products`, `/admin/services`, and worker state.
+- [x] Open PR to `develop`, wait for CI, merge, delete feature branch.
+- [x] Pull `develop` on `/opt/billing`, recreate backend and worker, run smoke, and verify `/products`, `/admin/products`, `/admin/services`, and worker state.
