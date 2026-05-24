@@ -11,6 +11,7 @@ class ScheduledTaskRegistry
     {
         return [
             'bank_sync_payments' => 'bank:sync-payments',
+            'payment_intents_expire' => 'payment-intents:expire',
             'provider_actions_work' => 'provider-actions:work --limit=50',
             'services_expire' => 'services:expire',
             'provider_actions_recover_stuck' => 'provider-actions:recover-stuck',
