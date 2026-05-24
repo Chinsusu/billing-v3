@@ -23,12 +23,35 @@ class ScheduledTaskRunTest extends TestCase
         $this->assertSame('provider-actions:work --limit=50', $run->command);
         $this->assertSame('success', $run->status);
         $this->assertSame(0, $run->exit_code);
-        $this->assertStringContainsString('Provider action jobs processed=0 failed=0.', $run->output);
         $this->assertNull($run->error);
         $this->assertNotNull($run->started_at);
         $this->assertNotNull($run->finished_at);
         $this->assertGreaterThanOrEqual($run->started_at, $run->finished_at);
         $this->assertGreaterThanOrEqual(0, $run->duration_ms);
+    }
+
+    public function test_runner_records_successful_command_output(): void
+    {
+        Artisan::command('test:scheduled-task-succeeds', function (): int {
+            $this->info('scheduled task succeeded deliberately');
+
+            return 0;
+        });
+
+        $exitCode = app(ScheduledTaskRunner::class)->run('test_success', 'test:scheduled-task-succeeds');
+
+        $this->assertSame(0, $exitCode);
+        $this->assertSame(1, ScheduledTaskRun::count());
+        $run = ScheduledTaskRun::firstOrFail();
+        $this->assertSame('test_success', $run->task);
+        $this->assertSame('test:scheduled-task-succeeds', $run->command);
+        $this->assertSame('success', $run->status);
+        $this->assertSame(0, $run->exit_code);
+        $this->assertStringContainsString('scheduled task succeeded deliberately', $run->output);
+        $this->assertNull($run->error);
+        $this->assertNotNull($run->started_at);
+        $this->assertNotNull($run->finished_at);
+        $this->assertGreaterThanOrEqual($run->started_at, $run->finished_at);
     }
 
     public function test_scheduled_task_wrapper_rejects_unknown_task_key(): void
