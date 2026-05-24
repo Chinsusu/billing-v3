@@ -268,6 +268,16 @@ Commands:
 
 Due period-end cancellation requests are processed automatically. Local services are marked `cancelled` when their `expires_at` has passed; provider-backed services queue an idempotent provider cancel action and keep the service active until the provider worker succeeds. Successful provider cancel jobs now complete the linked `service_cancellations` row, and the scheduled processor is visible in ops health, scheduled task runs, and ops alerts.
 
+## Sprint 24 Provider Callback Intake
+
+Routes:
+
+- `POST /webhooks/providers/{provisioningProviderAccount}`
+
+Provider accounts can define a write-only callback secret and JSON paths for provider event id, external id, action, and status. Provider callbacks must send the exact JSON body signed with HMAC-SHA256 in `X-Provider-Signature` using the account callback secret.
+
+Valid callbacks are audited in `provider_callback_events` with sensitive payload keys redacted. Duplicate provider event ids are idempotent per provider account. Matched cancel callbacks reconcile the service, provider action job, and linked cancellation row; sync and suspend callbacks update local service status where the provider status maps cleanly.
+
 ## Sprint 25 Ops Incident Workbench
 
 Routes:

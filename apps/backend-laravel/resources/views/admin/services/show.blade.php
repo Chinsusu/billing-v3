@@ -106,6 +106,27 @@
 </div>
 
 <div class="panel">
+    <h2>Provider Callbacks</h2>
+    <table>
+        <thead><tr><th>Event</th><th>Action</th><th>Status</th><th>Processing</th><th>Received</th><th>Error</th></tr></thead>
+        <tbody>
+            @forelse ($service->providerCallbackEvents as $event)
+                <tr>
+                    <td>{{ $event->provider_event_id ?? $event->id }}</td>
+                    <td>{{ $event->action ?? '-' }}</td>
+                    <td>{{ $event->provider_status ?? '-' }}</td>
+                    <td>{{ $event->processing_status }}</td>
+                    <td>{{ $event->processed_at?->toDateTimeString() ?? '-' }}</td>
+                    <td>{{ $event->error ?? '-' }}</td>
+                </tr>
+            @empty
+                <tr><td colspan="6" class="muted">No provider callbacks yet.</td></tr>
+            @endforelse
+        </tbody>
+    </table>
+</div>
+
+<div class="panel">
     <h2>Execution Logs</h2>
     <table>
         <thead><tr><th>Created</th><th>Action</th><th>Driver</th><th>Endpoint</th><th>Status</th><th>HTTP</th><th>Duration</th><th>Error</th><th>Request</th><th>Response</th></tr></thead>

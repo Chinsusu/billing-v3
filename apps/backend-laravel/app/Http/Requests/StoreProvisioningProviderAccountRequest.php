@@ -12,6 +12,16 @@ class StoreProvisioningProviderAccountRequest extends FormRequest
         return $this->user()?->can('provisioning_provider_accounts.manage') ?? false;
     }
 
+    protected function prepareForValidation(): void
+    {
+        $this->merge($this->missingCallbackDefaults([
+            'callback_event_id_path' => 'event_id',
+            'callback_external_id_path' => 'external_id',
+            'callback_action_path' => 'action',
+            'callback_status_path' => 'status',
+        ]));
+    }
+
     public function rules(): array
     {
         return [
@@ -29,6 +39,20 @@ class StoreProvisioningProviderAccountRequest extends FormRequest
             'response_external_id_path' => ['required', 'string', 'max:120'],
             'response_status_path' => ['required', 'string', 'max:120'],
             'response_config_path' => ['nullable', 'string', 'max:120'],
+            'callback_secret' => ['nullable', 'string', 'max:2000'],
+            'callback_event_id_path' => ['required', 'string', 'max:120'],
+            'callback_external_id_path' => ['required', 'string', 'max:120'],
+            'callback_action_path' => ['required', 'string', 'max:120'],
+            'callback_status_path' => ['required', 'string', 'max:120'],
         ];
+    }
+
+    private function missingCallbackDefaults(array $defaults): array
+    {
+        return array_filter(
+            $defaults,
+            fn (string $key): bool => ! $this->has($key),
+            ARRAY_FILTER_USE_KEY,
+        );
     }
 }
