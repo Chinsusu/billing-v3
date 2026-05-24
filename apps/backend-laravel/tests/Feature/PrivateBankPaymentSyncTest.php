@@ -49,7 +49,7 @@ class PrivateBankPaymentSyncTest extends TestCase
         ]);
 
         $this->artisan('bank:sync-payments')
-            ->expectsOutput('private_bank: accepted=1 rejected=0 unmatched=0 duplicate=0')
+            ->expectsOutput('private_bank: accepted=1 rejected=0 unmatched=0 expired=0 duplicate=0')
             ->assertExitCode(0);
 
         $this->assertSame(150000, $wallet->refresh()->balance_amount);
@@ -70,7 +70,7 @@ class PrivateBankPaymentSyncTest extends TestCase
         $this->assertSame('synced', $integration->refresh()->last_sync_status);
 
         $this->artisan('bank:sync-payments')
-            ->expectsOutput('private_bank: accepted=0 rejected=0 unmatched=0 duplicate=1')
+            ->expectsOutput('private_bank: accepted=0 rejected=0 unmatched=0 expired=0 duplicate=1')
             ->assertExitCode(0);
 
         $this->assertSame(150000, $wallet->refresh()->balance_amount);
@@ -119,7 +119,7 @@ class PrivateBankPaymentSyncTest extends TestCase
         ]);
 
         $this->artisan('bank:sync-payments')
-            ->expectsOutput('private_bank: accepted=0 rejected=1 unmatched=1 duplicate=0')
+            ->expectsOutput('private_bank: accepted=0 rejected=1 unmatched=1 expired=0 duplicate=0')
             ->assertExitCode(0);
 
         $this->assertDatabaseHas('payment_events', [

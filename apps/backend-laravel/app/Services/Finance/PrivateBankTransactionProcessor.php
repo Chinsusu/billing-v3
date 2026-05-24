@@ -33,7 +33,23 @@ class PrivateBankTransactionProcessor
                 return 'unmatched';
             }
 
-            if ($intent->status !== 'pending' || $intent->amount !== $amount || $intent->currency !== $currency) {
+            if ($intent->amount !== $amount || $intent->currency !== $currency) {
+                PaymentEvent::create($this->eventAttributes($integration, $intent, $transaction, 'rejected', $reference, $amount, $currency, $transactionId));
+
+                return 'rejected';
+            }
+
+            if ($this->intentIsExpired($intent)) {
+                if ($intent->status === 'pending') {
+                    $intent->update(['status' => 'expired']);
+                }
+
+                PaymentEvent::create($this->eventAttributes($integration, $intent, $transaction, 'expired', $reference, $amount, $currency, $transactionId));
+
+                return 'expired';
+            }
+
+            if ($intent->status !== 'pending') {
                 PaymentEvent::create($this->eventAttributes($integration, $intent, $transaction, 'rejected', $reference, $amount, $currency, $transactionId));
 
                 return 'rejected';
@@ -60,6 +76,12 @@ class PrivateBankTransactionProcessor
 
             return 'accepted';
         });
+    }
+
+    private function intentIsExpired(PaymentIntent $intent): bool
+    {
+        return $intent->status === 'expired'
+            || ($intent->status === 'pending' && $intent->expires_at !== null && $intent->expires_at->isPast());
     }
 
     private function eventAttributes(
