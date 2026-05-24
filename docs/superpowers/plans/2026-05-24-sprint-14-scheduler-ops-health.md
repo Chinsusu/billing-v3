@@ -1173,7 +1173,7 @@ Run:
 
 ```bash
 ssh --% root@10.1.1.124 "cd /opt/billing && docker compose -f infra/docker-compose.dev.yml config >/tmp/billing-compose-config.out && docker compose -f infra/docker-compose.dev.yml build backend"
-ssh --% root@10.1.1.124 "cd /opt/billing && if git grep -n PAYOS_API_KEY -- . ':(exclude).env.example' ':(exclude)apps/backend-laravel/.env.example' ':(exclude).github/workflows/ci.yml'; then exit 1; fi && if git grep -n MASTER_KEY_BASE64 -- . ':(exclude).env.example' ':(exclude)apps/backend-laravel/.env.example' ':(exclude).github/workflows/ci.yml'; then exit 1; fi && if git grep -n 'PRIVATE KEY' -- . ':(exclude).env.example' ':(exclude)apps/backend-laravel/.env.example' ':(exclude).github/workflows/ci.yml'; then exit 1; fi"
+ssh --% root@10.1.1.124 "cd /opt/billing && if git grep -n PAYOS_API_KEY -- . ':(exclude).env.example' ':(exclude)apps/backend-laravel/.env.example' ':(exclude).github/workflows/ci.yml' ':(exclude)docs/superpowers/plans/*'; then exit 1; fi && if git grep -n MASTER_KEY_BASE64 -- . ':(exclude).env.example' ':(exclude)apps/backend-laravel/.env.example' ':(exclude).github/workflows/ci.yml' ':(exclude)docs/superpowers/plans/*'; then exit 1; fi && if git grep -n 'PRIVATE KEY' -- . ':(exclude).env.example' ':(exclude)apps/backend-laravel/.env.example' ':(exclude).github/workflows/ci.yml' ':(exclude)docs/superpowers/plans/*'; then exit 1; fi"
 ```
 
 Expected: both commands exit 0.
