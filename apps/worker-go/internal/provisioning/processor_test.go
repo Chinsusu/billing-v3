@@ -23,7 +23,7 @@ func TestInternalExecutorProcessorSendsTokenAndMapsSuccess(t *testing.T) {
 		}
 
 		w.Header().Set("Content-Type", "application/json")
-		fmt.Fprint(w, `{"status":"processed","external_id":"provider-service-123"}`)
+		fmt.Fprint(w, `{"status":"processed","external_id":"provider-service-123","config":{"ip":"203.0.113.10","region":"sgp1"}}`)
 	}))
 	defer server.Close()
 	processor := NewInternalExecutorProcessor(server.URL, "internal-token", time.Second)
@@ -38,6 +38,9 @@ func TestInternalExecutorProcessorSendsTokenAndMapsSuccess(t *testing.T) {
 	}
 	if result.ExternalID != "provider-service-123" {
 		t.Fatalf("unexpected external id %q", result.ExternalID)
+	}
+	if result.Config["ip"] != "203.0.113.10" || result.Config["region"] != "sgp1" {
+		t.Fatalf("unexpected config %#v", result.Config)
 	}
 }
 
@@ -55,6 +58,24 @@ func TestInternalExecutorProcessorReturnsErrorOnNonSuccessStatus(t *testing.T) {
 	}
 	if !strings.Contains(err.Error(), "HTTP 422") {
 		t.Fatalf("unexpected error %q", err.Error())
+	}
+}
+
+func TestInternalExecutorProcessorMapsEmptyArrayConfigToEmptyObject(t *testing.T) {
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
+		fmt.Fprint(w, `{"status":"processed","external_id":"provider-service-123","config":[]}`)
+	}))
+	defer server.Close()
+	processor := NewInternalExecutorProcessor(server.URL, "internal-token", time.Second)
+
+	result, err := processor.Process(context.Background(), Job{ID: "job-1"})
+
+	if err != nil {
+		t.Fatalf("expected no error, got %v", err)
+	}
+	if len(result.Config) != 0 {
+		t.Fatalf("expected empty config, got %#v", result.Config)
 	}
 }
 

@@ -96,12 +96,12 @@
 - Modify: `apps/worker-go/internal/provisioningstore/store_test.go`
 - Modify: `apps/worker-go/internal/provisioningstore/store.go`
 
-- [ ] Add RED Go test that internal executor processor decodes `config`.
-- [ ] Add RED Go store test that `MarkProcessed` updates `services.config`.
-- [ ] Add `Config map[string]any` to `provisioning.Result`.
-- [ ] Marshal config in `MarkProcessed`, defaulting nil to `{}`.
-- [ ] Run `go fmt ./...`, `go vet ./...`, and `go test ./...` until green.
-- [ ] Commit Go config persistence slice.
+- [x] Add RED Go test that internal executor processor decodes `config`.
+- [x] Add RED Go store test that `MarkProcessed` updates `services.config`.
+- [x] Add `Config map[string]any` to `provisioning.Result`.
+- [x] Marshal config in `MarkProcessed`, defaulting nil to `{}`.
+- [x] Run `go fmt ./...`, `go vet ./...`, and `go test ./...` until green.
+- [x] Commit Go config persistence slice.
 
 ### Task 7: Runtime Smoke And Full Verification
 

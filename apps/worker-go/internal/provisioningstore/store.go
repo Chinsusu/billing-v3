@@ -93,7 +93,18 @@ func (s *Store) MarkProcessed(ctx context.Context, job Job, result Result) error
 		return err
 	}
 
-	if _, err := tx.ExecContext(ctx, `update services set status = 'active', external_id = $1, provisioned_at = now(), updated_at = now() where id = $2`, result.ExternalID, job.ServiceID); err != nil {
+	config := result.Config
+	if config == nil {
+		config = map[string]any{}
+	}
+	configJSON, err := json.Marshal(config)
+	if err != nil {
+		_ = tx.Rollback()
+
+		return err
+	}
+
+	if _, err := tx.ExecContext(ctx, `update services set status = 'active', external_id = $1, config = $2, provisioned_at = now(), updated_at = now() where id = $3`, result.ExternalID, string(configJSON), job.ServiceID); err != nil {
 		_ = tx.Rollback()
 
 		return err

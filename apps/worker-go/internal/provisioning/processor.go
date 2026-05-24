@@ -71,8 +71,9 @@ func (p InternalExecutorProcessor) Process(ctx context.Context, job Job) (Result
 	}
 
 	var payload struct {
-		Status     string `json:"status"`
-		ExternalID string `json:"external_id"`
+		Status     string          `json:"status"`
+		ExternalID string          `json:"external_id"`
+		Config     json.RawMessage `json:"config"`
 	}
 	if err := json.Unmarshal(body, &payload); err != nil {
 		return Result{}, fmt.Errorf("decode executor response: %w", err)
@@ -80,6 +81,28 @@ func (p InternalExecutorProcessor) Process(ctx context.Context, job Job) (Result
 	if payload.ExternalID == "" {
 		return Result{}, errors.New("executor response missing external_id")
 	}
+	config, err := decodeExecutorConfig(payload.Config)
+	if err != nil {
+		return Result{}, fmt.Errorf("decode executor config: %w", err)
+	}
 
-	return Result{Status: payload.Status, ExternalID: payload.ExternalID}, nil
+	return Result{Status: payload.Status, ExternalID: payload.ExternalID, Config: config}, nil
+}
+
+func decodeExecutorConfig(raw json.RawMessage) (map[string]any, error) {
+	if len(raw) == 0 || string(raw) == "null" {
+		return map[string]any{}, nil
+	}
+
+	var object map[string]any
+	if err := json.Unmarshal(raw, &object); err == nil && object != nil {
+		return object, nil
+	}
+
+	var array []any
+	if err := json.Unmarshal(raw, &array); err == nil && len(array) == 0 {
+		return map[string]any{}, nil
+	}
+
+	return nil, errors.New("expected object")
 }
