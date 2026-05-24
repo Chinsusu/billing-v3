@@ -82,9 +82,9 @@
 **Files:**
 - Modify: `docs/superpowers/plans/2026-05-24-sprint-7-worker-daemon-recovery.md`
 
-- [ ] Mark plan checklist complete after verification.
+- [x] Mark plan checklist complete after verification.
 - [x] Run Laravel Pint and full tests on the dev server.
 - [x] Run Go `gofmt`, `go vet`, and `go test`.
 - [x] Run Docker compose config and secret scan.
-- [ ] Commit and push branch.
-- [ ] Open PR to `develop`, wait for CI, merge, and update `/opt/billing`.
+- [x] Commit and push branch.
+- [x] Open PR to `develop`, wait for CI, merge, and update `/opt/billing`.
