@@ -15,7 +15,7 @@ return new class extends Migration
 
     public function down(): void
     {
-        if (!Schema::hasTable('scheduled_task_runs')) {
+        if (! Schema::hasTable('scheduled_task_runs')) {
             return;
         }
 

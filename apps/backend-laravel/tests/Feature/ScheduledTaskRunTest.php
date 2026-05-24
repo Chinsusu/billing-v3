@@ -95,8 +95,8 @@ class ScheduledTaskRunTest extends TestCase
     {
         $outputPrefix = 'scheduled task emitted before exception ';
         $errorPrefix = 'scheduled task exception message ';
-        $output = $outputPrefix . str_repeat('o', 4100);
-        $error = $errorPrefix . str_repeat('e', 4100);
+        $output = $outputPrefix.str_repeat('o', 4100);
+        $error = $errorPrefix.str_repeat('e', 4100);
 
         Artisan::command('test:scheduled-task-throws', function () use ($output, $error): int {
             $this->info($output);
@@ -122,13 +122,12 @@ class ScheduledTaskRunTest extends TestCase
 
     private function bindScheduledTasks(array $tasks): void
     {
-        $this->app->instance(ScheduledTaskRegistry::class, new class($tasks) extends ScheduledTaskRegistry {
+        $this->app->instance(ScheduledTaskRegistry::class, new class($tasks) extends ScheduledTaskRegistry
+        {
             /**
-             * @param array<string, string> $tasks
+             * @param  array<string, string>  $tasks
              */
-            public function __construct(private readonly array $tasks)
-            {
-            }
+            public function __construct(private readonly array $tasks) {}
 
             public function all(): array
             {

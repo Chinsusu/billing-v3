@@ -12,9 +12,7 @@ class ScheduledTaskRunner
 {
     private const SNIPPET_LIMIT = 4000;
 
-    public function __construct(private readonly ScheduledTaskRegistry $registry)
-    {
-    }
+    public function __construct(private readonly ScheduledTaskRegistry $registry) {}
 
     public function run(string $task): int
     {

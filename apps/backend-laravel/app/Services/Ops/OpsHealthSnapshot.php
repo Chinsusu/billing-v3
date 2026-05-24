@@ -46,7 +46,7 @@ class OpsHealthSnapshot
             $status = 'ok';
             $message = 'Recent successful run.';
 
-            if (!$lastSuccess || $lastSuccess->finished_at->lt($now->copy()->subMinutes($freshMinutes))) {
+            if (! $lastSuccess || $lastSuccess->finished_at->lt($now->copy()->subMinutes($freshMinutes))) {
                 $status = 'warning';
                 $message = "No successful run in the last {$freshMinutes} minutes.";
             }
