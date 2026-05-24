@@ -186,6 +186,21 @@ Routes and commands:
 
 The dev Compose runtime includes a `scheduler` service that runs Laravel `schedule:work`. It records each scheduled command execution in `scheduled_task_runs` and lets admins inspect scheduler freshness, queue counts, failed jobs, overdue services, and enabled bank integrations from `/admin/ops-health`.
 
+## Sprint 15 Ops Alerts
+
+Routes and commands:
+
+- `GET /admin/ops-alert-rules`
+- `POST /admin/ops-alert-rules`
+- `PUT /admin/ops-alert-rules/{opsAlertRule}`
+- `GET /admin/ops-alert-events`
+- `POST /admin/ops-alert-events/{opsAlertEvent}/acknowledge`
+- `POST /admin/ops-alert-events/{opsAlertEvent}/resolve`
+- `php artisan ops-alerts:evaluate`
+- `php artisan scheduled-tasks:run ops_alerts_evaluate`
+
+Admins can create enabled `ops_health` alert rules with optional webhook delivery. Webhook URLs and secrets are encrypted at rest and never rendered back to the browser. Alert evaluation persists cooldown-aware events for unhealthy scheduler tasks, queues, overdue services, and missing bank integration coverage; admins can acknowledge or resolve events from `/admin/ops-alert-events`.
+
 ## Sprint 8 Shared Postgres Runtime
 
 The dev Compose runtime runs Laravel and the worker against the same Postgres database:

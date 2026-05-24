@@ -17,7 +17,7 @@
 
 - [x] Save this S15 implementation plan.
 - [x] Scan the plan for placeholders, contradictions, vague steps, and missing spec requirements.
-- [ ] Commit the plan before production code changes.
+- [x] Commit the plan before production code changes.
 
 Run:
 
@@ -31,7 +31,7 @@ git commit -m "docs: add sprint 15 ops alerts plan"
 **Files:**
 - Create: `apps/backend-laravel/tests/Feature/OpsAlertsTest.php`
 
-- [ ] Add feature tests for alert rules, alert events, evaluator behavior, webhook delivery, admin actions, and scheduler registration.
+- [x] Add feature tests for alert rules, alert events, evaluator behavior, webhook delivery, admin actions, and scheduler registration.
 
 Test cases:
 
@@ -44,7 +44,7 @@ Test cases:
 - `test_customer_cannot_access_ops_alert_pages`
 - `test_scheduler_registers_ops_alert_evaluation_task`
 
-- [ ] Run the targeted test on `/opt/billing` and verify RED.
+- [x] Run the targeted test on `/opt/billing` and verify RED.
 
 Run:
 
@@ -54,7 +54,7 @@ ssh --% root@10.1.1.124 "cd /opt/billing && git fetch origin feature/sprint-15-o
 
 Expected: FAIL because `OpsAlertRule`, `OpsAlertEvent`, admin alert routes, and `ops-alerts:evaluate` do not exist.
 
-- [ ] Commit RED tests.
+- [x] Commit RED tests.
 
 Run:
 
@@ -71,11 +71,11 @@ git push origin feature/sprint-15-ops-alerts
 - Create: `apps/backend-laravel/app/Models/OpsAlertRule.php`
 - Create: `apps/backend-laravel/app/Models/OpsAlertEvent.php`
 
-- [ ] Add `ops_alert_rules` with encrypted `webhook_url` and `webhook_secret`.
-- [ ] Add `ops_alert_events` with fingerprint, status lifecycle, context JSON, actor references, and delivery fields.
-- [ ] Add Eloquent models with UUIDs, fillable attributes, casts, and relationships.
-- [ ] Run targeted tests and verify remaining failures move to missing evaluator/routes/command.
-- [ ] Commit schema/model slice.
+- [x] Add `ops_alert_rules` with encrypted `webhook_url` and `webhook_secret`.
+- [x] Add `ops_alert_events` with fingerprint, status lifecycle, context JSON, actor references, and delivery fields.
+- [x] Add Eloquent models with UUIDs, fillable attributes, casts, and relationships.
+- [x] Run targeted tests and verify remaining failures move to missing evaluator/routes/command.
+- [x] Commit schema/model slice.
 
 ### Task 4: Implement Evaluator, Webhook Delivery, Command, And Scheduler
 
@@ -87,16 +87,16 @@ git push origin feature/sprint-15-ops-alerts
 - Modify: `apps/backend-laravel/app/Services/Scheduler/ScheduledTaskRegistry.php`
 - Modify: `apps/backend-laravel/routes/console.php`
 
-- [ ] Evaluate enabled `ops_health` rules from `OpsHealthSnapshot`.
-- [ ] Emit task, queue, overdue service, and missing bank integration alert candidates.
-- [ ] Enforce unresolved event cooldown by fingerprint and rule.
-- [ ] Deliver webhook payloads with optional HMAC signature.
-- [ ] Record `delivered`, `failed`, or `skipped` delivery status.
-- [ ] Add `ops-alerts:evaluate` command.
-- [ ] Add scheduled task registry key `ops_alerts_evaluate`.
-- [ ] Add Laravel scheduler entry `scheduled-tasks:run ops_alerts_evaluate` every minute, without overlapping, named `ops_alerts_evaluate`.
-- [ ] Run evaluator and scheduler tests until only admin UI tests fail.
-- [ ] Commit evaluator slice.
+- [x] Evaluate enabled `ops_health` rules from `OpsHealthSnapshot`.
+- [x] Emit task, queue, overdue service, and missing bank integration alert candidates.
+- [x] Enforce unresolved event cooldown by fingerprint and rule.
+- [x] Deliver webhook payloads with optional HMAC signature.
+- [x] Record `delivered`, `failed`, or `skipped` delivery status.
+- [x] Add `ops-alerts:evaluate` command.
+- [x] Add scheduled task registry key `ops_alerts_evaluate`.
+- [x] Add Laravel scheduler entry `scheduled-tasks:run ops_alerts_evaluate` every minute, without overlapping, named `ops_alerts_evaluate`.
+- [x] Run evaluator and scheduler tests until only admin UI tests fail.
+- [x] Commit evaluator slice.
 
 ### Task 5: Implement Admin Ops Alert UI
 
@@ -110,14 +110,14 @@ git push origin feature/sprint-15-ops-alerts
 - Modify: `apps/backend-laravel/routes/web.php`
 - Modify: `apps/backend-laravel/resources/views/admin/dashboard.blade.php`
 
-- [ ] Add alert rule list/create/update in one compact admin page.
-- [ ] Preserve existing webhook secret when update secret input is blank.
-- [ ] Never render webhook URL or secret values back to the browser.
-- [ ] Add alert event list with status, severity, title, message, timestamps, and ack/resolve forms.
-- [ ] Add admin routes guarded by `permission:provisioning_jobs.view`.
-- [ ] Add dashboard link to `/admin/ops-alert-events`.
-- [ ] Run `OpsAlertsTest` until GREEN.
-- [ ] Commit admin UI slice.
+- [x] Add alert rule list/create/update in one compact admin page.
+- [x] Preserve existing webhook secret when update secret input is blank.
+- [x] Never render webhook URL or secret values back to the browser.
+- [x] Add alert event list with status, severity, title, message, timestamps, and ack/resolve forms.
+- [x] Add admin routes guarded by `permission:provisioning_jobs.view`.
+- [x] Add dashboard link to `/admin/ops-alert-events`.
+- [x] Run `OpsAlertsTest` until GREEN.
+- [x] Commit admin UI slice.
 
 ### Task 6: Documentation, Verification, PR, Deploy
 
