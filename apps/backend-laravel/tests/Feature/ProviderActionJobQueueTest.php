@@ -166,6 +166,53 @@ class ProviderActionJobQueueTest extends TestCase
         $this->assertSame('processed', $job->refresh()->status);
     }
 
+    public function test_recover_stuck_command_requeues_stale_processing_jobs_below_max_attempts(): void
+    {
+        $this->travelTo(Carbon::parse('2026-05-24 09:00:00'));
+        [, $service] = $this->providerBackedService();
+        $job = app(ProviderActionJobDispatcher::class)->enqueue($service, 'sync', "service-sync:{$service->id}:manual");
+        $job->forceFill([
+            'status' => 'processing',
+            'attempts' => 1,
+            'updated_at' => now()->subMinutes(10),
+        ])->save();
+
+        $this->artisan('provider-actions:recover-stuck')
+            ->expectsOutput('Provider action jobs requeued=1 failed=0.')
+            ->assertExitCode(0);
+
+        $job->refresh();
+        $this->assertSame('pending', $job->status);
+        $this->assertSame(1, $job->attempts);
+        $this->assertNull($job->available_at);
+        $this->assertNull($job->processed_at);
+        $this->assertSame('Recovered stale processing job.', $job->last_error);
+    }
+
+    public function test_recover_stuck_command_fails_stale_processing_jobs_at_max_attempts(): void
+    {
+        $this->travelTo(Carbon::parse('2026-05-24 09:00:00'));
+        [, $service] = $this->providerBackedService();
+        $job = app(ProviderActionJobDispatcher::class)->enqueue($service, 'sync', "service-sync:{$service->id}:manual");
+        $job->forceFill([
+            'status' => 'processing',
+            'attempts' => 3,
+            'max_attempts' => 3,
+            'updated_at' => now()->subMinutes(10),
+        ])->save();
+
+        $this->artisan('provider-actions:recover-stuck')
+            ->expectsOutput('Provider action jobs requeued=0 failed=1.')
+            ->assertExitCode(0);
+
+        $job->refresh();
+        $this->assertSame('failed', $job->status);
+        $this->assertSame(3, $job->attempts);
+        $this->assertNull($job->available_at);
+        $this->assertNotNull($job->processed_at);
+        $this->assertSame('Stale processing job exceeded max attempts.', $job->last_error);
+    }
+
     private function providerBackedService(array $serviceOverrides = []): array
     {
         $customer = User::factory()->create();
