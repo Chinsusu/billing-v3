@@ -17,19 +17,19 @@
 - Create: `docs/superpowers/plans/2026-05-24-sprint-23-scheduled-cancellations.md`
 
 - [x] Save S23 design spec and implementation plan.
-- [ ] Commit docs before production code changes.
+- [x] Commit docs before production code changes.
 
 ### Task 2: RED Tests
 
 **Files:**
 - Create: `apps/backend-laravel/tests/Feature/ServiceScheduledCancellationExecutionTest.php`
 
-- [ ] Add test for due local period-end cancellation.
-- [ ] Add test for future scheduled cancellation skipped.
-- [ ] Add test for due provider-backed cancellation queueing once.
-- [ ] Add test for provider action success completing linked cancellation row.
-- [ ] Add scheduler registry and schedule-list assertions.
-- [ ] Run targeted test on `/opt/billing` and verify RED.
+- [x] Add test for due local period-end cancellation.
+- [x] Add test for future scheduled cancellation skipped.
+- [x] Add test for due provider-backed cancellation queueing once.
+- [x] Add test for provider action success completing linked cancellation row.
+- [x] Add scheduler registry and schedule-list assertions.
+- [x] Run targeted test on `/opt/billing` and verify RED.
 - [ ] Commit RED tests.
 
 ### Task 3: Scheduled Cancellation Processor
