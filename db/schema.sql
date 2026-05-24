@@ -1,0 +1,2 @@
+-- Billing v3 Sprint 0 placeholder schema.
+-- Domain migrations will be added after the Laravel foundation is stable.

@@ -1,0 +1,54 @@
+name: billing-v3-dev
+
+services:
+  postgres:
+    image: postgres:16
+    container_name: billing_v3_postgres
+    environment:
+      POSTGRES_DB: billing_v3
+      POSTGRES_USER: billing
+      POSTGRES_PASSWORD: billing_secret
+    ports:
+      - "5432:5432"
+    volumes:
+      - billing_v3_pg:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U billing -d billing_v3"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+
+  rabbitmq:
+    image: rabbitmq:4-management
+    container_name: billing_v3_rabbitmq
+    environment:
+      RABBITMQ_DEFAULT_USER: billing
+      RABBITMQ_DEFAULT_PASS: billing_secret
+      RABBITMQ_DEFAULT_VHOST: /
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    volumes:
+      - billing_v3_rabbitmq:/var/lib/rabbitmq
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "-q", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 20
+
+  redis:
+    image: redis:7-alpine
+    container_name: billing_v3_redis
+    ports:
+      - "6379:6379"
+
+  mailpit:
+    image: axllent/mailpit:latest
+    container_name: billing_v3_mailpit
+    ports:
+      - "1025:1025"
+      - "8025:8025"
+
+volumes:
+  billing_v3_pg:
+  billing_v3_rabbitmq:

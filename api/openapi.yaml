@@ -1,0 +1,14 @@
+openapi: 3.1.0
+info:
+  title: Billing v3 API
+  version: 0.1.0
+  description: Sprint 0 placeholder contract.
+servers:
+  - url: http://localhost:8080/api/v1
+paths:
+  /health:
+    get:
+      summary: Health check
+      responses:
+        '200':
+          description: OK
