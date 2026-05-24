@@ -24,7 +24,7 @@ class PaymentEventController extends Controller
                 ->paginate(20)
                 ->withQueryString(),
             'filters' => $filters,
-            'statuses' => ['accepted', 'rejected', 'unmatched'],
+            'statuses' => ['accepted', 'rejected', 'unmatched', 'expired', 'reconciled'],
         ]);
     }
 

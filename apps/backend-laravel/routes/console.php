@@ -13,6 +13,11 @@ Schedule::command('scheduled-tasks:run bank_sync_payments')
     ->withoutOverlapping()
     ->name('bank_sync_payments');
 
+Schedule::command('scheduled-tasks:run payment_intents_expire')
+    ->everyMinute()
+    ->withoutOverlapping()
+    ->name('payment_intents_expire');
+
 Schedule::command('scheduled-tasks:run provider_actions_work')
     ->everyMinute()
     ->withoutOverlapping()

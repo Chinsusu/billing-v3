@@ -44,7 +44,29 @@ class BankWebhookProcessor
             ];
         }
 
-        if ($intent->status !== 'pending' || $intent->amount !== $amount || $intent->currency !== $currency) {
+        if ($intent->amount !== $amount || $intent->currency !== $currency) {
+            PaymentEvent::create($this->eventAttributes($intent, $payload, 'rejected', $reference, $amount, $currency, $transactionId));
+
+            return [
+                'status_code' => 422,
+                'body' => ['status' => 'rejected'],
+            ];
+        }
+
+        if ($this->intentIsExpired($intent)) {
+            if ($intent->status === 'pending') {
+                $intent->update(['status' => 'expired']);
+            }
+
+            PaymentEvent::create($this->eventAttributes($intent, $payload, 'expired', $reference, $amount, $currency, $transactionId));
+
+            return [
+                'status_code' => 422,
+                'body' => ['status' => 'expired'],
+            ];
+        }
+
+        if ($intent->status !== 'pending') {
             PaymentEvent::create($this->eventAttributes($intent, $payload, 'rejected', $reference, $amount, $currency, $transactionId));
 
             return [
@@ -87,6 +109,12 @@ class BankWebhookProcessor
         }
 
         return hash_equals(hash_hmac('sha256', $body, $secret), $signature);
+    }
+
+    private function intentIsExpired(PaymentIntent $intent): bool
+    {
+        return $intent->status === 'expired'
+            || ($intent->status === 'pending' && $intent->expires_at !== null && $intent->expires_at->isPast());
     }
 
     private function eventAttributes(

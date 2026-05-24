@@ -17,7 +17,7 @@ class SyncPrivateBankPaymentsCommand extends Command
     public function handle(PrivateBankClient $client, PrivateBankTransactionProcessor $processor): int
     {
         BankIntegration::where('enabled', true)->orderBy('provider')->get()->each(function (BankIntegration $integration) use ($client, $processor): void {
-            $counts = ['accepted' => 0, 'rejected' => 0, 'unmatched' => 0, 'duplicate' => 0];
+            $counts = ['accepted' => 0, 'rejected' => 0, 'unmatched' => 0, 'expired' => 0, 'duplicate' => 0];
 
             try {
                 foreach ($client->transactions($integration) as $transaction) {
@@ -38,7 +38,7 @@ class SyncPrivateBankPaymentsCommand extends Command
                 ]);
             }
 
-            $this->info("{$integration->provider}: accepted={$counts['accepted']} rejected={$counts['rejected']} unmatched={$counts['unmatched']} duplicate={$counts['duplicate']}");
+            $this->info("{$integration->provider}: accepted={$counts['accepted']} rejected={$counts['rejected']} unmatched={$counts['unmatched']} expired={$counts['expired']} duplicate={$counts['duplicate']}");
         });
 
         return self::SUCCESS;

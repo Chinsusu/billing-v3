@@ -231,6 +231,16 @@ Routes:
 
 Customer dashboard now shows wallet balance, open invoice count, active service count, recent invoices, recent orders, recent services, and recent wallet top-ups. Customer history pages are scoped to the authenticated user and link to the existing order, invoice, and QR top-up detail pages.
 
+## Sprint 19 Payment Expiry and Reconciliation
+
+Routes and commands:
+
+- `POST /admin/payment-events/{paymentEvent}/reconcile-wallet`
+- `php artisan payment-intents:expire`
+- `php artisan scheduled-tasks:run payment_intents_expire`
+
+Pending payment intents expire when `expires_at` has passed. Bank sandbox webhooks and private bank sync record matching late payments as `expired` payment events without crediting wallets automatically. Finance admins can reconcile `unmatched`, `rejected`, or `expired` payment events to a customer wallet from the payment event detail page; reconciliation credits the wallet once with source type `payment_event_reconciliation` and marks the event `reconciled`.
+
 ## Sprint 20 Service Runbook
 
 Routes:
