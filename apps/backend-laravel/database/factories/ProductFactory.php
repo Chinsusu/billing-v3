@@ -38,6 +38,10 @@ class ProductFactory extends Factory
             'provider_lifecycle_expires_at_path' => null,
             'provider_lifecycle_date_format' => 'iso8601',
             'provider_lifecycle_timezone' => 'UTC',
+            'provider_renew_path' => null,
+            'provider_suspend_path' => null,
+            'provider_cancel_path' => null,
+            'provider_sync_path' => null,
         ];
     }
 }

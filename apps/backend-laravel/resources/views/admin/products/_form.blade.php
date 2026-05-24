@@ -45,6 +45,10 @@
 <label>Provider Plan Code<input name="provider_plan_code" value="{{ old('provider_plan_code', $product->provider_plan_code) }}" placeholder="A1"></label>
 <label>Provider Region<input name="provider_region" value="{{ old('provider_region', $product->provider_region) }}" placeholder="sgp1"></label>
 <label>Provider Provision Path<input name="provider_provision_path" value="{{ old('provider_provision_path', $product->provider_provision_path) }}" placeholder="/api/provision"></label>
+<label>Provider Renew Path<input name="provider_renew_path" value="{{ old('provider_renew_path', $product->provider_renew_path) }}" placeholder="/api/services/{external_id}/renew"></label>
+<label>Provider Suspend Path<input name="provider_suspend_path" value="{{ old('provider_suspend_path', $product->provider_suspend_path) }}" placeholder="/api/services/{external_id}/suspend"></label>
+<label>Provider Cancel Path<input name="provider_cancel_path" value="{{ old('provider_cancel_path', $product->provider_cancel_path) }}" placeholder="/api/services/{external_id}/cancel"></label>
+<label>Provider Sync Path<input name="provider_sync_path" value="{{ old('provider_sync_path', $product->provider_sync_path) }}" placeholder="/api/services/{external_id}"></label>
 <label>Provider Lifecycle Path<input name="provider_lifecycle_path" value="{{ old('provider_lifecycle_path', $product->provider_lifecycle_path) }}" placeholder="/api/services/{external_id}"></label>
 <label>Provider Ordered At Path<input name="provider_lifecycle_ordered_at_path" value="{{ old('provider_lifecycle_ordered_at_path', $product->provider_lifecycle_ordered_at_path) }}" placeholder="data.ordered_at"></label>
 <label>Provider Expires At Path<input name="provider_lifecycle_expires_at_path" value="{{ old('provider_lifecycle_expires_at_path', $product->provider_lifecycle_expires_at_path) }}" placeholder="data.expires_at"></label>
