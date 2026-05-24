@@ -5,6 +5,7 @@ namespace App\Services\Orders;
 use App\Models\Order;
 use App\Models\Product;
 use App\Models\ProvisioningJob;
+use App\Models\ProvisioningProviderAccount;
 use App\Models\Service;
 use App\Models\User;
 use App\Services\Finance\WalletService;
@@ -18,6 +19,9 @@ class OrderCheckoutService
     public function checkout(User $user, Product $product): Order
     {
         return DB::transaction(function () use ($user, $product): Order {
+            $product->loadMissing('providerAccount');
+            $providerAccount = $product->providerAccount ?: ProvisioningProviderAccount::where('slug', 'sandbox')->first();
+
             $order = Order::create([
                 'user_id' => $user->id,
                 'order_number' => $this->newOrderNumber(),
@@ -92,6 +96,7 @@ class OrderCheckoutService
                         'type' => $product->type,
                         'duration_days' => $product->duration_days,
                         'config' => $product->config ?? [],
+                        'provider' => $this->providerSnapshot($product, $providerAccount),
                     ],
                 ],
                 'available_at' => now(),
@@ -104,5 +109,18 @@ class OrderCheckoutService
     private function newOrderNumber(): string
     {
         return 'ORD-'.now()->format('Ymd').'-'.Str::upper(Str::random(8));
+    }
+
+    private function providerSnapshot(Product $product, ?ProvisioningProviderAccount $providerAccount): array
+    {
+        return [
+            'account_id' => $providerAccount?->id,
+            'account_slug' => $providerAccount?->slug ?? 'sandbox',
+            'driver' => $providerAccount?->driver ?? 'sandbox',
+            'plan_code' => $product->provider_plan_code,
+            'region' => $product->provider_region,
+            'provision_path' => $product->provider_provision_path ?: $providerAccount?->provision_path,
+            'options' => $product->provider_options ?? [],
+        ];
     }
 }

@@ -72,8 +72,10 @@ class DatabaseSeeder extends Seeder
                 'duration_days' => 30,
                 'description' => 'Starter proxy plan for Sprint 1 catalog validation.',
                 'config' => [],
+                'provider_account_id' => $sandboxProvider->id,
+                'provider_options' => [],
             ]
-        );
+        )->update(['provider_account_id' => $sandboxProvider->id]);
 
         Product::firstOrCreate(
             ['code' => 'vps-basic-30d'],
@@ -86,7 +88,9 @@ class DatabaseSeeder extends Seeder
                 'duration_days' => 30,
                 'description' => 'Starter VPS plan for Sprint 1 catalog validation.',
                 'config' => [],
+                'provider_account_id' => $sandboxProvider->id,
+                'provider_options' => [],
             ]
-        );
+        )->update(['provider_account_id' => $sandboxProvider->id]);
     }
 }
