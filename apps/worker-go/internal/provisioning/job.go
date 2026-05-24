@@ -1,5 +1,7 @@
 package provisioning
 
+import "time"
+
 type Payload struct {
 	Action  string         `json:"action"`
 	Product ProductPayload `json:"product"`
@@ -27,4 +29,6 @@ type Result struct {
 	Status     string
 	ExternalID string
 	Config     map[string]any
+	OrderedAt  *time.Time
+	ExpiresAt  *time.Time
 }

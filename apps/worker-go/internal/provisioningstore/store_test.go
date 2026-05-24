@@ -77,9 +77,11 @@ func TestMarkProcessedActivatesServiceAndMarksJobProcessed(t *testing.T) {
 	defer closeDB()
 
 	store := NewStore(db)
+	orderedAt := time.Date(2026, 5, 24, 9, 0, 0, 0, time.UTC)
+	expiresAt := time.Date(2026, 6, 24, 9, 0, 0, 0, time.UTC)
 	mock.ExpectBegin()
-	mock.ExpectExec(regexp.QuoteMeta(`update services set status = 'active', external_id = $1, config = $2, provisioned_at = now(), updated_at = now() where id = $3`)).
-		WithArgs("sandbox-proxy-service-1", jsonObjectArg{want: map[string]any{"ip": "203.0.113.10", "region": "sgp1"}}, "service-1").
+	mock.ExpectExec(regexp.QuoteMeta(`update services set status = 'active', external_id = $1, config = $2, provisioned_at = coalesce($3, now()), expires_at = coalesce($4, expires_at), updated_at = now() where id = $5`)).
+		WithArgs("sandbox-proxy-service-1", jsonObjectArg{want: map[string]any{"ip": "203.0.113.10", "region": "sgp1"}}, orderedAt, expiresAt, "service-1").
 		WillReturnResult(sqlmock.NewResult(0, 1))
 	mock.ExpectExec(regexp.QuoteMeta(`update provisioning_jobs set status = 'processed', processed_at = now(), last_error = null, updated_at = now() where id = $1`)).
 		WithArgs("job-1").
@@ -89,6 +91,8 @@ func TestMarkProcessedActivatesServiceAndMarksJobProcessed(t *testing.T) {
 	err := store.MarkProcessed(context.Background(), Job{ID: "job-1", ServiceID: "service-1"}, Result{
 		ExternalID: "sandbox-proxy-service-1",
 		Config:     map[string]any{"ip": "203.0.113.10", "region": "sgp1"},
+		OrderedAt:  &orderedAt,
+		ExpiresAt:  &expiresAt,
 	})
 
 	if err != nil {
@@ -105,8 +109,8 @@ func TestMarkProcessedDefaultsNilConfigToEmptyObject(t *testing.T) {
 
 	store := NewStore(db)
 	mock.ExpectBegin()
-	mock.ExpectExec(regexp.QuoteMeta(`update services set status = 'active', external_id = $1, config = $2, provisioned_at = now(), updated_at = now() where id = $3`)).
-		WithArgs("sandbox-proxy-service-1", jsonObjectArg{want: map[string]any{}}, "service-1").
+	mock.ExpectExec(regexp.QuoteMeta(`update services set status = 'active', external_id = $1, config = $2, provisioned_at = coalesce($3, now()), expires_at = coalesce($4, expires_at), updated_at = now() where id = $5`)).
+		WithArgs("sandbox-proxy-service-1", jsonObjectArg{want: map[string]any{}}, nil, nil, "service-1").
 		WillReturnResult(sqlmock.NewResult(0, 1))
 	mock.ExpectExec(regexp.QuoteMeta(`update provisioning_jobs set status = 'processed', processed_at = now(), last_error = null, updated_at = now() where id = $1`)).
 		WithArgs("job-1").

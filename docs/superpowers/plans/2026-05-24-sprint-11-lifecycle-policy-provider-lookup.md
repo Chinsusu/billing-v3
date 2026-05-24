@@ -99,13 +99,13 @@
 - Modify: `apps/worker-go/internal/provisioningstore/store.go`
 - Modify: `apps/worker-go/internal/provisioningstore/store_test.go`
 
-- [ ] Add RED processor test decoding `ordered_at` and `expires_at`.
-- [ ] Add RED store test updating `services.provisioned_at` and `services.expires_at`.
-- [ ] Add nullable date fields to `provisioning.Result`.
-- [ ] Parse RFC3339 dates from executor response.
-- [ ] Update `MarkProcessed` SQL to set `provisioned_at` from result or `now()`, and only overwrite `expires_at` when result has one.
-- [ ] Run `go fmt ./...`, `go vet ./...`, and `go test ./...` until green.
-- [ ] Commit Go date persistence slice.
+- [x] Add RED processor test decoding `ordered_at` and `expires_at`.
+- [x] Add RED store test updating `services.provisioned_at` and `services.expires_at`.
+- [x] Add nullable date fields to `provisioning.Result`.
+- [x] Parse RFC3339 dates from executor response.
+- [x] Update `MarkProcessed` SQL to set `provisioned_at` from result or `now()`, and only overwrite `expires_at` when result has one.
+- [x] Run `go fmt ./...`, `go vet ./...`, and `go test ./...` until green.
+- [x] Commit Go date persistence slice.
 
 ### Task 7: Runtime Smoke And Full Verification
 
