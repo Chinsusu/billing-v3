@@ -765,10 +765,8 @@ class AdminOpsHealthTest extends TestCase
             ->assertSee('failed: 1')
             ->assertSee('Provider Action Queue')
             ->assertSee('pending: 1')
-            ->assertSee('Overdue Active Services')
-            ->assertSee('1')
-            ->assertSee('Enabled Bank Integrations')
-            ->assertSee('1');
+            ->assertSeeInOrder(['Overdue Active Services', '1'])
+            ->assertSeeInOrder(['Enabled Bank Integrations', '1']);
     }
 
     public function test_ops_health_warns_when_scheduled_task_is_stale(): void
@@ -789,9 +787,18 @@ class AdminOpsHealthTest extends TestCase
         $this->actingAs($admin)
             ->get('/admin/ops-health')
             ->assertOk()
-            ->assertSee('bank_sync_payments')
-            ->assertSee('warning')
-            ->assertSee('No successful run in the last 3 minutes.');
+            ->assertSeeInOrder(['bank_sync_payments', 'warning', 'No successful run in the last 3 minutes.']);
+    }
+
+    public function test_admin_dashboard_links_to_ops_health(): void
+    {
+        $admin = $this->adminUser();
+
+        $this->actingAs($admin)
+            ->get('/admin')
+            ->assertOk()
+            ->assertSee('Ops Health')
+            ->assertSee('href="/admin/ops-health"', false);
     }
 
     public function test_customer_cannot_access_ops_health(): void
