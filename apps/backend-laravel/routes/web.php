@@ -13,6 +13,7 @@ use App\Http\Controllers\Admin\OpsAlertRuleController;
 use App\Http\Controllers\Admin\OpsHealthController;
 use App\Http\Controllers\Admin\OrderController as AdminOrderController;
 use App\Http\Controllers\Admin\PaymentEventController;
+use App\Http\Controllers\Admin\PaymentEventReconciliationController;
 use App\Http\Controllers\Admin\ProductController;
 use App\Http\Controllers\Admin\ProviderActionJobController;
 use App\Http\Controllers\Admin\ProviderActionJobRetryController;
@@ -87,6 +88,7 @@ Route::middleware('auth')->group(function (): void {
         Route::get('/invoices/{invoice}', [AdminInvoiceController::class, 'show'])->middleware('permission:invoices.view')->name('invoices.show');
         Route::get('/payment-events', [PaymentEventController::class, 'index'])->middleware('permission:payment_events.view')->name('payment-events.index');
         Route::get('/payment-events/{paymentEvent}', [PaymentEventController::class, 'show'])->middleware('permission:payment_events.view')->name('payment-events.show');
+        Route::post('/payment-events/{paymentEvent}/reconcile-wallet', PaymentEventReconciliationController::class)->middleware('permission:wallets.adjust')->name('payment-events.reconcile-wallet');
         Route::get('/customers', [CustomerController::class, 'index'])->middleware('permission:customers.view')->name('customers.index');
         Route::get('/customers/{user}', [CustomerController::class, 'show'])->middleware('permission:customers.view')->name('customers.show');
         Route::post('/customers/{user}/wallet-adjustments', CustomerWalletAdjustmentController::class)->middleware('permission:wallets.adjust')->name('customers.wallet-adjustments.store');

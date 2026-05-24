@@ -21,6 +21,42 @@
     </table>
 </div>
 
+@php
+    $reconciliation = $event->payload['reconciliation'] ?? null;
+    $canReconcileStatus = in_array($event->status, ['unmatched', 'rejected', 'expired'], true);
+@endphp
+
+@if ($reconciliation)
+<div class="panel">
+    <h2>Reconciliation</h2>
+    <table>
+        <tbody>
+            <tr><th>Customer</th><td>{{ $reconciliation['user_email'] ?? '-' }}</td></tr>
+            <tr><th>Actor</th><td>{{ $reconciliation['actor_email'] ?? '-' }}</td></tr>
+            <tr><th>Wallet</th><td>{{ $reconciliation['wallet_id'] ?? '-' }}</td></tr>
+            <tr><th>Ledger Entry</th><td>{{ $reconciliation['ledger_entry_id'] ?? '-' }}</td></tr>
+            <tr><th>Reconciled</th><td>{{ $reconciliation['reconciled_at'] ?? '-' }}</td></tr>
+        </tbody>
+    </table>
+</div>
+@endif
+
+@can('wallets.adjust')
+    @if ($canReconcileStatus)
+        <div class="panel">
+            <h2>Reconcile to Wallet</h2>
+            <p>Amount: {{ $event->amount ? number_format($event->amount).' '.$event->currency : '-' }}</p>
+            <form method="POST" action="/admin/payment-events/{{ $event->id }}/reconcile-wallet">
+                @csrf
+                <label>Customer Email
+                    <input name="user_email" type="email" value="{{ old('user_email', $customer?->email) }}" required>
+                </label>
+                <button type="submit">Reconcile Payment</button>
+            </form>
+        </div>
+    @endif
+@endcan
+
 <div class="panel">
     <h2>Payload</h2>
     <pre>{{ json_encode($event->payload ?? [], JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES) }}</pre>

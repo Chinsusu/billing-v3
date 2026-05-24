@@ -31,7 +31,7 @@
 - [x] Add admin reconciliation forbidden/invalid-status tests.
 - [x] Add scheduled task registry assertion.
 - [x] Run targeted test on `/opt/billing` and verify RED.
-- [ ] Commit RED tests.
+- [x] Commit RED tests.
 
 ### Task 3: Expiry Command and Scheduler
 
@@ -40,11 +40,11 @@
 - Modify: `apps/backend-laravel/app/Services/Scheduler/ScheduledTaskRegistry.php`
 - Modify: `apps/backend-laravel/routes/console.php`
 
-- [ ] Implement `payment-intents:expire`.
-- [ ] Register `payment_intents_expire` as an allowed scheduled task.
-- [ ] Schedule it every minute through the existing scheduler wrapper.
-- [ ] Run targeted test until expiry and scheduler assertions pass.
-- [ ] Commit expiry command slice.
+- [x] Implement `payment-intents:expire`.
+- [x] Register `payment_intents_expire` as an allowed scheduled task.
+- [x] Schedule it every minute through the existing scheduler wrapper.
+- [x] Run targeted test until expiry and scheduler assertions pass.
+- [x] Commit expiry command slice.
 
 ### Task 4: Expired Bank Event Handling
 
@@ -55,13 +55,13 @@
 - Modify: `apps/backend-laravel/app/Http/Controllers/Admin/PaymentEventController.php`
 - Modify: `apps/backend-laravel/resources/views/admin/payment-events/index.blade.php`
 
-- [ ] Record matching expired-intent transactions as `expired`.
-- [ ] Avoid wallet credit for expired transactions.
-- [ ] Keep amount/currency mismatches as `rejected`.
-- [ ] Add `expired` count to private bank sync output.
-- [ ] Add `expired` and `reconciled` to admin filters.
-- [ ] Run targeted test until expired bank event assertions pass.
-- [ ] Commit expired bank event slice.
+- [x] Record matching expired-intent transactions as `expired`.
+- [x] Avoid wallet credit for expired transactions.
+- [x] Keep amount/currency mismatches as `rejected`.
+- [x] Add `expired` count to private bank sync output.
+- [x] Add `expired` and `reconciled` to admin filters.
+- [x] Run targeted test until expired bank event assertions pass.
+- [x] Commit expired bank event slice.
 
 ### Task 5: Admin Reconciliation
 
@@ -71,13 +71,13 @@
 - Modify: `apps/backend-laravel/routes/web.php`
 - Modify: `apps/backend-laravel/resources/views/admin/payment-events/show.blade.php`
 
-- [ ] Implement reconciliation service with wallet credit idempotency.
-- [ ] Implement admin POST controller validating `user_email`.
-- [ ] Protect route with `wallets.adjust`.
-- [ ] Add reconciliation form for `unmatched`, `rejected`, and `expired` events.
-- [ ] Render reconciliation metadata for reconciled events.
-- [ ] Run targeted test until reconciliation assertions pass.
-- [ ] Commit reconciliation slice.
+- [x] Implement reconciliation service with wallet credit idempotency.
+- [x] Implement admin POST controller validating `user_email`.
+- [x] Protect route with `wallets.adjust`.
+- [x] Add reconciliation form for `unmatched`, `rejected`, and `expired` events.
+- [x] Render reconciliation metadata for reconciled events.
+- [x] Run targeted test until reconciliation assertions pass.
+- [x] Commit reconciliation slice.
 
 ### Task 6: Documentation, Verification, PR, Deploy
 
