@@ -24,13 +24,13 @@
 **Files:**
 - Create: `apps/backend-laravel/tests/Feature/AdminFinanceDetailWorkbenchTest.php`
 
-- [ ] Add admin invoice detail test.
-- [ ] Add admin order detail test.
-- [ ] Add admin payment event detail test.
-- [ ] Add list link/filter tests.
-- [ ] Add customer forbidden tests.
-- [ ] Run targeted test on `/opt/billing` and verify RED.
-- [ ] Commit RED tests.
+- [x] Add admin invoice detail test.
+- [x] Add admin order detail test.
+- [x] Add admin payment event detail test.
+- [x] Add list link/filter tests.
+- [x] Add customer forbidden tests.
+- [x] Run targeted test on `/opt/billing` and verify RED.
+- [x] Commit RED tests.
 
 ### Task 3: Admin Invoice Detail
 
