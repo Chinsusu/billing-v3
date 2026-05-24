@@ -31,7 +31,7 @@
 - [x] Add admin callback config write-only secret test.
 - [x] Add admin service runbook callback history test.
 - [x] Run targeted test on `/opt/billing` and verify RED.
-- [ ] Commit RED tests.
+- [x] Commit RED tests.
 
 ### Task 3: Schema and Provider Account Config
 
@@ -45,12 +45,12 @@
 - Modify: `apps/backend-laravel/app/Http/Controllers/Admin/ProvisioningProviderAccountController.php`
 - Modify: `apps/backend-laravel/resources/views/admin/provisioning-provider-accounts/_form.blade.php`
 
-- [ ] Add callback config columns and encrypted casts.
-- [ ] Add provider callback event table and model relationships.
-- [ ] Persist callback config from admin create/update.
-- [ ] Keep callback secret write-only in the form.
-- [ ] Run targeted test until config assertions pass.
-- [ ] Commit schema/config slice.
+- [x] Add callback config columns and encrypted casts.
+- [x] Add provider callback event table and model relationships.
+- [x] Persist callback config from admin create/update.
+- [x] Keep callback secret write-only in the form.
+- [x] Run targeted test until config assertions pass.
+- [x] Commit schema/config slice.
 
 ### Task 4: Callback Webhook and Reconciliation
 
@@ -61,14 +61,14 @@
 - Modify: `apps/backend-laravel/bootstrap/app.php`
 - Modify: `apps/backend-laravel/app/Models/Service.php`
 
-- [ ] Add signed webhook route and CSRF exception.
-- [ ] Validate provider enabled/configured/signature.
-- [ ] Extract callback fields through provider account JSON paths.
-- [ ] Persist redacted callback audit rows.
-- [ ] Reconcile service status, provider action job, and linked cancellation rows.
-- [ ] Enforce duplicate provider event id idempotency.
-- [ ] Run targeted test until webhook assertions pass.
-- [ ] Commit webhook/reconciliation slice.
+- [x] Add signed webhook route and CSRF exception.
+- [x] Validate provider enabled/configured/signature.
+- [x] Extract callback fields through provider account JSON paths.
+- [x] Persist redacted callback audit rows.
+- [x] Reconcile service status, provider action job, and linked cancellation rows.
+- [x] Enforce duplicate provider event id idempotency.
+- [x] Run targeted test until webhook assertions pass.
+- [x] Commit webhook/reconciliation slice.
 
 ### Task 5: Admin Runbook, Documentation, Verification, PR, Deploy
 
@@ -78,9 +78,9 @@
 - Modify: `README.md`
 - Modify: `docs/superpowers/plans/2026-05-24-sprint-24-provider-callbacks.md`
 
-- [ ] Load provider callback events on admin service runbook.
-- [ ] Render callback history without exposing raw secrets.
-- [ ] Update README with S24 endpoint/config behavior.
+- [x] Load provider callback events on admin service runbook.
+- [x] Render callback history without exposing raw secrets.
+- [x] Update README with S24 endpoint/config behavior.
 - [ ] Push branch and check it out on `/opt/billing`.
 - [ ] Run Laravel Pint and full Laravel tests on `/opt/billing`.
 - [ ] Run Go checks on `/opt/billing`.
