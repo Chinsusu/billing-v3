@@ -28,11 +28,11 @@
 - Modify: `apps/worker-go/internal/provisioningstore/store_test.go`
 - Create: `apps/worker-go/internal/provisioning/daemon_test.go`
 
-- [ ] Add config tests for `WORKER_POLL_INTERVAL`, `PROVISIONING_STUCK_AFTER`, `PROVISIONING_MAX_ATTEMPTS`, and `PROVISIONING_RETRY_BACKOFF`.
-- [ ] Add store tests for retry backoff and final failure in `MarkFailed`.
-- [ ] Add store tests for stuck job recovery to pending and failed.
-- [ ] Add daemon loop tests for repeated processing and sleeping when idle.
-- [ ] Run Go tests on the dev server and verify they fail because config fields, recovery methods, and daemon loop do not exist.
+- [x] Add config tests for `WORKER_POLL_INTERVAL`, `PROVISIONING_STUCK_AFTER`, `PROVISIONING_MAX_ATTEMPTS`, and `PROVISIONING_RETRY_BACKOFF`.
+- [x] Add store tests for retry backoff and final failure in `MarkFailed`.
+- [x] Add store tests for stuck job recovery to pending and failed.
+- [x] Add daemon loop tests for repeated processing and sleeping when idle.
+- [x] Run Go tests on the dev server and verify they fail because config fields, recovery methods, and daemon loop do not exist.
 
 ### Task 3: Worker Config And Store Implementation
 

@@ -3,7 +3,7 @@
 <div class="panel">
     <h1>Provisioning Jobs</h1>
     <table>
-        <thead><tr><th>Type</th><th>Reference</th><th>Product</th><th>Status</th><th>Attempts</th><th>Error</th><th></th></tr></thead>
+        <thead><tr><th>Type</th><th>Reference</th><th>Product</th><th>Status</th><th>Attempts</th><th>Available</th><th>Processed</th><th>Error</th><th></th></tr></thead>
         <tbody>
             @forelse ($provisioningJobs as $job)
                 <tr>
@@ -12,6 +12,8 @@
                     <td>{{ $job->payload['product']['code'] ?? '-' }}</td>
                     <td>{{ $job->status }}</td>
                     <td>{{ $job->attempts }}</td>
+                    <td>{{ $job->available_at?->toDateTimeString() ?? '-' }}</td>
+                    <td>{{ $job->processed_at?->toDateTimeString() ?? '-' }}</td>
                     <td>{{ $job->last_error ?? '-' }}</td>
                     <td>
                         @if ($job->status === 'failed')
@@ -23,7 +25,7 @@
                     </td>
                 </tr>
             @empty
-                <tr><td colspan="7" class="muted">No provisioning jobs yet.</td></tr>
+                <tr><td colspan="9" class="muted">No provisioning jobs yet.</td></tr>
             @endforelse
         </tbody>
     </table>

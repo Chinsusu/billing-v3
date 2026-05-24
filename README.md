@@ -111,6 +111,23 @@ Sandbox webhook payload:
 
 Sign the exact JSON body with HMAC-SHA256 and send the hex digest in `X-Billing-Signature` using `BANK_SANDBOX_WEBHOOK_SECRET`.
 
+## Sprint 7 Worker Daemon
+
+The Go worker can run continuously with retry backoff and stuck-job recovery:
+
+```bash
+docker run --rm --network host -v "$PWD/apps/worker-go:/app" -w /app golang:1.26.3 go run ./cmd/worker --daemon
+```
+
+Runtime environment:
+
+- `WORKER_POLL_INTERVAL`: idle poll sleep, default `5s`.
+- `PROVISIONING_STUCK_AFTER`: old `processing` job recovery threshold, default `5m`.
+- `PROVISIONING_MAX_ATTEMPTS`: max processing attempts before permanent failure, default `3`.
+- `PROVISIONING_RETRY_BACKOFF`: delay before retrying a failed attempt, default `60s`.
+
+The dev Compose file includes a `worker` service that runs `go run ./cmd/worker --daemon` against the Compose Postgres service.
+
 Seeded accounts after `php artisan db:seed`:
 
 ```text

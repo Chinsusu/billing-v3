@@ -49,6 +49,24 @@ services:
       - "1025:1025"
       - "8025:8025"
 
+  worker:
+    image: golang:1.26.3
+    container_name: billing_v3_worker
+    working_dir: /app
+    command: ["go", "run", "./cmd/worker", "--daemon"]
+    environment:
+      DATABASE_URL: postgres://billing:billing_secret@postgres:5432/billing_v3?sslmode=disable
+      LOG_LEVEL: info
+      WORKER_POLL_INTERVAL: 5s
+      PROVISIONING_STUCK_AFTER: 5m
+      PROVISIONING_MAX_ATTEMPTS: 3
+      PROVISIONING_RETRY_BACKOFF: 60s
+    volumes:
+      - ../apps/worker-go:/app
+    depends_on:
+      postgres:
+        condition: service_healthy
+
 volumes:
   billing_v3_pg:
   billing_v3_rabbitmq:
