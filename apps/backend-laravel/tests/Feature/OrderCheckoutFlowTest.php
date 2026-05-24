@@ -136,6 +136,44 @@ class OrderCheckoutFlowTest extends TestCase
         ], $job->payload['product']['provider']);
     }
 
+    public function test_checkout_snapshots_lifecycle_policy_and_uses_calendar_month_no_overflow(): void
+    {
+        $this->travelTo('2026-01-31 09:00:00');
+        $customer = $this->customerUser();
+        Wallet::factory()->for($customer)->create(['balance_amount' => 300000]);
+        $product = Product::factory()->create([
+            'name' => 'Calendar Monthly VPS',
+            'code' => 'vps-calendar-monthly',
+            'type' => 'vps',
+            'status' => 'active',
+            'price_amount' => 199000,
+            'currency' => 'VND',
+            'duration_days' => 30,
+            'lifecycle_source' => 'local_policy',
+            'lifecycle_unit' => 'calendar_month',
+            'lifecycle_count' => 1,
+        ]);
+
+        $this->actingAs($customer)->post("/products/{$product->id}/order");
+
+        $service = Service::firstOrFail();
+        $job = ProvisioningJob::firstOrFail();
+        $expectedPolicy = [
+            'source' => 'local_policy',
+            'unit' => 'calendar_month',
+            'count' => 1,
+            'provider_lifecycle_path' => null,
+            'ordered_at_path' => null,
+            'expires_at_path' => null,
+            'date_format' => 'iso8601',
+            'timezone' => 'UTC',
+        ];
+
+        $this->assertTrue($service->expires_at->isSameSecond(now()->addMonthNoOverflow()));
+        $this->assertSame($expectedPolicy, $service->meta['lifecycle_policy']);
+        $this->assertSame($expectedPolicy, $job->payload['product']['lifecycle_policy']);
+    }
+
     public function test_checkout_with_insufficient_wallet_balance_rolls_back(): void
     {
         $customer = $this->customerUser();
