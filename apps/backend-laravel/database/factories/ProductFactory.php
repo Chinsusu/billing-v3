@@ -30,6 +30,14 @@ class ProductFactory extends Factory
             'provider_region' => null,
             'provider_provision_path' => null,
             'provider_options' => [],
+            'lifecycle_source' => 'local_policy',
+            'lifecycle_unit' => 'day',
+            'lifecycle_count' => 30,
+            'provider_lifecycle_path' => null,
+            'provider_lifecycle_ordered_at_path' => null,
+            'provider_lifecycle_expires_at_path' => null,
+            'provider_lifecycle_date_format' => 'iso8601',
+            'provider_lifecycle_timezone' => 'UTC',
         ];
     }
 }

@@ -10,6 +10,7 @@ use App\Models\ProvisioningProviderAccount;
 use App\Models\Service;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
 use Tests\TestCase;
 
@@ -102,6 +103,73 @@ class ProvisioningInternalExecutorTest extends TestCase
         });
     }
 
+    public function test_internal_executor_runs_provider_lifecycle_lookup_after_generic_http_provisioning(): void
+    {
+        config(['services.internal_provisioning.token' => 'secret-token']);
+        $job = $this->provisioningJobForProvider([
+            'slug' => 'provider-a-main',
+            'driver' => 'generic_http',
+            'base_url' => 'https://provider-a.example.test',
+            'provision_path' => '/api/provision',
+            'auth_type' => 'bearer',
+            'api_key' => 'provider-secret-1234',
+            'api_key_last_four' => '1234',
+            'response_external_id_path' => 'data.id',
+            'response_status_path' => 'data.status',
+            'response_config_path' => 'data.config',
+        ], [
+            'provider_plan_code' => 'A1',
+            'provider_provision_path' => '/api/accounts/main/provision',
+            'lifecycle_source' => 'provider_lookup',
+            'lifecycle_unit' => 'calendar_month',
+            'lifecycle_count' => 1,
+            'provider_lifecycle_path' => '/api/services/{external_id}',
+            'provider_lifecycle_ordered_at_path' => 'data.ordered_at',
+            'provider_lifecycle_expires_at_path' => 'data.expires_at',
+            'provider_lifecycle_date_format' => 'iso8601',
+            'provider_lifecycle_timezone' => 'UTC',
+        ]);
+
+        Http::fake([
+            'https://provider-a.example.test/api/accounts/main/provision' => Http::response([
+                'data' => [
+                    'id' => 'provider-service-123',
+                    'status' => 'active',
+                    'config' => ['ip' => '203.0.113.10'],
+                ],
+            ]),
+            'https://provider-a.example.test/api/services/provider-service-123' => Http::response([
+                'data' => [
+                    'ordered_at' => '2026-05-24T09:00:00+00:00',
+                    'expires_at' => '2026-06-24T09:00:00+00:00',
+                ],
+            ]),
+        ]);
+
+        $this->postJson("/internal/provisioning/jobs/{$job->id}/execute", [], [
+            'Authorization' => 'Bearer secret-token',
+        ])
+            ->assertOk()
+            ->assertJson([
+                'status' => 'processed',
+                'external_id' => 'provider-service-123',
+                'config' => ['ip' => '203.0.113.10'],
+                'ordered_at' => '2026-05-24T09:00:00+00:00',
+                'expires_at' => '2026-06-24T09:00:00+00:00',
+            ]);
+
+        Http::assertSentCount(2);
+        Http::assertSent(fn ($request): bool => $request->method() === 'GET'
+            && $request->url() === 'https://provider-a.example.test/api/services/provider-service-123'
+            && $request->hasHeader('Authorization', 'Bearer provider-secret-1234'));
+
+        $this->assertSame(1, DB::table('provisioning_execution_logs')
+            ->where('provisioning_job_id', $job->id)
+            ->where('action', 'provider_lifecycle_lookup')
+            ->where('status', 'success')
+            ->count());
+    }
+
     private function provisioningJobForProvider(array $providerOverrides, array $productOverrides = []): ProvisioningJob
     {
         $user = User::factory()->create();
@@ -155,6 +223,16 @@ class ProvisioningInternalExecutorTest extends TestCase
                     'type' => $product->type,
                     'duration_days' => $product->duration_days,
                     'config' => $product->config ?? [],
+                    'lifecycle_policy' => [
+                        'source' => $product->lifecycle_source,
+                        'unit' => $product->lifecycle_unit,
+                        'count' => $product->lifecycle_count,
+                        'provider_lifecycle_path' => $product->provider_lifecycle_path,
+                        'ordered_at_path' => $product->provider_lifecycle_ordered_at_path,
+                        'expires_at_path' => $product->provider_lifecycle_expires_at_path,
+                        'date_format' => $product->provider_lifecycle_date_format,
+                        'timezone' => $product->provider_lifecycle_timezone,
+                    ],
                     'provider' => [
                         'account_id' => $providerAccount->id,
                         'account_slug' => $providerAccount->slug,

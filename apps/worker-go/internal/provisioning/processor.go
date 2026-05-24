@@ -74,6 +74,8 @@ func (p InternalExecutorProcessor) Process(ctx context.Context, job Job) (Result
 		Status     string          `json:"status"`
 		ExternalID string          `json:"external_id"`
 		Config     json.RawMessage `json:"config"`
+		OrderedAt  string          `json:"ordered_at"`
+		ExpiresAt  string          `json:"expires_at"`
 	}
 	if err := json.Unmarshal(body, &payload); err != nil {
 		return Result{}, fmt.Errorf("decode executor response: %w", err)
@@ -85,8 +87,16 @@ func (p InternalExecutorProcessor) Process(ctx context.Context, job Job) (Result
 	if err != nil {
 		return Result{}, fmt.Errorf("decode executor config: %w", err)
 	}
+	orderedAt, err := parseOptionalExecutorTime(payload.OrderedAt)
+	if err != nil {
+		return Result{}, fmt.Errorf("decode executor ordered_at: %w", err)
+	}
+	expiresAt, err := parseOptionalExecutorTime(payload.ExpiresAt)
+	if err != nil {
+		return Result{}, fmt.Errorf("decode executor expires_at: %w", err)
+	}
 
-	return Result{Status: payload.Status, ExternalID: payload.ExternalID, Config: config}, nil
+	return Result{Status: payload.Status, ExternalID: payload.ExternalID, Config: config, OrderedAt: orderedAt, ExpiresAt: expiresAt}, nil
 }
 
 func decodeExecutorConfig(raw json.RawMessage) (map[string]any, error) {
@@ -105,4 +115,17 @@ func decodeExecutorConfig(raw json.RawMessage) (map[string]any, error) {
 	}
 
 	return nil, errors.New("expected object")
+}
+
+func parseOptionalExecutorTime(value string) (*time.Time, error) {
+	if value == "" {
+		return nil, nil
+	}
+
+	parsed, err := time.Parse(time.RFC3339, value)
+	if err != nil {
+		return nil, err
+	}
+
+	return &parsed, nil
 }

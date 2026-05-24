@@ -23,7 +23,7 @@ func TestInternalExecutorProcessorSendsTokenAndMapsSuccess(t *testing.T) {
 		}
 
 		w.Header().Set("Content-Type", "application/json")
-		fmt.Fprint(w, `{"status":"processed","external_id":"provider-service-123","config":{"ip":"203.0.113.10","region":"sgp1"}}`)
+		fmt.Fprint(w, `{"status":"processed","external_id":"provider-service-123","config":{"ip":"203.0.113.10","region":"sgp1"},"ordered_at":"2026-05-24T09:00:00Z","expires_at":"2026-06-24T09:00:00Z"}`)
 	}))
 	defer server.Close()
 	processor := NewInternalExecutorProcessor(server.URL, "internal-token", time.Second)
@@ -41,6 +41,12 @@ func TestInternalExecutorProcessorSendsTokenAndMapsSuccess(t *testing.T) {
 	}
 	if result.Config["ip"] != "203.0.113.10" || result.Config["region"] != "sgp1" {
 		t.Fatalf("unexpected config %#v", result.Config)
+	}
+	if result.OrderedAt == nil || result.OrderedAt.Format(time.RFC3339) != "2026-05-24T09:00:00Z" {
+		t.Fatalf("unexpected ordered_at %#v", result.OrderedAt)
+	}
+	if result.ExpiresAt == nil || result.ExpiresAt.Format(time.RFC3339) != "2026-06-24T09:00:00Z" {
+		t.Fatalf("unexpected expires_at %#v", result.ExpiresAt)
 	}
 }
 

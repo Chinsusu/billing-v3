@@ -76,7 +76,63 @@ class ProvisioningExecutionAuditTest extends TestCase
         $this->assertStringNotContainsString('provider-secret-1234', $this->payloadString($log->request_payload));
     }
 
-    private function genericHttpJob(): ProvisioningJob
+    public function test_internal_executor_records_failed_provider_lifecycle_lookup_log(): void
+    {
+        config(['services.internal_provisioning.token' => 'secret-token']);
+        $job = $this->genericHttpJob([
+            'source' => 'provider_lookup',
+            'unit' => 'calendar_month',
+            'count' => 1,
+            'provider_lifecycle_path' => '/api/services/{external_id}',
+            'ordered_at_path' => 'data.ordered_at',
+            'expires_at_path' => 'data.expires_at',
+            'date_format' => 'iso8601',
+            'timezone' => 'UTC',
+        ]);
+
+        Http::fake([
+            'https://provider-a.example.test/api/provision' => Http::response([
+                'data' => [
+                    'id' => 'provider-service-123',
+                    'status' => 'active',
+                    'config' => ['ip' => '203.0.113.10'],
+                ],
+            ]),
+            'https://provider-a.example.test/api/services/provider-service-123' => Http::response([
+                'message' => 'temporary lookup failure',
+                'api_key' => 'lookup-response-secret',
+            ], 500),
+        ]);
+
+        $this->postJson("/internal/provisioning/jobs/{$job->id}/execute", [], [
+            'Authorization' => 'Bearer secret-token',
+        ])
+            ->assertStatus(422)
+            ->assertJson(['message' => 'Provider lifecycle lookup returned HTTP 500.']);
+
+        $log = DB::table('provisioning_execution_logs')
+            ->where('provisioning_job_id', $job->id)
+            ->where('action', 'provider_lifecycle_lookup')
+            ->first();
+
+        $this->assertNotNull($log);
+        $this->assertSame('failed', $log->status);
+        $this->assertSame(500, $log->http_status);
+        $this->assertSame('provider_lifecycle_http_error', $log->error_code);
+        $this->assertStringNotContainsString('lookup-response-secret', $this->payloadString($log->response_payload));
+        $this->assertStringContainsString('***redacted***', $this->payloadString($log->response_payload));
+    }
+
+    private function genericHttpJob(array $lifecyclePolicy = [
+        'source' => 'local_policy',
+        'unit' => 'day',
+        'count' => 30,
+        'provider_lifecycle_path' => null,
+        'ordered_at_path' => null,
+        'expires_at_path' => null,
+        'date_format' => 'iso8601',
+        'timezone' => 'UTC',
+    ]): ProvisioningJob
     {
         $user = User::factory()->create();
         $providerAccount = ProvisioningProviderAccount::create([
@@ -131,6 +187,7 @@ class ProvisioningExecutionAuditTest extends TestCase
                     'type' => $product->type,
                     'duration_days' => $product->duration_days,
                     'config' => [],
+                    'lifecycle_policy' => $lifecyclePolicy,
                     'provider' => [
                         'account_id' => $providerAccount->id,
                         'account_slug' => $providerAccount->slug,

@@ -75,6 +75,37 @@ class ServiceRenewalLifecycleTest extends TestCase
         ]);
     }
 
+    public function test_calendar_month_renewal_uses_no_overflow_from_service_snapshot(): void
+    {
+        $now = Carbon::parse('2026-01-20 09:00:00');
+        $this->travelTo($now);
+        $customer = $this->customerUser();
+        Wallet::factory()->for($customer)->create(['balance_amount' => 200000]);
+        $service = $this->serviceFor($customer, [
+            'status' => 'active',
+            'expires_at' => Carbon::parse('2026-01-31 09:00:00'),
+            'meta' => [
+                'duration_days' => 30,
+                'lifecycle_policy' => [
+                    'source' => 'local_policy',
+                    'unit' => 'calendar_month',
+                    'count' => 1,
+                    'provider_lifecycle_path' => null,
+                    'ordered_at_path' => null,
+                    'expires_at_path' => null,
+                    'date_format' => 'iso8601',
+                    'timezone' => 'UTC',
+                ],
+            ],
+        ]);
+
+        $this->actingAs($customer)->post("/services/{$service->id}/renew");
+
+        $service->refresh();
+        $this->assertTrue($service->expires_at->isSameSecond(Carbon::parse('2026-02-28 09:00:00')));
+        $this->assertSame('2026-02-28T09:00:00.000000Z', $service->meta['renewals'][0]['new_expires_at']);
+    }
+
     public function test_renewal_falls_back_to_order_item_snapshot_when_product_is_missing(): void
     {
         $now = Carbon::parse('2026-05-24 09:00:00');

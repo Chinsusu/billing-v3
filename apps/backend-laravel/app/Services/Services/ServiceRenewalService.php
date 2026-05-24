@@ -11,7 +11,10 @@ use Illuminate\Validation\ValidationException;
 
 class ServiceRenewalService
 {
-    public function __construct(private readonly WalletService $walletService) {}
+    public function __construct(
+        private readonly WalletService $walletService,
+        private readonly ServiceLifecyclePolicy $lifecyclePolicy,
+    ) {}
 
     public function renew(Service $service, User $user): Service
     {
@@ -37,7 +40,8 @@ class ServiceRenewalService
                 ]);
             }
 
-            $durationDays = (int) ($lockedService->meta['duration_days'] ?? $lockedService->orderItem?->duration_days ?? 0);
+            $policy = $this->lifecyclePolicy->forService($lockedService);
+            $durationDays = (int) ($lockedService->meta['duration_days'] ?? $lockedService->orderItem?->duration_days ?? $policy['count'] ?? 0);
             if ($durationDays <= 0) {
                 throw ValidationException::withMessages([
                     'service' => 'Service duration is missing.',
@@ -54,7 +58,7 @@ class ServiceRenewalService
 
             $oldExpiresAt = $lockedService->expires_at->copy();
             $baseExpiresAt = $oldExpiresAt->greaterThan(now()) ? $oldExpiresAt : now();
-            $newExpiresAt = $baseExpiresAt->copy()->addDays($durationDays);
+            $newExpiresAt = $this->lifecyclePolicy->expiresAt($baseExpiresAt, $policy);
             $wallet = $this->walletService->walletFor($user, $currency);
 
             $this->walletService->debit(
