@@ -112,13 +112,13 @@
 **Files:**
 - Modify: `docs/superpowers/plans/2026-05-24-sprint-11-lifecycle-policy-provider-lookup.md`
 
-- [ ] Push branch to GitHub and checkout it on `/opt/billing`.
-- [ ] Recreate Compose backend and worker.
-- [ ] Run `php artisan runtime:smoke-provisioning --timeout=30`.
-- [ ] Run Laravel Pint and full tests on `/opt/billing`.
-- [ ] Run Go `go fmt ./...`, `go vet ./...`, and `go test ./...` on `/opt/billing`.
-- [ ] Run Docker Compose config/build and secret scan.
-- [ ] Mark completed checklist items and commit plan progress.
+- [x] Push branch to GitHub and checkout it on `/opt/billing`.
+- [x] Recreate Compose backend and worker.
+- [x] Run `php artisan runtime:smoke-provisioning --timeout=30`.
+- [x] Run Laravel Pint and full tests on `/opt/billing`.
+- [x] Run Go `go fmt ./...`, `go vet ./...`, and `go test ./...` on `/opt/billing`.
+- [x] Run Docker Compose config/build and secret scan.
+- [x] Mark completed checklist items and commit plan progress.
 
 ### Task 8: PR, CI, Merge, Deploy
 
