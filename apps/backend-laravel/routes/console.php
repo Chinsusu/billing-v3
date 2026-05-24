@@ -2,7 +2,28 @@
 
 use Illuminate\Foundation\Inspiring;
 use Illuminate\Support\Facades\Artisan;
+use Illuminate\Support\Facades\Schedule;
 
 Artisan::command('inspire', function () {
     $this->comment(Inspiring::quote());
 })->purpose('Display an inspiring quote');
+
+Schedule::command('scheduled-tasks:run bank_sync_payments')
+    ->everyMinute()
+    ->withoutOverlapping()
+    ->name('bank_sync_payments');
+
+Schedule::command('scheduled-tasks:run provider_actions_work')
+    ->everyMinute()
+    ->withoutOverlapping()
+    ->name('provider_actions_work');
+
+Schedule::command('scheduled-tasks:run services_expire')
+    ->everyFiveMinutes()
+    ->withoutOverlapping()
+    ->name('services_expire');
+
+Schedule::command('scheduled-tasks:run provider_actions_recover_stuck')
+    ->everyFiveMinutes()
+    ->withoutOverlapping()
+    ->name('provider_actions_recover_stuck');
