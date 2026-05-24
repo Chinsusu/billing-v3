@@ -469,6 +469,8 @@ git push origin feature/sprint-14-scheduler-ops-health
 
 - [x] Add tests for schedule list and Compose service configuration.
 
+Note: `Symfony\Component\Yaml\Yaml` is not installed in the backend container, so use built-in text assertions and read `infra/docker-compose.dev.yml` only from local/mounted paths. The backend test runtime must not use network fallbacks; Task 5 mounts `../infra` read-only at `/infra` so the Compose assertions can inspect `/infra/docker-compose.dev.yml`.
+
 Use:
 
 ```php
@@ -477,7 +479,6 @@ Use:
 namespace Tests\Feature;
 
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Symfony\Component\Yaml\Yaml;
 use Tests\TestCase;
 
 class SchedulerConfigurationTest extends TestCase
@@ -496,14 +497,44 @@ class SchedulerConfigurationTest extends TestCase
 
     public function test_compose_defines_scheduler_service(): void
     {
-        $compose = Yaml::parseFile(base_path('../../infra/docker-compose.dev.yml'));
+        $compose = $this->readComposeFile();
 
-        $this->assertArrayHasKey('scheduler', $compose['services']);
-        $scheduler = $compose['services']['scheduler'];
-        $this->assertSame('billing_v3_scheduler', $scheduler['container_name']);
-        $this->assertSame(['sh', '-lc', 'composer install --no-interaction --prefer-dist && if [ ! -f .env ] || ! grep -q \'^DB_CONNECTION=pgsql$\' .env; then old_key=$(grep \'^APP_KEY=\' .env 2>/dev/null | cut -d= -f2-); cp .env.compose.example .env; if [ -n "$$old_key" ]; then sed -i "s|^APP_KEY=.*|APP_KEY=$$old_key|" .env; else php artisan key:generate --ansi --force; fi; fi && php artisan config:clear && php artisan migrate --force && php artisan schedule:work'], $scheduler['command']);
-        $this->assertSame('service_healthy', $scheduler['depends_on']['backend']['condition']);
-        $this->assertSame('service_healthy', $scheduler['depends_on']['postgres']['condition']);
+        $scheduler = $this->composeServiceBlock($compose, 'scheduler');
+
+        $this->assertStringContainsString('container_name: billing_v3_scheduler', $scheduler);
+        $this->assertStringContainsString('php artisan schedule:work', $scheduler);
+        $this->assertMatchesRegularExpression('/depends_on:\s+backend:\s+condition: service_healthy/s', $scheduler);
+        $this->assertMatchesRegularExpression('/depends_on:.*postgres:\s+condition: service_healthy/s', $scheduler);
+    }
+
+    private function readComposeFile(): string
+    {
+        $paths = [
+            base_path('../../infra/docker-compose.dev.yml'),
+            base_path('../../../infra/docker-compose.dev.yml'),
+            '/infra/docker-compose.dev.yml',
+        ];
+
+        foreach ($paths as $path) {
+            if (is_file($path)) {
+                return (string) file_get_contents($path);
+            }
+        }
+
+        $this->fail('Expected infra/docker-compose.dev.yml to be readable from the backend test runtime.');
+    }
+
+    private function composeServiceBlock(string $compose, string $service): string
+    {
+        $matched = preg_match(
+            sprintf('/^  %s:\R(?P<body>(?: {4}.*\R?)*)/m', preg_quote($service, '/')),
+            $compose,
+            $matches
+        );
+
+        $this->assertSame(1, $matched, "Expected Compose service [{$service}] to be defined.");
+
+        return $matches[0];
     }
 }
 ```
@@ -604,11 +635,20 @@ Add this service after `backend` and before `worker`:
       INTERNAL_PROVISIONING_TOKEN: local-internal-provisioning-token
     volumes:
       - ../apps/backend-laravel:/app
+      - ../infra:/infra:ro
     depends_on:
       backend:
         condition: service_healthy
       postgres:
         condition: service_healthy
+```
+
+Also add the read-only infra mount to the existing `backend` service so backend feature tests can read `/infra/docker-compose.dev.yml`:
+
+```yaml
+    volumes:
+      - ../apps/backend-laravel:/app
+      - ../infra:/infra:ro
 ```
 
 - [ ] Run scheduler config tests until GREEN.

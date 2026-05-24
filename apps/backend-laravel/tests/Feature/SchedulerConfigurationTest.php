@@ -36,10 +36,7 @@ class SchedulerConfigurationTest extends TestCase
         $paths = [
             base_path('../../infra/docker-compose.dev.yml'),
             base_path('../../../infra/docker-compose.dev.yml'),
-        ];
-        $urls = [
-            'https://raw.githubusercontent.com/Chinsusu/billing-v3/feature/sprint-14-scheduler-ops-health/infra/docker-compose.dev.yml',
-            'https://raw.githubusercontent.com/Chinsusu/billing-v3/develop/infra/docker-compose.dev.yml',
+            '/infra/docker-compose.dev.yml',
         ];
 
         foreach ($paths as $path) {
@@ -48,15 +45,7 @@ class SchedulerConfigurationTest extends TestCase
             }
         }
 
-        foreach ($urls as $url) {
-            $compose = @file_get_contents($url);
-
-            if (is_string($compose) && $compose !== '') {
-                return $compose;
-            }
-        }
-
-        $this->fail('Expected infra/docker-compose.dev.yml to be readable for scheduler service assertions.');
+        $this->fail('Expected infra/docker-compose.dev.yml to be readable from the backend test runtime.');
     }
 
     private function composeServiceBlock(string $compose, string $service): string
