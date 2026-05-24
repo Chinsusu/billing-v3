@@ -55,4 +55,9 @@ class Service extends Model
     {
         return $this->hasMany(ProvisioningExecutionLog::class);
     }
+
+    public function providerActionJobs(): HasMany
+    {
+        return $this->hasMany(ProviderActionJob::class);
+    }
 }
