@@ -129,12 +129,12 @@
 
 - [x] Update README with S13 provider action queue commands and admin routes.
 - [x] Push branch and check it out on `/opt/billing`.
-- [ ] Recreate backend and run migrations.
-- [ ] Run Laravel Pint and full Laravel tests on `/opt/billing`.
-- [ ] Run Go checks on `/opt/billing` using containerized `go fmt`, `go vet`, and `go test`.
-- [ ] Run Docker Compose config/build and secret scan.
-- [ ] Run `php artisan provider-actions:work --once` against an empty/due queue.
-- [ ] Run `php artisan runtime:smoke-provisioning --timeout=30`.
-- [ ] Mark plan verification complete, commit, and push.
+- [x] Recreate backend and run migrations.
+- [x] Run Laravel Pint and full Laravel tests on `/opt/billing`.
+- [x] Run Go checks on `/opt/billing` using containerized `go fmt`, `go vet`, and `go test`.
+- [x] Run Docker Compose config/build and secret scan.
+- [x] Run `php artisan provider-actions:work --once` against an empty/due queue.
+- [x] Run `php artisan runtime:smoke-provisioning --timeout=30`.
+- [x] Mark plan verification complete, commit, and push.
 - [ ] Open PR to `develop`, wait for CI, merge, delete feature branch.
 - [ ] Pull `develop` on `/opt/billing`, recreate backend and worker, run smoke, and verify `/products`, `/admin/services`, `/admin/provider-action-jobs`, backend health, and worker state.
