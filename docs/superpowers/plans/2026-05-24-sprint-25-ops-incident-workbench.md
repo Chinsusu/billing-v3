@@ -24,14 +24,14 @@
 **Files:**
 - Create: `apps/backend-laravel/tests/Feature/OpsIncidentWorkbenchTest.php`
 
-- [ ] Add ops alert event detail test.
-- [ ] Add ops alert index link test.
-- [ ] Add scheduled task run list/filter test.
-- [ ] Add scheduled task run detail test.
-- [ ] Add ops health scheduled task links test.
-- [ ] Add customer forbidden test.
-- [ ] Run targeted test on `/opt/billing` and verify RED.
-- [ ] Commit RED tests.
+- [x] Add ops alert event detail test.
+- [x] Add ops alert index link test.
+- [x] Add scheduled task run list/filter test.
+- [x] Add scheduled task run detail test.
+- [x] Add ops health scheduled task links test.
+- [x] Add customer forbidden test.
+- [x] Run targeted test on `/opt/billing` and verify RED.
+- [x] Commit RED tests.
 
 ### Task 3: Ops Alert Event Detail
 
