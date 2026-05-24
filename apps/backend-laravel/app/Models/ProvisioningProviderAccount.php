@@ -28,6 +28,11 @@ class ProvisioningProviderAccount extends Model
         return $this->hasMany(Product::class, 'provider_account_id');
     }
 
+    public function executionLogs(): HasMany
+    {
+        return $this->hasMany(ProvisioningExecutionLog::class, 'provider_account_id');
+    }
+
     public function endpointUrl(?string $overridePath = null): ?string
     {
         if ($this->base_url === null) {

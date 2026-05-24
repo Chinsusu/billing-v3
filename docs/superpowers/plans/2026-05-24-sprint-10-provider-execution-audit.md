@@ -28,13 +28,13 @@
 - Create: `apps/backend-laravel/tests/Feature/ProvisioningProviderAccountTestHarnessTest.php`
 - Modify: `apps/backend-laravel/tests/Feature/ProvisioningOperationsTest.php`
 
-- [ ] Add test: generic HTTP internal executor records successful redacted execution log.
-- [ ] Add test: generic HTTP provider failure records failed execution log and returns `422`.
-- [ ] Add test: admin can test generic provider account and update `last_test_*` fields.
-- [ ] Add test: failed provider account test stores error without leaking API key.
-- [ ] Add test: admin provisioning job detail page displays execution logs.
-- [ ] Run targeted Laravel tests on `/opt/billing` and verify they fail because log table/routes/classes do not exist.
-- [ ] Commit Laravel RED tests.
+- [x] Add test: generic HTTP internal executor records successful redacted execution log.
+- [x] Add test: generic HTTP provider failure records failed execution log and returns `422`.
+- [x] Add test: admin can test generic provider account and update `last_test_*` fields.
+- [x] Add test: failed provider account test stores error without leaking API key.
+- [x] Add test: admin provisioning job detail page displays execution logs.
+- [x] Run targeted Laravel tests on `/opt/billing` and verify they fail because log table/routes/classes do not exist.
+- [x] Commit Laravel RED tests.
 
 ### Task 3: Laravel Audit Log Model, Migration, And Redaction
 
