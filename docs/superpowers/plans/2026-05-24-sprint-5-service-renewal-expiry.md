@@ -26,7 +26,7 @@
 **Files:**
 - Create: `apps/backend-laravel/tests/Feature/ServiceRenewalLifecycleTest.php`
 
-- [ ] Add a test for customer renewal extending expiry and debiting wallet.
+- [x] Add a test for customer renewal extending expiry and debiting wallet.
 
 Expected test shape:
 
@@ -60,13 +60,13 @@ public function test_customer_can_renew_active_service_from_wallet(): void
 }
 ```
 
-- [ ] Add a test that renewal uses current product price when linked product exists.
-- [ ] Add a test that renewal falls back to order item snapshot price when the product link is missing.
-- [ ] Add a test that insufficient wallet balance leaves wallet and expiry unchanged.
-- [ ] Add a test that another customer cannot renew the service.
-- [ ] Add a test that expired services cannot be renewed.
-- [ ] Add a test that `services:expire` marks overdue active services expired and leaves future active services unchanged.
-- [ ] Run the new test file on the dev server and verify it fails on missing route, service, and command.
+- [x] Add a test that renewal uses current product price when linked product exists.
+- [x] Add a test that renewal falls back to order item snapshot price when the product link is missing.
+- [x] Add a test that insufficient wallet balance leaves wallet and expiry unchanged.
+- [x] Add a test that another customer cannot renew the service.
+- [x] Add a test that expired services cannot be renewed.
+- [x] Add a test that `services:expire` marks overdue active services expired and leaves future active services unchanged.
+- [x] Run the new test file on the dev server and verify it fails on missing route, service, and command.
 
 Run:
 
@@ -83,7 +83,7 @@ Expected RED result: tests fail because `POST /services/{service}/renew` and `se
 - Create: `apps/backend-laravel/app/Http/Controllers/ServiceRenewalController.php`
 - Modify: `apps/backend-laravel/routes/web.php`
 
-- [ ] Implement `ServiceRenewalService`.
+- [x] Implement `ServiceRenewalService`.
 
 Core implementation:
 
@@ -166,7 +166,7 @@ class ServiceRenewalService
 }
 ```
 
-- [ ] Implement `ServiceRenewalController`.
+- [x] Implement `ServiceRenewalController`.
 
 ```php
 namespace App\Http\Controllers;
@@ -192,13 +192,13 @@ class ServiceRenewalController extends Controller
 }
 ```
 
-- [ ] Add the authenticated route.
+- [x] Add the authenticated route.
 
 ```php
 Route::post('/services/{service}/renew', ServiceRenewalController::class)->name('services.renew');
 ```
 
-- [ ] Run `php artisan test tests/Feature/ServiceRenewalLifecycleTest.php` and fix only renewal-related failures.
+- [x] Run `php artisan test tests/Feature/ServiceRenewalLifecycleTest.php` and fix only renewal-related failures.
 
 ### Task 4: Expiry Command
 
@@ -206,7 +206,7 @@ Route::post('/services/{service}/renew', ServiceRenewalController::class)->name(
 - Create: `apps/backend-laravel/app/Console/Commands/ExpireServicesCommand.php`
 - Modify if needed: `apps/backend-laravel/bootstrap/app.php`
 
-- [ ] Implement `services:expire`.
+- [x] Implement `services:expire`.
 
 Core implementation:
 
@@ -247,7 +247,7 @@ class ExpireServicesCommand extends Command
 }
 ```
 
-- [ ] Run the command test and verify overdue services expire while future services stay active.
+- [x] Run the command test and verify overdue services expire while future services stay active.
 
 ### Task 5: Blade And Documentation
 
@@ -257,7 +257,7 @@ class ExpireServicesCommand extends Command
 - Modify: `README.md`
 - Modify: `docs/superpowers/plans/2026-05-24-sprint-5-service-renewal-expiry.md`
 
-- [ ] Add a renew form to customer service detail for active services.
+- [x] Add a renew form to customer service detail for active services.
 
 Expected Blade fragment:
 
@@ -270,21 +270,21 @@ Expected Blade fragment:
 @endif
 ```
 
-- [ ] Ensure admin service list already displays `status` and `expires_at`; add no extra UI unless tests require it.
-- [ ] Document S5 routes and command in `README.md`.
-- [ ] Mark the plan checklist complete after verification.
+- [x] Ensure admin service list already displays `status` and `expires_at`; add no extra UI unless tests require it.
+- [x] Document S5 routes and command in `README.md`.
+- [x] Mark the plan checklist complete after verification.
 
 ### Task 6: Final Verification And Publish
 
 **Files:** All S5 files.
 
-- [ ] Run Laravel Pint and full tests on the dev server.
+- [x] Run Laravel Pint and full tests on the dev server.
 
 ```bash
 docker run --rm --entrypoint sh -v /opt/billing/apps/backend-laravel:/app -w /app composer:2 -lc 'composer install --no-interaction --prefer-dist >/tmp/composer-install.log && ./vendor/bin/pint --test && php artisan test'
 ```
 
-- [ ] Run Go checks to verify no unrelated worker regression.
+- [x] Run Go checks to verify no unrelated worker regression.
 
 ```bash
 docker run --rm -v /opt/billing/apps/worker-go:/app -w /app golang:1.26.3 gofmt -l .
@@ -292,9 +292,9 @@ docker run --rm -v /opt/billing/apps/worker-go:/app -w /app golang:1.26.3 go vet
 docker run --rm -v /opt/billing/apps/worker-go:/app -w /app golang:1.26.3 go test ./...
 ```
 
-- [ ] Run Docker compose config and secret scan.
-- [ ] Commit implementation.
-- [ ] Push `feature/sprint-5-service-renewal-expiry`.
+- [x] Run Docker compose config and secret scan.
+- [x] Commit implementation.
+- [x] Push `feature/sprint-5-service-renewal-expiry`.
 - [ ] Open PR to `develop`.
 - [ ] Wait for GitHub CI.
 - [ ] Merge after CI passes.
