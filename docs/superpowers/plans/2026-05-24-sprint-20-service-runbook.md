@@ -24,12 +24,12 @@
 **Files:**
 - Create: `apps/backend-laravel/tests/Feature/ServiceRunbookTest.php`
 
-- [ ] Add admin service runbook test.
-- [ ] Add admin service list link test.
-- [ ] Add customer provider action history test.
-- [ ] Add customer/admin authorization test.
-- [ ] Run targeted test on `/opt/billing` and verify RED.
-- [ ] Commit RED tests.
+- [x] Add admin service runbook test.
+- [x] Add admin service list link test.
+- [x] Add customer provider action history test.
+- [x] Add customer/admin authorization test.
+- [x] Run targeted test on `/opt/billing` and verify RED.
+- [x] Commit RED tests.
 
 ### Task 3: Admin Service Runbook
 
@@ -39,11 +39,11 @@
 - Create: `apps/backend-laravel/resources/views/admin/services/show.blade.php`
 - Modify: `apps/backend-laravel/resources/views/admin/services/index.blade.php`
 
-- [ ] Add `show` action loading user, order, product, provisioning jobs, provider action jobs, and execution logs.
-- [ ] Add `GET /admin/services/{service}` route guarded by `services.view`.
-- [ ] Render admin runbook sections and execution log payloads.
-- [ ] Link admin services index rows to service detail.
-- [ ] Commit admin runbook slice.
+- [x] Add `show` action loading user, order, product, provisioning jobs, provider action jobs, and execution logs.
+- [x] Add `GET /admin/services/{service}` route guarded by `services.view`.
+- [x] Render admin runbook sections and execution log payloads.
+- [x] Link admin services index rows to service detail.
+- [x] Commit admin runbook slice.
 
 ### Task 4: Customer Service Detail Upgrade
 
@@ -51,11 +51,11 @@
 - Modify: `apps/backend-laravel/app/Http/Controllers/ServiceController.php`
 - Modify: `apps/backend-laravel/resources/views/services/show.blade.php`
 
-- [ ] Load provider action jobs and execution logs for customer service detail.
-- [ ] Render provider action history.
-- [ ] Render execution status summary without raw request/response payloads.
-- [ ] Run `ServiceRunbookTest` until GREEN.
-- [ ] Commit customer detail slice.
+- [x] Load provider action jobs and execution logs for customer service detail.
+- [x] Render provider action history.
+- [x] Render execution status summary without raw request/response payloads.
+- [x] Run `ServiceRunbookTest` until GREEN.
+- [x] Commit customer detail slice.
 
 ### Task 5: Documentation, Verification, PR, Deploy
 
