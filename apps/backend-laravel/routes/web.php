@@ -1,6 +1,8 @@
 <?php
 
 use App\Http\Controllers\Admin\AdminDashboardController;
+use App\Http\Controllers\Admin\BankIntegrationController;
+use App\Http\Controllers\Admin\BankIntegrationTestController;
 use App\Http\Controllers\Admin\InvoiceController as AdminInvoiceController;
 use App\Http\Controllers\Admin\OrderController as AdminOrderController;
 use App\Http\Controllers\Admin\PaymentEventController;
@@ -58,6 +60,12 @@ Route::middleware('auth')->group(function (): void {
         Route::get('/invoices', [AdminInvoiceController::class, 'index'])->middleware('permission:invoices.view')->name('invoices.index');
         Route::post('/invoices', [AdminInvoiceController::class, 'store'])->middleware('permission:invoices.create')->name('invoices.store');
         Route::get('/payment-events', PaymentEventController::class)->middleware('permission:payment_events.view')->name('payment-events.index');
+        Route::get('/bank-integrations', [BankIntegrationController::class, 'index'])->middleware('permission:bank_integrations.manage')->name('bank-integrations.index');
+        Route::get('/bank-integrations/create', [BankIntegrationController::class, 'create'])->middleware('permission:bank_integrations.manage')->name('bank-integrations.create');
+        Route::post('/bank-integrations', [BankIntegrationController::class, 'store'])->middleware('permission:bank_integrations.manage')->name('bank-integrations.store');
+        Route::get('/bank-integrations/{bankIntegration}/edit', [BankIntegrationController::class, 'edit'])->middleware('permission:bank_integrations.manage')->name('bank-integrations.edit');
+        Route::put('/bank-integrations/{bankIntegration}', [BankIntegrationController::class, 'update'])->middleware('permission:bank_integrations.manage')->name('bank-integrations.update');
+        Route::post('/bank-integrations/{bankIntegration}/test', BankIntegrationTestController::class)->middleware('permission:bank_integrations.manage')->name('bank-integrations.test');
         Route::get('/orders', [AdminOrderController::class, 'index'])->middleware('permission:orders.view')->name('orders.index');
         Route::get('/services', [AdminServiceController::class, 'index'])->middleware('permission:services.view')->name('services.index');
         Route::get('/provisioning-jobs', [ProvisioningJobController::class, 'index'])->middleware('permission:provisioning_jobs.view')->name('provisioning-jobs.index');
