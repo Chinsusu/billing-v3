@@ -61,6 +61,21 @@ Routes:
 
 Customer checkout debits wallet with idempotency key `order-payment:{order_id}`, creates a service in `pending_provision`, and writes a `provision_service` outbox row in `provisioning_jobs`.
 
+## Sprint 4 Provisioning Execution
+
+Routes:
+
+- `GET /services/{service}`
+- `POST /admin/provisioning-jobs/{provisioningJob}/retry`
+
+The Go worker can process one pending provisioning job with:
+
+```bash
+docker run --rm --network host -v "$PWD/apps/worker-go:/app" -w /app golang:1.26.3 go run ./cmd/worker --once
+```
+
+S4 uses the sandbox processor only: pending jobs are claimed, services are marked `active` with a sandbox external ID on success, and failed jobs can be requeued by an admin without resetting attempts.
+
 Sandbox webhook payload:
 
 ```json
