@@ -19,29 +19,43 @@ class OpsHealthSnapshot
 
     public function data(): array
     {
+        $now = now();
+
         return [
-            'tasks' => $this->taskHealth(),
+            'tasks' => $this->taskHealth($now),
             'provisioningQueue' => $this->queueHealth(ProvisioningJob::class),
             'providerActionQueue' => $this->queueHealth(ProviderActionJob::class),
             'overdueActiveServiceCount' => Service::where('status', 'active')
                 ->whereNotNull('expires_at')
-                ->where('expires_at', '<=', now())
+                ->where('expires_at', '<=', $now)
                 ->count(),
             'enabledBankIntegrationCount' => BankIntegration::where('enabled', true)->count(),
         ];
     }
 
-    private function taskHealth(): array
+    private function taskHealth($now): array
     {
-        return collect(self::TASKS)->mapWithKeys(function (int $freshMinutes, string $task): array {
+        return collect(self::TASKS)->mapWithKeys(function (int $freshMinutes, string $task) use ($now): array {
             $lastRun = ScheduledTaskRun::where('task', $task)->latest('started_at')->first();
-            $lastSuccess = ScheduledTaskRun::where('task', $task)->where('status', 'success')->latest('finished_at')->first();
+            $lastSuccess = ScheduledTaskRun::where('task', $task)
+                ->where('status', 'success')
+                ->whereNotNull('finished_at')
+                ->latest('finished_at')
+                ->first();
             $status = 'ok';
             $message = 'Recent successful run.';
 
-            if (!$lastSuccess || $lastSuccess->finished_at?->lt(now()->subMinutes($freshMinutes))) {
+            if (!$lastSuccess || $lastSuccess->finished_at->lt($now->copy()->subMinutes($freshMinutes))) {
                 $status = 'warning';
                 $message = "No successful run in the last {$freshMinutes} minutes.";
+            }
+
+            if (
+                $lastRun?->status === 'running'
+                && $lastRun->started_at->lt($now->copy()->subMinutes($freshMinutes))
+            ) {
+                $status = 'warning';
+                $message = "Latest run has been running for more than {$freshMinutes} minutes.";
             }
 
             if ($lastRun?->status === 'failed') {

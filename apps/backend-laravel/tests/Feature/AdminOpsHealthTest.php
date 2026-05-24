@@ -111,6 +111,98 @@ class AdminOpsHealthTest extends TestCase
         );
     }
 
+    public function test_ops_health_ignores_successful_scheduled_task_without_finished_at(): void
+    {
+        $this->travelTo(Carbon::parse('2026-05-24 09:00:00'));
+        $admin = $this->adminUser();
+        ScheduledTaskRun::create([
+            'task' => 'bank_sync_payments',
+            'command' => 'bank:sync-payments',
+            'status' => 'success',
+            'started_at' => now()->subMinute(),
+            'finished_at' => null,
+            'duration_ms' => null,
+            'exit_code' => 0,
+            'output' => 'Started but never finished.',
+        ]);
+
+        $response = $this->actingAs($admin)->get('/admin/ops-health');
+
+        $response->assertOk();
+        $this->assertMatchesRegularExpression(
+            '/<tr>(?:(?!<\/tr>).)*bank_sync_payments(?:(?!<\/tr>).)*warning(?:(?!<\/tr>).)*No successful run in the last 3 minutes\.(?:(?!<\/tr>).)*<\/tr>/s',
+            $response->getContent()
+        );
+    }
+
+    public function test_ops_health_warns_when_latest_scheduled_task_run_is_stuck_running(): void
+    {
+        $this->travelTo(Carbon::parse('2026-05-24 09:00:00'));
+        $admin = $this->adminUser();
+        ScheduledTaskRun::create([
+            'task' => 'provider_actions_work',
+            'command' => 'provider-actions:work --limit=50',
+            'status' => 'success',
+            'started_at' => now()->subMinutes(5),
+            'finished_at' => now()->subMinute(),
+            'duration_ms' => 25,
+            'exit_code' => 0,
+            'output' => 'Provider action jobs processed=0 failed=0.',
+        ]);
+        ScheduledTaskRun::create([
+            'task' => 'provider_actions_work',
+            'command' => 'provider-actions:work --limit=50',
+            'status' => 'running',
+            'started_at' => now()->subMinutes(4),
+            'finished_at' => null,
+            'duration_ms' => null,
+            'exit_code' => null,
+            'output' => null,
+        ]);
+
+        $response = $this->actingAs($admin)->get('/admin/ops-health');
+
+        $response->assertOk();
+        $this->assertMatchesRegularExpression(
+            '/<tr>(?:(?!<\/tr>).)*provider_actions_work(?:(?!<\/tr>).)*warning(?:(?!<\/tr>).)*Latest run has been running for more than 3 minutes\.(?:(?!<\/tr>).)*<\/tr>/s',
+            $response->getContent()
+        );
+    }
+
+    public function test_ops_health_keeps_latest_failed_run_failed_with_recent_success(): void
+    {
+        $this->travelTo(Carbon::parse('2026-05-24 09:00:00'));
+        $admin = $this->adminUser();
+        ScheduledTaskRun::create([
+            'task' => 'provider_actions_work',
+            'command' => 'provider-actions:work --limit=50',
+            'status' => 'success',
+            'started_at' => now()->subMinutes(2),
+            'finished_at' => now()->subMinutes(2),
+            'duration_ms' => 25,
+            'exit_code' => 0,
+            'output' => 'Provider action jobs processed=0 failed=0.',
+        ]);
+        ScheduledTaskRun::create([
+            'task' => 'provider_actions_work',
+            'command' => 'provider-actions:work --limit=50',
+            'status' => 'failed',
+            'started_at' => now()->subMinute(),
+            'finished_at' => now()->subMinute(),
+            'duration_ms' => 10,
+            'exit_code' => 1,
+            'error' => 'Provider exploded.',
+        ]);
+
+        $response = $this->actingAs($admin)->get('/admin/ops-health');
+
+        $response->assertOk();
+        $this->assertMatchesRegularExpression(
+            '/<tr>(?:(?!<\/tr>).)*provider_actions_work(?:(?!<\/tr>).)*failed(?:(?!<\/tr>).)*Provider exploded\.(?:(?!<\/tr>).)*<\/tr>/s',
+            $response->getContent()
+        );
+    }
+
     public function test_admin_dashboard_links_to_ops_health(): void
     {
         $admin = $this->adminUser();
