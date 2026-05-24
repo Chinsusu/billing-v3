@@ -10,6 +10,7 @@ use App\Models\Service;
 use App\Models\User;
 use Database\Seeders\RolesAndPermissionsSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\DB;
 use Tests\TestCase;
 
 class ProvisioningOperationsTest extends TestCase
@@ -139,6 +140,51 @@ class ProvisioningOperationsTest extends TestCase
             ->assertSee($availableAt->toDateTimeString())
             ->assertSee($processedAt->toDateTimeString())
             ->assertSee('provider timeout, waiting for retry');
+    }
+
+    public function test_admin_can_view_provisioning_job_execution_logs(): void
+    {
+        $customer = $this->customerUser();
+        $service = $this->serviceFor($customer);
+        $job = ProvisioningJob::create([
+            'order_id' => $service->order_id,
+            'service_id' => $service->id,
+            'user_id' => $customer->id,
+            'type' => 'provision_service',
+            'status' => 'failed',
+            'attempts' => 1,
+            'idempotency_key' => "service-provision:{$service->id}",
+            'payload' => ['product' => ['code' => $service->product_code]],
+            'last_error' => 'Provider returned HTTP 401.',
+        ]);
+        DB::table('provisioning_execution_logs')->insert([
+            'id' => (string) \Illuminate\Support\Str::uuid(),
+            'provisioning_job_id' => $job->id,
+            'service_id' => $service->id,
+            'provider_account_id' => null,
+            'action' => 'provision_service',
+            'driver' => 'generic_http',
+            'endpoint' => 'https://provider-a.example.test/api/provision',
+            'status' => 'failed',
+            'http_status' => 401,
+            'duration_ms' => 42,
+            'error_code' => 'provider_http_error',
+            'error_message' => 'Provider returned HTTP 401.',
+            'request_payload' => json_encode(['api_key' => '***redacted***', 'product' => ['code' => $service->product_code]]),
+            'response_payload' => json_encode(['message' => 'unauthorized']),
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
+        $admin = $this->adminUser();
+
+        $this->actingAs($admin)
+            ->get("/admin/provisioning-jobs/{$job->id}")
+            ->assertOk()
+            ->assertSee('Execution Logs')
+            ->assertSee('provider_http_error')
+            ->assertSee('https://provider-a.example.test/api/provision')
+            ->assertSee('***redacted***')
+            ->assertDontSee('provider-secret-1234');
     }
 
     private function serviceFor(User $user, array $overrides = []): Service
