@@ -41,12 +41,12 @@
 - Modify: `apps/backend-laravel/resources/views/admin/ops-alert-events/index.blade.php`
 - Create: `apps/backend-laravel/resources/views/admin/ops-alert-events/show.blade.php`
 
-- [ ] Add `show` action loading rule and actor relationships.
-- [ ] Add detail route protected by `provisioning_jobs.view`.
-- [ ] Link event title/reference from index to detail.
-- [ ] Render event metadata, context JSON, delivery state, and existing action forms.
-- [ ] Run targeted test until alert detail checks are GREEN.
-- [ ] Commit alert event detail slice.
+- [x] Add `show` action loading rule and actor relationships.
+- [x] Add detail route protected by `provisioning_jobs.view`.
+- [x] Link event title/reference from index to detail.
+- [x] Render event metadata, context JSON, delivery state, and existing action forms.
+- [x] Run targeted test until alert detail checks are GREEN.
+- [x] Commit alert event detail slice.
 
 ### Task 4: Scheduled Task Run Workbench
 
@@ -58,13 +58,13 @@
 - Create: `apps/backend-laravel/resources/views/admin/scheduled-task-runs/index.blade.php`
 - Create: `apps/backend-laravel/resources/views/admin/scheduled-task-runs/show.blade.php`
 
-- [ ] Add list action with optional `task` and `status` filters.
-- [ ] Add show action for full output/error snippets.
-- [ ] Add routes protected by `provisioning_jobs.view`.
-- [ ] Link ops health task rows to filtered runs and latest run detail.
-- [ ] Add admin dashboard link.
-- [ ] Run targeted test until all workbench checks are GREEN.
-- [ ] Commit scheduled task run workbench slice.
+- [x] Add list action with optional `task` and `status` filters.
+- [x] Add show action for full output/error snippets.
+- [x] Add routes protected by `provisioning_jobs.view`.
+- [x] Link ops health task rows to filtered runs and latest run detail.
+- [x] Add admin dashboard link.
+- [x] Run targeted test until all workbench checks are GREEN.
+- [x] Commit scheduled task run workbench slice.
 
 ### Task 5: Documentation, Verification, PR, Deploy
 
@@ -72,11 +72,11 @@
 - Modify: `README.md`
 - Modify: `docs/superpowers/plans/2026-05-24-sprint-25-ops-incident-workbench.md`
 
-- [ ] Update README with S25 routes.
-- [ ] Push branch and check it out on `/opt/billing`.
-- [ ] Run Laravel Pint and full Laravel tests on `/opt/billing`.
-- [ ] Run Go checks on `/opt/billing`.
-- [ ] Run Docker Compose config/build and secret scan.
-- [ ] Verify `/admin/scheduled-task-runs`, `/admin/ops-alert-events/{missing}`, and `/up` smoke behavior.
-- [ ] Mark verification steps complete in this plan, commit, and push.
+- [x] Update README with S25 routes.
+- [x] Push branch and check it out on `/opt/billing`.
+- [x] Run Laravel Pint and full Laravel tests on `/opt/billing`.
+- [x] Run Go checks on `/opt/billing`.
+- [x] Run Docker Compose config/build and secret scan.
+- [x] Verify `/admin/scheduled-task-runs`, `/admin/ops-alert-events/{missing}`, and `/up` smoke behavior.
+- [x] Mark verification steps complete in this plan, commit, and push.
 - [ ] Open PR to `develop`, wait for CI, merge, delete feature branch, and deploy `/opt/billing`.

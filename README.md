@@ -239,6 +239,16 @@ Routes:
 
 Customers can request immediate or period-end cancellation for active services. Local services are cancelled immediately; provider-backed services queue an idempotent provider cancel action and keep the service active until the provider action succeeds. Cancellation requests are audited in `service_cancellations`. Admins with `wallets.adjust` can credit service refunds from the service runbook, recorded in ledger entries with `source_type=service_refund`.
 
+## Sprint 25 Ops Incident Workbench
+
+Routes:
+
+- `GET /admin/ops-alert-events/{opsAlertEvent}`
+- `GET /admin/scheduled-task-runs`
+- `GET /admin/scheduled-task-runs/{scheduledTaskRun}`
+
+Admins can drill from ops alert event rows into event details with rule, delivery, actor, and context metadata. Ops health now links each scheduled task to its run history and latest run detail, while scheduled task run pages expose stored command output/error snippets for incident triage.
+
 ## Sprint 8 Shared Postgres Runtime
 
 The dev Compose runtime runs Laravel and the worker against the same Postgres database:
