@@ -17,6 +17,7 @@ class ScheduledTaskRegistry
             'service_cancellations_process_scheduled' => 'service-cancellations:process-scheduled --limit=50',
             'provider_actions_recover_stuck' => 'provider-actions:recover-stuck',
             'ops_alerts_evaluate' => 'ops-alerts:evaluate',
+            'notifications_send' => 'notifications:send --limit=50',
         ];
     }
 

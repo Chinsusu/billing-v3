@@ -17,6 +17,7 @@ class OpsHealthSnapshot
         'services_expire' => 15,
         'service_cancellations_process_scheduled' => 15,
         'provider_actions_recover_stuck' => 15,
+        'notifications_send' => 3,
     ];
 
     public function data(): array

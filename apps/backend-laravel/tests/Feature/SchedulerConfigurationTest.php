@@ -14,6 +14,7 @@ class SchedulerConfigurationTest extends TestCase
             ->expectsOutputToContain('scheduled-tasks:run services_expire')
             ->expectsOutputToContain('scheduled-tasks:run service_cancellations_process_scheduled')
             ->expectsOutputToContain('scheduled-tasks:run provider_actions_recover_stuck')
+            ->expectsOutputToContain('scheduled-tasks:run notifications_send')
             ->assertExitCode(0);
     }
 
@@ -27,6 +28,18 @@ class SchedulerConfigurationTest extends TestCase
         $this->assertStringContainsString('php artisan schedule:work', $scheduler);
         $this->assertMatchesRegularExpression('/depends_on:.*backend:\s+condition: service_healthy/s', $scheduler);
         $this->assertMatchesRegularExpression('/depends_on:.*postgres:\s+condition: service_healthy/s', $scheduler);
+    }
+
+    public function test_compose_defines_https_proxy_service(): void
+    {
+        $compose = $this->readComposeFile();
+
+        $proxy = $this->composeServiceBlock($compose, 'proxy');
+
+        $this->assertStringContainsString('container_name: billing_v3_proxy', $proxy);
+        $this->assertStringContainsString('"443:443"', $proxy);
+        $this->assertStringContainsString('./caddy/Caddyfile:/etc/caddy/Caddyfile:ro', $proxy);
+        $this->assertMatchesRegularExpression('/depends_on:.*backend:\s+condition: service_healthy/s', $proxy);
     }
 
     private function readComposeFile(): string

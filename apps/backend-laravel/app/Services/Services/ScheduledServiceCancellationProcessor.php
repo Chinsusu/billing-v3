@@ -5,6 +5,7 @@ namespace App\Services\Services;
 use App\Models\ProviderActionJob;
 use App\Models\Service;
 use App\Models\ServiceCancellation;
+use App\Services\Notifications\NotificationOutbox;
 use App\Services\Provisioning\ProviderActionJobDispatcher;
 use App\Services\Provisioning\ProviderServiceActionService;
 use Illuminate\Support\Facades\DB;
@@ -15,6 +16,7 @@ class ScheduledServiceCancellationProcessor
     public function __construct(
         private readonly ProviderServiceActionService $providerActions,
         private readonly ProviderActionJobDispatcher $providerActionJobs,
+        private readonly NotificationOutbox $notifications,
     ) {}
 
     /**
@@ -140,5 +142,24 @@ class ScheduledServiceCancellationProcessor
             'completed_at' => now(),
             'meta' => $cancellationMeta,
         ])->save();
+
+        $user = $cancellation->user ?? $service->user;
+        if ($user !== null) {
+            $this->notifications->enqueue(
+                $user,
+                'service_cancellation_completed',
+                $user->email,
+                'Service cancellation completed',
+                "Your service {$service->product_name} was cancelled.",
+                'service',
+                $service->id,
+                "service-cancellation-completed:{$cancellation->id}",
+                [
+                    'service_id' => $service->id,
+                    'service_cancellation_id' => $cancellation->id,
+                    'completed_by' => 'scheduled_processor',
+                ],
+            );
+        }
     }
 }

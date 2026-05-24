@@ -5,6 +5,7 @@ namespace App\Services\Finance;
 use App\Models\LedgerEntry;
 use App\Models\PaymentEvent;
 use App\Models\User;
+use App\Services\Notifications\NotificationOutbox;
 use Illuminate\Support\Facades\DB;
 use InvalidArgumentException;
 
@@ -12,7 +13,10 @@ class PaymentEventReconciliationService
 {
     private const RECONCILABLE_STATUSES = ['unmatched', 'rejected', 'expired'];
 
-    public function __construct(private readonly WalletService $wallets) {}
+    public function __construct(
+        private readonly WalletService $wallets,
+        private readonly NotificationOutbox $notifications,
+    ) {}
 
     public function reconcile(PaymentEvent $event, User $customer, ?User $actor): LedgerEntry
     {
@@ -64,6 +68,23 @@ class PaymentEventReconciliationService
                 'wallet_id' => $wallet->id,
                 'payload' => $payload,
             ]);
+
+            $this->notifications->enqueue(
+                $customer,
+                'wallet_credited',
+                $customer->email,
+                'Wallet credited',
+                "Your wallet was credited {$event->amount} {$currency} from payment reconciliation {$event->reference}.",
+                'payment_event',
+                $event->id,
+                "wallet-credited:payment-event:{$event->id}",
+                [
+                    'payment_event_id' => $event->id,
+                    'ledger_entry_id' => $ledger->id,
+                    'amount' => $event->amount,
+                    'currency' => $currency,
+                ],
+            );
 
             return $ledger;
         });

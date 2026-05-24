@@ -6,6 +6,8 @@ use App\Http\Controllers\Admin\BankIntegrationTestController;
 use App\Http\Controllers\Admin\CustomerController;
 use App\Http\Controllers\Admin\CustomerWalletAdjustmentController;
 use App\Http\Controllers\Admin\InvoiceController as AdminInvoiceController;
+use App\Http\Controllers\Admin\NotificationEventController;
+use App\Http\Controllers\Admin\NotificationEventRetryController;
 use App\Http\Controllers\Admin\OpsAlertEventAcknowledgeController;
 use App\Http\Controllers\Admin\OpsAlertEventController;
 use App\Http\Controllers\Admin\OpsAlertEventResolveController;
@@ -115,6 +117,9 @@ Route::middleware('auth')->group(function (): void {
         Route::post('/services/{service}/cancel-provider', ServiceProviderCancelController::class)->middleware('permission:services.view')->name('services.cancel-provider');
         Route::get('/provider-action-jobs', [ProviderActionJobController::class, 'index'])->middleware('permission:provisioning_jobs.view')->name('provider-action-jobs.index');
         Route::post('/provider-action-jobs/{providerActionJob}/retry', ProviderActionJobRetryController::class)->middleware('permission:provisioning_jobs.view')->name('provider-action-jobs.retry');
+        Route::get('/notification-events', [NotificationEventController::class, 'index'])->middleware('permission:notifications.manage')->name('notification-events.index');
+        Route::get('/notification-events/{notificationEvent}', [NotificationEventController::class, 'show'])->middleware('permission:notifications.manage')->name('notification-events.show');
+        Route::post('/notification-events/{notificationEvent}/retry', NotificationEventRetryController::class)->middleware('permission:notifications.manage')->name('notification-events.retry');
         Route::get('/ops-health', OpsHealthController::class)->middleware('permission:provisioning_jobs.view')->name('ops-health');
         Route::get('/scheduled-task-runs', [ScheduledTaskRunController::class, 'index'])->middleware('permission:provisioning_jobs.view')->name('scheduled-task-runs.index');
         Route::get('/scheduled-task-runs/{scheduledTaskRun}', [ScheduledTaskRunController::class, 'show'])->middleware('permission:provisioning_jobs.view')->name('scheduled-task-runs.show');

@@ -95,12 +95,22 @@ class ProviderCallbackIntakeTest extends TestCase
         $this->assertSame('valid', $event->signature_status);
         $this->assertSame('processed', $event->processing_status);
         $this->assertSame('***redacted***', json_decode($event->payload, true, 512, JSON_THROW_ON_ERROR)['secret_token']);
+        $this->assertDatabaseHas('notification_events', [
+            'user_id' => $customer->id,
+            'type' => 'service_cancellation_completed',
+            'recipient_email' => $customer->email,
+            'source_type' => 'service',
+            'source_id' => $service->id,
+            'idempotency_key' => "service-cancellation-completed:{$cancellation->id}",
+            'status' => 'pending',
+        ]);
 
         $this->signedProviderCallback($account, $payload)
             ->assertOk()
             ->assertJsonPath('status', 'duplicate');
 
         $this->assertSame(1, DB::table('provider_callback_events')->count());
+        $this->assertSame(1, DB::table('notification_events')->where('idempotency_key', "service-cancellation-completed:{$cancellation->id}")->count());
         $this->assertSame('cancelled', $service->refresh()->status);
     }
 

@@ -12,6 +12,7 @@ use App\Services\Scheduler\ScheduledTaskRegistry;
 use Database\Seeders\RolesAndPermissionsSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
 use Tests\TestCase;
 
@@ -180,6 +181,15 @@ class PaymentIntentExpiryReconciliationTest extends TestCase
         $this->assertSame($wallet->id, $event->wallet_id);
         $this->assertSame($admin->id, $event->payload['reconciliation']['actor_id']);
         $this->assertSame($customer->id, $event->payload['reconciliation']['user_id']);
+        $this->assertDatabaseHas('notification_events', [
+            'user_id' => $customer->id,
+            'type' => 'wallet_credited',
+            'recipient_email' => $customer->email,
+            'source_type' => 'payment_event',
+            'source_id' => $event->id,
+            'idempotency_key' => "wallet-credited:payment-event:{$event->id}",
+            'status' => 'pending',
+        ]);
 
         $this->actingAs($admin)
             ->post("/admin/payment-events/{$event->id}/reconcile-wallet", [
@@ -189,6 +199,7 @@ class PaymentIntentExpiryReconciliationTest extends TestCase
 
         $this->assertSame(175000, $wallet->refresh()->balance_amount);
         $this->assertSame(1, LedgerEntry::count());
+        $this->assertSame(1, DB::table('notification_events')->where('idempotency_key', "wallet-credited:payment-event:{$event->id}")->count());
     }
 
     public function test_reconciliation_requires_wallet_adjust_permission_and_rejects_accepted_events(): void

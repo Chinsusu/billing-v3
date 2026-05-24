@@ -42,3 +42,8 @@ Schedule::command('scheduled-tasks:run ops_alerts_evaluate')
     ->everyMinute()
     ->withoutOverlapping()
     ->name('ops_alerts_evaluate');
+
+Schedule::command('scheduled-tasks:run notifications_send')
+    ->everyMinute()
+    ->withoutOverlapping()
+    ->name('notifications_send');

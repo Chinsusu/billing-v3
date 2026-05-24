@@ -14,6 +14,7 @@ use App\Services\Scheduler\ScheduledTaskRegistry;
 use Database\Seeders\RolesAndPermissionsSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Str;
 use Tests\TestCase;
@@ -62,10 +63,20 @@ class ServiceScheduledCancellationExecutionTest extends TestCase
         $this->assertNotNull($cancellation->completed_at);
         $this->assertSame('2026-05-24T09:00:00.000000Z', $cancellation->meta['cancelled_at']);
         $this->assertSame(0, ProviderActionJob::count());
+        $this->assertDatabaseHas('notification_events', [
+            'user_id' => $customer->id,
+            'type' => 'service_cancellation_completed',
+            'recipient_email' => 'scheduled-local@example.test',
+            'source_type' => 'service',
+            'source_id' => $service->id,
+            'idempotency_key' => "service-cancellation-completed:{$cancellation->id}",
+            'status' => 'pending',
+        ]);
 
         $this->artisan('service-cancellations:process-scheduled')
             ->expectsOutput('Scheduled cancellations completed=0 queued=0 skipped=0 failed=0.')
             ->assertExitCode(0);
+        $this->assertSame(1, DB::table('notification_events')->where('idempotency_key', "service-cancellation-completed:{$cancellation->id}")->count());
     }
 
     public function test_future_period_end_cancellation_is_not_processed(): void
@@ -152,6 +163,16 @@ class ServiceScheduledCancellationExecutionTest extends TestCase
         $this->assertSame($job->id, $cancellation->provider_action_job_id);
         $this->assertSame($job->id, $cancellation->meta['provider_action_job_id']);
         $this->assertSame('2026-05-24T09:00:00.000000Z', $cancellation->meta['provider_completed_at']);
+        $this->assertDatabaseHas('notification_events', [
+            'user_id' => $customer->id,
+            'type' => 'service_cancellation_completed',
+            'recipient_email' => 'scheduled-provider-complete@example.test',
+            'source_type' => 'service',
+            'source_id' => $service->id,
+            'idempotency_key' => "service-cancellation-completed:{$cancellation->id}",
+            'status' => 'pending',
+        ]);
+        $this->assertSame(1, DB::table('notification_events')->where('idempotency_key', "service-cancellation-completed:{$cancellation->id}")->count());
     }
 
     public function test_scheduled_cancellation_processor_is_registered_with_scheduler(): void
