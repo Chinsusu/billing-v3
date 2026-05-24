@@ -11,6 +11,16 @@ use Illuminate\View\View;
 
 class WalletTopUpController extends Controller
 {
+    public function index(Request $request): View
+    {
+        return view('wallet.top-ups.index', [
+            'paymentIntents' => PaymentIntent::where('user_id', $request->user()->id)
+                ->where('type', 'wallet_topup')
+                ->latest()
+                ->paginate(20),
+        ]);
+    }
+
     public function store(Request $request, PaymentIntentService $paymentIntentService): RedirectResponse
     {
         $validated = $request->validate([

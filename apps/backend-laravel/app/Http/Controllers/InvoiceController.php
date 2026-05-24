@@ -11,6 +11,13 @@ use Illuminate\View\View;
 
 class InvoiceController extends Controller
 {
+    public function index(Request $request): View
+    {
+        return view('invoices.index', [
+            'invoices' => Invoice::where('user_id', $request->user()->id)->latest()->paginate(20),
+        ]);
+    }
+
     public function show(Request $request, Invoice $invoice): View
     {
         abort_unless($invoice->user_id === $request->user()->id, 404);
