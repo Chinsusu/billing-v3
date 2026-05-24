@@ -3,6 +3,7 @@
 use App\Console\Commands\ExpireServicesCommand;
 use App\Console\Commands\SmokeProvisioningRuntimeCommand;
 use App\Console\Commands\SyncPrivateBankPaymentsCommand;
+use App\Console\Commands\WorkProviderActionJobsCommand;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
@@ -20,6 +21,7 @@ return Application::configure(basePath: dirname(__DIR__))
         ExpireServicesCommand::class,
         SmokeProvisioningRuntimeCommand::class,
         SyncPrivateBankPaymentsCommand::class,
+        WorkProviderActionJobsCommand::class,
     ])
     ->withMiddleware(function (Middleware $middleware): void {
         $middleware->alias([
