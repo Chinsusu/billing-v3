@@ -14,6 +14,7 @@ use App\Models\Wallet;
 use Database\Seeders\RolesAndPermissionsSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
 use Tests\TestCase;
 
 class ServiceCancellationFlowTest extends TestCase
@@ -157,7 +158,7 @@ class ServiceCancellationFlowTest extends TestCase
     private function serviceFor(User $user, array $overrides = []): Service
     {
         $product = Product::factory()->create([
-            'code' => 'cancel-proxy-30d',
+            'code' => 'cancel-proxy-'.Str::lower(Str::random(8)),
             'name' => 'Cancel Proxy',
             'type' => 'proxy',
             'status' => 'active',
