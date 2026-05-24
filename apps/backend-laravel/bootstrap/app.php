@@ -41,6 +41,7 @@ return Application::configure(basePath: dirname(__DIR__))
         ]);
         $middleware->validateCsrfTokens(except: [
             'webhooks/bank/sandbox',
+            'webhooks/providers/*',
             'internal/provisioning/jobs/*/execute',
         ]);
     })

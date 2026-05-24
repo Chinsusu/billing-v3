@@ -61,6 +61,11 @@ class Service extends Model
         return $this->hasMany(ProviderActionJob::class);
     }
 
+    public function providerCallbackEvents(): HasMany
+    {
+        return $this->hasMany(ProviderCallbackEvent::class);
+    }
+
     public function cancellations(): HasMany
     {
         return $this->hasMany(ServiceCancellation::class);

@@ -35,6 +35,7 @@ use App\Http\Controllers\InvoiceController;
 use App\Http\Controllers\OrderController;
 use App\Http\Controllers\ProductCatalogController;
 use App\Http\Controllers\ProductOrderController;
+use App\Http\Controllers\ProviderCallbackController;
 use App\Http\Controllers\ServiceCancellationController;
 use App\Http\Controllers\ServiceController;
 use App\Http\Controllers\ServiceRenewalController;
@@ -46,6 +47,7 @@ use Illuminate\Support\Facades\Route;
 Route::get('/', fn () => redirect('/products'));
 Route::get('/products', ProductCatalogController::class)->name('products.index');
 Route::post('/webhooks/bank/sandbox', BankWebhookSandboxController::class)->name('webhooks.bank-sandbox');
+Route::post('/webhooks/providers/{provisioningProviderAccount}', ProviderCallbackController::class)->name('webhooks.providers');
 Route::post('/internal/provisioning/jobs/{job}/execute', ProvisioningJobExecutionController::class)
     ->withoutMiddleware([ValidateCsrfToken::class])
     ->name('internal.provisioning-jobs.execute');

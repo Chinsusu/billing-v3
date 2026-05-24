@@ -25,6 +25,7 @@ class ServiceController extends Controller
                 'product',
                 'provisioningJobs' => fn ($query) => $query->latest(),
                 'providerActionJobs' => fn ($query) => $query->latest(),
+                'providerCallbackEvents' => fn ($query) => $query->latest(),
                 'provisioningExecutionLogs' => fn ($query) => $query->latest(),
                 'cancellations' => fn ($query) => $query->latest(),
             ]),
