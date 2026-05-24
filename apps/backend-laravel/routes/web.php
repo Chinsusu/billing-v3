@@ -98,6 +98,7 @@ Route::middleware('auth')->group(function (): void {
         Route::post('/provisioning-provider-accounts/{provisioningProviderAccount}/test', ProvisioningProviderAccountTestController::class)->middleware('permission:provisioning_provider_accounts.manage')->name('provisioning-provider-accounts.test');
         Route::get('/orders', [AdminOrderController::class, 'index'])->middleware('permission:orders.view')->name('orders.index');
         Route::get('/services', [AdminServiceController::class, 'index'])->middleware('permission:services.view')->name('services.index');
+        Route::get('/services/{service}', [AdminServiceController::class, 'show'])->middleware('permission:services.view')->name('services.show');
         Route::post('/services/{service}/sync-provider', ServiceProviderSyncController::class)->middleware('permission:services.view')->name('services.sync-provider');
         Route::post('/services/{service}/cancel-provider', ServiceProviderCancelController::class)->middleware('permission:services.view')->name('services.cancel-provider');
         Route::get('/provider-action-jobs', [ProviderActionJobController::class, 'index'])->middleware('permission:provisioning_jobs.view')->name('provider-action-jobs.index');

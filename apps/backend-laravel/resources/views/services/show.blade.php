@@ -20,6 +20,46 @@
 </div>
 
 <div class="panel">
+    <h2>Provider Action History</h2>
+    <table>
+        <thead><tr><th>Action</th><th>Status</th><th>Attempts</th><th>Processed</th><th>Error</th></tr></thead>
+        <tbody>
+            @forelse ($service->providerActionJobs as $job)
+                <tr>
+                    <td>{{ $job->action }}</td>
+                    <td>{{ $job->status }}</td>
+                    <td>{{ $job->attempts }}</td>
+                    <td>{{ $job->processed_at?->format('Y-m-d H:i') ?? '-' }}</td>
+                    <td>{{ $job->last_error ?? '-' }}</td>
+                </tr>
+            @empty
+                <tr><td colspan="5" class="muted">No provider actions yet.</td></tr>
+            @endforelse
+        </tbody>
+    </table>
+</div>
+
+<div class="panel">
+    <h2>Provider Execution Summary</h2>
+    <table>
+        <thead><tr><th>Action</th><th>Status</th><th>HTTP</th><th>Duration</th><th>Error</th></tr></thead>
+        <tbody>
+            @forelse ($service->provisioningExecutionLogs as $log)
+                <tr>
+                    <td>{{ $log->action }}</td>
+                    <td>{{ $log->status }}</td>
+                    <td>{{ $log->http_status ?? '-' }}</td>
+                    <td>{{ $log->duration_ms }}ms</td>
+                    <td>{{ $log->error_code ?? $log->error_message ?? '-' }}</td>
+                </tr>
+            @empty
+                <tr><td colspan="5" class="muted">No provider execution logs yet.</td></tr>
+            @endforelse
+        </tbody>
+    </table>
+</div>
+
+<div class="panel">
     <h2>Provisioning History</h2>
     <table>
         <thead><tr><th>Type</th><th>Status</th><th>Attempts</th><th>Processed</th><th>Error</th></tr></thead>

@@ -9,7 +9,7 @@
             @forelse ($services as $service)
                 <tr>
                     <td>{{ $service->user->email }}</td>
-                    <td>{{ $service->product_name }}</td>
+                    <td><a href="/admin/services/{{ $service->id }}">{{ $service->product_name }}</a></td>
                     <td>{{ $service->product_type }}</td>
                     <td>{{ $service->status }}</td>
                     <td>{{ $service->expires_at?->format('Y-m-d') }}</td>
