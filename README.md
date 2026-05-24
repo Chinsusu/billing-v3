@@ -154,7 +154,24 @@ Products can define provider action paths for renew, suspend, cancel, and sync. 
 
 Provider-backed renewal calls the configured renew endpoint before wallet debit. If the provider returns an expiry at the configured lifecycle `expires_at` JSON path, that provider date becomes the local service expiry; if provider renew fails, the wallet is not debited and local expiry is unchanged.
 
-The expiry command calls the configured suspend endpoint before marking an overdue active service as `expired`. If provider suspend fails, the service remains active and the command returns a non-zero exit code. Admins can sync a service from the provider with the admin services table; sync updates local status and expiry when the provider response includes them. All provider lifecycle actions write redacted `provisioning_execution_logs` rows.
+Sprint 13 moves suspend, cancel, and sync to a durable provider action queue. Renew remains synchronous so wallet debit still happens only after provider renew succeeds. All provider lifecycle HTTP attempts write redacted `provisioning_execution_logs` rows.
+
+## Sprint 13 Provider Action Queue
+
+Routes and commands:
+
+- `POST /admin/services/{service}/sync-provider`
+- `POST /admin/services/{service}/cancel-provider`
+- `GET /admin/provider-action-jobs`
+- `POST /admin/provider-action-jobs/{providerActionJob}/retry`
+- `php artisan provider-actions:work --once`
+- `php artisan provider-actions:work --limit=50`
+- `php artisan provider-actions:recover-stuck`
+- `php artisan services:expire`
+
+Overdue provider-backed services with a configured suspend path are queued as `suspend` provider action jobs and remain `active` until the worker successfully suspends them. Services without a suspend path still expire locally.
+
+The provider action worker processes `suspend`, `cancel`, and `sync` jobs through Laravel, where encrypted provider secrets are available. Failed attempts are requeued with backoff until `max_attempts`, then marked `failed`. Stale `processing` jobs can be recovered with `provider-actions:recover-stuck`. Admins can inspect provider action jobs and retry failed jobs from `/admin/provider-action-jobs`.
 
 ## Sprint 8 Shared Postgres Runtime
 

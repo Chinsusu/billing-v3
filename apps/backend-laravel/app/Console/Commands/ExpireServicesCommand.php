@@ -3,9 +3,9 @@
 namespace App\Console\Commands;
 
 use App\Models\Service;
+use App\Services\Provisioning\ProviderActionJobDispatcher;
 use App\Services\Provisioning\ProviderServiceActionService;
 use Illuminate\Console\Command;
-use RuntimeException;
 
 class ExpireServicesCommand extends Command
 {
@@ -13,10 +13,10 @@ class ExpireServicesCommand extends Command
 
     protected $description = 'Mark overdue active services as expired.';
 
-    public function handle(ProviderServiceActionService $providerActions): int
+    public function handle(ProviderServiceActionService $providerActions, ProviderActionJobDispatcher $providerActionJobs): int
     {
         $count = 0;
-        $failed = 0;
+        $queued = 0;
 
         Service::query()
             ->with('product.providerAccount')
@@ -24,18 +24,15 @@ class ExpireServicesCommand extends Command
             ->whereNotNull('expires_at')
             ->where('expires_at', '<=', now())
             ->get()
-            ->each(function (Service $service) use (&$count, &$failed, $providerActions): void {
+            ->each(function (Service $service) use (&$count, &$queued, $providerActions, $providerActionJobs): void {
                 if ($providerActions->hasConfiguredAction($service, 'suspend')) {
-                    try {
-                        $providerActions->execute($service, 'suspend', "service-suspend:{$service->id}:".now()->toISOString(), [
-                            'expires_at' => $service->expires_at?->toISOString(),
-                            'expired_at' => now()->toISOString(),
-                        ]);
-                    } catch (RuntimeException) {
-                        $failed++;
+                    $providerActionJobs->enqueue($service, 'suspend', "service-suspend:{$service->id}:".now()->toISOString(), [
+                        'expires_at' => $service->expires_at?->toISOString(),
+                        'expired_at' => now()->toISOString(),
+                    ]);
+                    $queued++;
 
-                        return;
-                    }
+                    return;
                 }
 
                 $meta = $service->meta ?? [];
@@ -49,8 +46,8 @@ class ExpireServicesCommand extends Command
                 $count++;
             });
 
-        $this->info("Expired {$count} services. Failed {$failed} services.");
+        $this->info("Expired {$count} services. Queued {$queued} provider action jobs.");
 
-        return $failed > 0 ? self::FAILURE : self::SUCCESS;
+        return self::SUCCESS;
     }
 }
