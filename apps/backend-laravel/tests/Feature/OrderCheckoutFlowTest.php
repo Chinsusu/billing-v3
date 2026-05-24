@@ -11,6 +11,8 @@ use App\Models\User;
 use App\Models\Wallet;
 use Database\Seeders\RolesAndPermissionsSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
 use Tests\TestCase;
 
 class OrderCheckoutFlowTest extends TestCase
@@ -76,6 +78,62 @@ class OrderCheckoutFlowTest extends TestCase
             ->assertOk()
             ->assertSee('Vietnam Proxy 30 Days')
             ->assertSee('pending_provision');
+    }
+
+    public function test_checkout_snapshots_product_provider_mapping_into_provisioning_job(): void
+    {
+        $customer = $this->customerUser();
+        Wallet::factory()->for($customer)->create(['balance_amount' => 300000]);
+        $accountId = (string) Str::uuid();
+        DB::table('provisioning_provider_accounts')->insert([
+            'id' => $accountId,
+            'slug' => 'provider-a-main',
+            'name' => 'Provider A Main',
+            'driver' => 'generic_http',
+            'base_url' => 'https://provider-a.example.test',
+            'provision_path' => '/api/provision',
+            'auth_type' => 'bearer',
+            'auth_header_name' => null,
+            'api_key' => encrypt('provider-secret-1234'),
+            'api_key_last_four' => '1234',
+            'enabled' => true,
+            'timeout_seconds' => 15,
+            'request_template' => '{}',
+            'response_external_id_path' => 'external_id',
+            'response_status_path' => 'status',
+            'response_config_path' => null,
+            'created_by_id' => null,
+            'updated_by_id' => null,
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
+        $product = Product::factory()->create([
+            'name' => 'Provider A VPS 30 Days',
+            'code' => 'vps-provider-a-30d',
+            'type' => 'vps',
+            'status' => 'active',
+            'price_amount' => 199000,
+            'currency' => 'VND',
+            'duration_days' => 30,
+            'provider_account_id' => $accountId,
+            'provider_plan_code' => 'A2',
+            'provider_region' => 'sgp1',
+            'provider_provision_path' => '/api/accounts/main/provision',
+            'provider_options' => ['size' => 'small', 'backups' => true],
+        ]);
+
+        $this->actingAs($customer)->post("/products/{$product->id}/order");
+
+        $job = ProvisioningJob::firstOrFail();
+        $this->assertSame([
+            'account_id' => $accountId,
+            'account_slug' => 'provider-a-main',
+            'driver' => 'generic_http',
+            'plan_code' => 'A2',
+            'region' => 'sgp1',
+            'provision_path' => '/api/accounts/main/provision',
+            'options' => ['size' => 'small', 'backups' => true],
+        ], $job->payload['product']['provider']);
     }
 
     public function test_checkout_with_insufficient_wallet_balance_rolls_back(): void
