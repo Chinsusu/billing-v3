@@ -28,7 +28,7 @@ The invoice detail page shows:
 - Customer email with a link to admin customer detail.
 - Invoice line JSON/table data.
 - Related payment events.
-- Related ledger entries where `source_type` is `invoice_payment` and `source_id` is the invoice id.
+- Related ledger entries where `source_type` is `invoice` and `source_id` is the invoice id.
 
 ## Admin Order Detail
 
@@ -38,7 +38,7 @@ The order detail page shows:
 - Order items and product snapshots.
 - Services created by the order with links to service runbooks.
 - Provisioning jobs created for the order with links to provisioning job detail.
-- Ledger entries where `source_type` is `order_payment` and `source_id` is the order id.
+- Ledger entries where `source_type` is `order` and `source_id` is the order id.
 
 ## Admin Payment Event Detail
 
