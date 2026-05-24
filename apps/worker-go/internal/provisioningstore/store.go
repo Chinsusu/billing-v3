@@ -128,7 +128,7 @@ func (s *Store) MarkProcessed(ctx context.Context, job Job, result Result) error
 		return err
 	}
 
-	if _, err := tx.ExecContext(ctx, `insert into notification_events (id, user_id, channel, type, recipient_email, subject, body_text, source_type, source_id, idempotency_key, status, attempts, max_attempts, available_at, payload, created_at, updated_at) select $1, services.user_id, 'email', 'service_provisioned', users.email, $2, $3, 'service', services.id, $4, 'pending', 0, 3, now(), $5, now(), now() from services join users on users.id = services.user_id where services.id = $6 on conflict (idempotency_key) do nothing`, notificationID, "Service provisioned", fmt.Sprintf("Your service is active. External ID: %s.", result.ExternalID), fmt.Sprintf("service-provisioned:%s", job.ServiceID), string(notificationPayload), job.ServiceID); err != nil {
+	if _, err := tx.ExecContext(ctx, `insert into notification_events (id, user_id, channel, type, recipient_email, subject, body_text, source_type, source_id, idempotency_key, status, attempts, max_attempts, available_at, payload, created_at, updated_at) select $1, services.user_id, 'email', 'service_provisioned', users.email, $2, $3, 'service', services.id::text, $4, 'pending', 0, 3, now(), $5, now(), now() from services join users on users.id = services.user_id where services.id = $6 on conflict (idempotency_key) do nothing`, notificationID, "Service provisioned", fmt.Sprintf("Your service is active. External ID: %s.", result.ExternalID), fmt.Sprintf("service-provisioned:%s", job.ServiceID), string(notificationPayload), job.ServiceID); err != nil {
 		_ = tx.Rollback()
 
 		return err

@@ -6,6 +6,7 @@ use App\Console\Commands\ExpireServicesCommand;
 use App\Console\Commands\ProcessScheduledServiceCancellationsCommand;
 use App\Console\Commands\RecoverStuckProviderActionJobsCommand;
 use App\Console\Commands\RunScheduledTaskCommand;
+use App\Console\Commands\SendNotificationsCommand;
 use App\Console\Commands\SmokeProvisioningRuntimeCommand;
 use App\Console\Commands\SyncPrivateBankPaymentsCommand;
 use App\Console\Commands\WorkProviderActionJobsCommand;
@@ -29,6 +30,7 @@ return Application::configure(basePath: dirname(__DIR__))
         ProcessScheduledServiceCancellationsCommand::class,
         RecoverStuckProviderActionJobsCommand::class,
         RunScheduledTaskCommand::class,
+        SendNotificationsCommand::class,
         SmokeProvisioningRuntimeCommand::class,
         SyncPrivateBankPaymentsCommand::class,
         WorkProviderActionJobsCommand::class,

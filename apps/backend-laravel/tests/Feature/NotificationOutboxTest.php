@@ -152,6 +152,12 @@ class NotificationOutboxTest extends TestCase
         ]);
 
         $this->actingAs($admin)
+            ->get('/admin')
+            ->assertOk()
+            ->assertSee('Notification Events')
+            ->assertSee('/admin/notification-events', false);
+
+        $this->actingAs($admin)
             ->get('/admin/notification-events?status=failed&type=provider_action_failed')
             ->assertOk()
             ->assertSee('provider_action_failed')
