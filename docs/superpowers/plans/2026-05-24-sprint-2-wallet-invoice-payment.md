@@ -23,11 +23,11 @@
 - Create: `apps/backend-laravel/database/factories/InvoiceFactory.php`
 - Create: `apps/backend-laravel/database/factories/PaymentIntentFactory.php`
 
-- [ ] Write failing model-backed feature tests that expect wallet, invoice, payment intent, payment event, and ledger tables.
-- [ ] Add the finance migration with UUID primary keys, foreign keys, unique idempotency keys, and useful indexes.
-- [ ] Add models with fillable attributes, casts, UUID support, and relationships.
-- [ ] Add factories used by feature tests.
-- [ ] Run the finance tests and verify the schema/model section passes.
+- [x] Write failing model-backed feature tests that expect wallet, invoice, payment intent, payment event, and ledger tables.
+- [x] Add the finance migration with UUID primary keys, foreign keys, unique idempotency keys, and useful indexes.
+- [x] Add models with fillable attributes, casts, UUID support, and relationships.
+- [x] Add factories used by feature tests.
+- [x] Run the finance tests and verify the schema/model section passes.
 
 ### Task 2: Wallet Ledger Service
 
@@ -37,11 +37,11 @@
 - Test: `apps/backend-laravel/tests/Feature/WalletTopUpFlowTest.php`
 - Test: `apps/backend-laravel/tests/Feature/InvoicePaymentFlowTest.php`
 
-- [ ] Write failing tests for wallet credit idempotency, wallet debit, and insufficient balance.
-- [ ] Implement `WalletService::walletFor()`, `credit()`, and `debit()` with database transactions and row locks.
-- [ ] Make debit throw `InsufficientWalletBalance` when balance is too low.
-- [ ] Ensure duplicate idempotency keys return the existing ledger entry without changing balance.
-- [ ] Run targeted wallet/invoice tests and verify they pass.
+- [x] Write failing tests for wallet credit idempotency, wallet debit, and insufficient balance.
+- [x] Implement `WalletService::walletFor()`, `credit()`, and `debit()` with database transactions and row locks.
+- [x] Make debit throw `InsufficientWalletBalance` when balance is too low.
+- [x] Ensure duplicate idempotency keys return the existing ledger entry without changing balance.
+- [x] Run targeted wallet/invoice tests and verify they pass.
 
 ### Task 3: Payment Intents And Bank Webhook Sandbox
 
@@ -54,12 +54,12 @@
 - Modify: `apps/backend-laravel/routes/web.php`
 - Test: `apps/backend-laravel/tests/Feature/WalletTopUpFlowTest.php`
 
-- [ ] Write failing tests for top-up intent creation, valid signed webhook, duplicate webhook, invalid signature, unknown reference, and amount mismatch.
-- [ ] Implement payment intent creation with stable reference and QR payload.
-- [ ] Implement HMAC signature verification using `BANK_SANDBOX_WEBHOOK_SECRET`.
-- [ ] Implement webhook processing statuses: `accepted`, `duplicate`, `unmatched`, and `rejected`.
-- [ ] Wire the public webhook route.
-- [ ] Run targeted wallet top-up tests and verify they pass.
+- [x] Write failing tests for top-up intent creation, valid signed webhook, duplicate webhook, invalid signature, unknown reference, and amount mismatch.
+- [x] Implement payment intent creation with stable reference and QR payload.
+- [x] Implement HMAC signature verification using `BANK_SANDBOX_WEBHOOK_SECRET`.
+- [x] Implement webhook processing statuses: `accepted`, `duplicate`, `unmatched`, and `rejected`.
+- [x] Wire the public webhook route.
+- [x] Run targeted wallet top-up tests and verify they pass.
 
 ### Task 4: Customer Wallet And Invoice Flows
 
@@ -76,11 +76,11 @@
 - Modify: `apps/backend-laravel/routes/web.php`
 - Test: `apps/backend-laravel/tests/Feature/InvoicePaymentFlowTest.php`
 
-- [ ] Write failing tests for customer wallet page, own invoice view, paying invoice with wallet, insufficient balance, and invoice ownership protection.
-- [ ] Implement controllers and routes for `/wallet`, `/wallet/top-ups`, `/wallet/top-ups/{paymentIntent}`, `/invoices/{invoice}`, and `/invoices/{invoice}/pay`.
-- [ ] Implement invoice payment service using wallet debit and idempotency key `invoice-payment:{invoice_id}`.
-- [ ] Add Blade views with wallet balance, ledger rows, invoice details, and top-up QR payload.
-- [ ] Run targeted customer flow tests and verify they pass.
+- [x] Write failing tests for customer wallet page, own invoice view, paying invoice with wallet, insufficient balance, and invoice ownership protection.
+- [x] Implement controllers and routes for `/wallet`, `/wallet/top-ups`, `/wallet/top-ups/{paymentIntent}`, `/invoices/{invoice}`, and `/invoices/{invoice}/pay`.
+- [x] Implement invoice payment service using wallet debit and idempotency key `invoice-payment:{invoice_id}`.
+- [x] Add Blade views with wallet balance, ledger rows, invoice details, and top-up QR payload.
+- [x] Run targeted customer flow tests and verify they pass.
 
 ### Task 5: Admin Finance Views, Seeds, Docs, And Verification
 
@@ -97,13 +97,13 @@
 - Modify: `README.md`
 - Test: `apps/backend-laravel/tests/Feature/AdminFinanceTest.php`
 
-- [ ] Write failing tests for admin invoice creation and payment event visibility.
-- [ ] Add invoice and payment event permissions to roles.
-- [ ] Implement admin controllers, request validation, routes, and views.
-- [ ] Seed a customer wallet and open invoice for the seeded customer.
-- [ ] Update README with Sprint 2 wallet, invoice, webhook, and signature examples.
-- [ ] Run all Laravel tests.
-- [ ] Run Pint.
-- [ ] Run Go worker checks.
-- [ ] Run docker compose config and secret scan.
-- [ ] Commit and push the feature branch.
+- [x] Write failing tests for admin invoice creation and payment event visibility.
+- [x] Add invoice and payment event permissions to roles.
+- [x] Implement admin controllers, request validation, routes, and views.
+- [x] Seed a customer wallet and open invoice for the seeded customer.
+- [x] Update README with Sprint 2 wallet, invoice, webhook, and signature examples.
+- [x] Run all Laravel tests.
+- [x] Run Pint.
+- [x] Run Go worker checks.
+- [x] Run docker compose config and secret scan.
+- [x] Commit and push the feature branch.
