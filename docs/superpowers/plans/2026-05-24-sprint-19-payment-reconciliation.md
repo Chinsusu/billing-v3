@@ -17,20 +17,20 @@
 - Create: `docs/superpowers/plans/2026-05-24-sprint-19-payment-reconciliation.md`
 
 - [x] Save S19 design spec and implementation plan.
-- [ ] Commit docs before production code changes.
+- [x] Commit docs before production code changes.
 
 ### Task 2: RED Tests
 
 **Files:**
 - Create: `apps/backend-laravel/tests/Feature/PaymentIntentExpiryReconciliationTest.php`
 
-- [ ] Add expiry command test for stale, future, and succeeded intents.
-- [ ] Add sandbox webhook test for late payment against an expired intent.
-- [ ] Add private bank sync test for late payment against an expired intent.
-- [ ] Add admin reconciliation success and idempotency test.
-- [ ] Add admin reconciliation forbidden/invalid-status tests.
-- [ ] Add scheduled task registry assertion.
-- [ ] Run targeted test on `/opt/billing` and verify RED.
+- [x] Add expiry command test for stale, future, and succeeded intents.
+- [x] Add sandbox webhook test for late payment against an expired intent.
+- [x] Add private bank sync test for late payment against an expired intent.
+- [x] Add admin reconciliation success and idempotency test.
+- [x] Add admin reconciliation forbidden/invalid-status tests.
+- [x] Add scheduled task registry assertion.
+- [x] Run targeted test on `/opt/billing` and verify RED.
 - [ ] Commit RED tests.
 
 ### Task 3: Expiry Command and Scheduler
