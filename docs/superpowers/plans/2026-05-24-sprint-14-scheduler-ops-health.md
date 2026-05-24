@@ -561,7 +561,7 @@ git push origin feature/sprint-14-scheduler-ops-health
 - Modify: `apps/backend-laravel/routes/console.php`
 - Modify: `infra/docker-compose.dev.yml`
 
-- [ ] Register schedule entries in `apps/backend-laravel/routes/console.php`.
+- [x] Register schedule entries in `apps/backend-laravel/routes/console.php`.
 
 Use:
 
@@ -597,7 +597,7 @@ Schedule::command('scheduled-tasks:run provider_actions_recover_stuck')
     ->name('provider_actions_recover_stuck');
 ```
 
-- [ ] Add a `scheduler` service to `infra/docker-compose.dev.yml`.
+- [x] Add a `scheduler` service to `infra/docker-compose.dev.yml`.
 
 Add this service after `backend` and before `worker`:
 
@@ -647,17 +647,17 @@ Also add the read-only infra mount to the existing `backend` service so backend 
       - ../infra:/infra:ro
 ```
 
-- [ ] Run scheduler config tests until GREEN.
+- [x] Run scheduler config tests until GREEN.
 
 Run:
 
 ```bash
-ssh --% root@10.1.1.124 "cd /opt/billing && git fetch origin feature/sprint-14-scheduler-ops-health && git reset --hard origin/feature/sprint-14-scheduler-ops-health && docker compose -f infra/docker-compose.dev.yml exec -T backend sh -lc 'APP_ENV=testing php artisan test --filter=SchedulerConfigurationTest'"
+ssh --% root@10.1.1.124 "cd /opt/billing && git fetch origin feature/sprint-14-scheduler-ops-health && git reset --hard origin/feature/sprint-14-scheduler-ops-health && docker compose -f infra/docker-compose.dev.yml up -d --build backend scheduler && docker compose -f infra/docker-compose.dev.yml exec -T backend sh -lc 'APP_ENV=testing php artisan test --filter=SchedulerConfigurationTest'"
 ```
 
 Expected: PASS with 2 tests.
 
-- [ ] Verify Compose config parses.
+- [x] Verify Compose config parses.
 
 Run:
 
@@ -667,7 +667,7 @@ ssh --% root@10.1.1.124 "cd /opt/billing && docker compose -f infra/docker-compo
 
 Expected: exit code 0.
 
-- [ ] Commit scheduler runtime slice.
+- [x] Commit scheduler runtime slice.
 
 Run:
 
