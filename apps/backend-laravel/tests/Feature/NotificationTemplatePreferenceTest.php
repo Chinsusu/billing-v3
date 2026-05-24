@@ -157,12 +157,13 @@ class NotificationTemplatePreferenceTest extends TestCase
         $customer->assignRole('customer');
         $admin = User::factory()->create(['email' => 'protected-admin@example.test']);
         $admin->assignRole('super_admin');
+        $expectedCustomerTypes = array_keys($catalog->customerTypes());
+        $actualCustomerTypes = NotificationTemplate::whereIn('type', $expectedCustomerTypes)->pluck('type')->all();
+        sort($expectedCustomerTypes);
+        sort($actualCustomerTypes);
 
         $this->assertSame(count($catalog->defaults()), NotificationTemplate::count());
-        $this->assertSameCanonicalizing(
-            array_keys($catalog->customerTypes()),
-            NotificationTemplate::whereIn('type', array_keys($catalog->customerTypes()))->pluck('type')->all(),
-        );
+        $this->assertSame($expectedCustomerTypes, $actualCustomerTypes);
 
         $this->get('/notification-preferences')->assertRedirect('/login');
 
