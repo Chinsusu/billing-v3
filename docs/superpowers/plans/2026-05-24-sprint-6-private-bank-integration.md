@@ -94,4 +94,4 @@ docker run --rm --entrypoint sh -v /opt/billing/apps/backend-laravel:/app -w /ap
 - [x] Run Laravel Pint and full tests on the dev server.
 - [x] Run Go `gofmt`, `go vet`, and `go test`.
 - [x] Run Docker compose config and secret scan.
-- [ ] Commit, push, open PR to `develop`, wait for CI, merge, and update `/opt/billing`.
+- [x] Commit, push, open PR to `develop`, wait for CI, merge, and update `/opt/billing`.
