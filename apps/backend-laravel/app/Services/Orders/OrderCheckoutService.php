@@ -9,18 +9,24 @@ use App\Models\ProvisioningProviderAccount;
 use App\Models\Service;
 use App\Models\User;
 use App\Services\Finance\WalletService;
+use App\Services\Services\ServiceLifecyclePolicy;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 
 class OrderCheckoutService
 {
-    public function __construct(private readonly WalletService $walletService) {}
+    public function __construct(
+        private readonly WalletService $walletService,
+        private readonly ServiceLifecyclePolicy $lifecyclePolicy,
+    ) {}
 
     public function checkout(User $user, Product $product): Order
     {
         return DB::transaction(function () use ($user, $product): Order {
             $product->loadMissing('providerAccount');
             $providerAccount = $product->providerAccount ?: ProvisioningProviderAccount::where('slug', 'sandbox')->first();
+            $lifecyclePolicy = $this->lifecyclePolicy->forProduct($product);
+            $expiresAt = $this->lifecyclePolicy->expiresAt(now(), $lifecyclePolicy);
 
             $order = Order::create([
                 'user_id' => $user->id,
@@ -72,8 +78,11 @@ class OrderCheckoutService
                 'product_type' => $product->type,
                 'status' => 'pending_provision',
                 'config' => $product->config ?? [],
-                'meta' => ['duration_days' => $product->duration_days],
-                'expires_at' => now()->addDays($product->duration_days),
+                'meta' => [
+                    'duration_days' => $product->duration_days,
+                    'lifecycle_policy' => $lifecyclePolicy,
+                ],
+                'expires_at' => $expiresAt,
             ]);
 
             ProvisioningJob::create([
@@ -96,6 +105,7 @@ class OrderCheckoutService
                         'type' => $product->type,
                         'duration_days' => $product->duration_days,
                         'config' => $product->config ?? [],
+                        'lifecycle_policy' => $lifecyclePolicy,
                         'provider' => $this->providerSnapshot($product, $providerAccount),
                     ],
                 ],

@@ -28,12 +28,12 @@
 - Modify: `apps/backend-laravel/tests/Feature/OrderCheckoutFlowTest.php`
 - Modify: `apps/backend-laravel/tests/Feature/ServiceRenewalLifecycleTest.php`
 
-- [ ] Add admin product test storing `lifecycle_source=provider_lookup`, calendar-month fields, lookup path, JSON paths, date format, and timezone.
-- [ ] Add checkout test proving product lifecycle policy is snapshotted into `services.meta.lifecycle_policy` and provisioning job payload.
-- [ ] Add checkout test proving `calendar_month` uses no-overflow expiry.
-- [ ] Add renewal test proving calendar-month renewal uses no-overflow expiry from the service snapshot.
-- [ ] Run targeted Laravel tests on `/opt/billing` and verify failures are missing columns/fields/date service.
-- [ ] Commit Laravel lifecycle RED tests.
+- [x] Add admin product test storing `lifecycle_source=provider_lookup`, calendar-month fields, lookup path, JSON paths, date format, and timezone.
+- [x] Add checkout test proving product lifecycle policy is snapshotted into `services.meta.lifecycle_policy` and provisioning job payload.
+- [x] Add checkout test proving `calendar_month` uses no-overflow expiry.
+- [x] Add renewal test proving calendar-month renewal uses no-overflow expiry from the service snapshot.
+- [x] Run targeted Laravel tests on `/opt/billing` and verify failures are missing columns/fields/date service.
+- [x] Commit Laravel lifecycle RED tests.
 
 ### Task 3: Laravel Lifecycle Policy Model, Migration, And Calculator
 
@@ -50,14 +50,14 @@
 - Modify: `apps/backend-laravel/app/Services/Orders/OrderCheckoutService.php`
 - Modify: `apps/backend-laravel/app/Services/Services/ServiceRenewalService.php`
 
-- [ ] Add lifecycle columns with backward-compatible defaults.
-- [ ] Add model fillable/casts/default factory values.
-- [ ] Validate lifecycle fields and provider lookup fields in product requests.
-- [ ] Save lifecycle fields from admin product forms.
-- [ ] Add `ServiceLifecyclePolicy` to snapshot and calculate expiries.
-- [ ] Use lifecycle snapshot in checkout and renewal.
-- [ ] Run lifecycle tests until green.
-- [ ] Commit Laravel lifecycle policy slice.
+- [x] Add lifecycle columns with backward-compatible defaults.
+- [x] Add model fillable/casts/default factory values.
+- [x] Validate lifecycle fields and provider lookup fields in product requests.
+- [x] Save lifecycle fields from admin product forms.
+- [x] Add `ServiceLifecyclePolicy` to snapshot and calculate expiries.
+- [x] Use lifecycle snapshot in checkout and renewal.
+- [x] Run lifecycle tests until green.
+- [x] Commit Laravel lifecycle policy slice.
 
 ### Task 4: Laravel RED Tests For Provider Lifecycle Lookup
 

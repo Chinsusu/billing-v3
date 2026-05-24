@@ -66,6 +66,9 @@ class ProductController extends Controller
         $attributes['provider_region'] = $this->nullableString($attributes['provider_region'] ?? null);
         $attributes['provider_provision_path'] = $this->nullableString($attributes['provider_provision_path'] ?? null);
         $attributes['provider_options'] = $this->jsonObject($attributes['provider_options'] ?? null);
+        $attributes['provider_lifecycle_path'] = $this->nullableString($attributes['provider_lifecycle_path'] ?? null);
+        $attributes['provider_lifecycle_ordered_at_path'] = $this->nullableString($attributes['provider_lifecycle_ordered_at_path'] ?? null);
+        $attributes['provider_lifecycle_expires_at_path'] = $this->nullableString($attributes['provider_lifecycle_expires_at_path'] ?? null);
 
         return $attributes;
     }

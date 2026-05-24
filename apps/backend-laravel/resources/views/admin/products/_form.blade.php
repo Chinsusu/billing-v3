@@ -18,6 +18,21 @@
 <label>Price Amount<input type="number" name="price_amount" value="{{ old('price_amount', $product->price_amount) }}" min="1" required></label>
 <label>Currency<input name="currency" value="{{ old('currency', $product->currency ?: 'VND') }}" maxlength="3" required></label>
 <label>Duration Days<input type="number" name="duration_days" value="{{ old('duration_days', $product->duration_days ?: 30) }}" min="1" required></label>
+<label>Lifecycle Source
+    <select name="lifecycle_source" required>
+        @foreach (['local_policy' => 'Local Policy', 'provider_response' => 'Provider Response', 'provider_lookup' => 'Provider Lookup'] as $value => $label)
+            <option value="{{ $value }}" @selected(old('lifecycle_source', $product->lifecycle_source ?: 'local_policy') === $value)>{{ $label }}</option>
+        @endforeach
+    </select>
+</label>
+<label>Lifecycle Unit
+    <select name="lifecycle_unit" required>
+        @foreach (['day' => 'Days', 'calendar_month' => 'Calendar Months'] as $value => $label)
+            <option value="{{ $value }}" @selected(old('lifecycle_unit', $product->lifecycle_unit ?: 'day') === $value)>{{ $label }}</option>
+        @endforeach
+    </select>
+</label>
+<label>Lifecycle Count<input type="number" name="lifecycle_count" value="{{ old('lifecycle_count', $product->lifecycle_count ?: $product->duration_days ?: 30) }}" min="1" required></label>
 <label>Description<textarea name="description">{{ old('description', $product->description) }}</textarea></label>
 <label>Provider Account
     <select name="provider_account_id">
@@ -30,5 +45,16 @@
 <label>Provider Plan Code<input name="provider_plan_code" value="{{ old('provider_plan_code', $product->provider_plan_code) }}" placeholder="A1"></label>
 <label>Provider Region<input name="provider_region" value="{{ old('provider_region', $product->provider_region) }}" placeholder="sgp1"></label>
 <label>Provider Provision Path<input name="provider_provision_path" value="{{ old('provider_provision_path', $product->provider_provision_path) }}" placeholder="/api/provision"></label>
+<label>Provider Lifecycle Path<input name="provider_lifecycle_path" value="{{ old('provider_lifecycle_path', $product->provider_lifecycle_path) }}" placeholder="/api/services/{external_id}"></label>
+<label>Provider Ordered At Path<input name="provider_lifecycle_ordered_at_path" value="{{ old('provider_lifecycle_ordered_at_path', $product->provider_lifecycle_ordered_at_path) }}" placeholder="data.ordered_at"></label>
+<label>Provider Expires At Path<input name="provider_lifecycle_expires_at_path" value="{{ old('provider_lifecycle_expires_at_path', $product->provider_lifecycle_expires_at_path) }}" placeholder="data.expires_at"></label>
+<label>Provider Date Format
+    <select name="provider_lifecycle_date_format" required>
+        @foreach (['iso8601' => 'ISO 8601', 'unix_seconds' => 'Unix Seconds', 'unix_ms' => 'Unix Milliseconds'] as $value => $label)
+            <option value="{{ $value }}" @selected(old('provider_lifecycle_date_format', $product->provider_lifecycle_date_format ?: 'iso8601') === $value)>{{ $label }}</option>
+        @endforeach
+    </select>
+</label>
+<label>Provider Date Timezone<input name="provider_lifecycle_timezone" value="{{ old('provider_lifecycle_timezone', $product->provider_lifecycle_timezone ?: 'UTC') }}" placeholder="UTC"></label>
 <label>Provider Options<textarea name="provider_options">{{ old('provider_options', json_encode($product->provider_options ?? [], JSON_PRETTY_PRINT)) }}</textarea></label>
 <p><button type="submit">Save Product</button></p>
