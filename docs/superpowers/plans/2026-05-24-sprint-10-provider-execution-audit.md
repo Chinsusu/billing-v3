@@ -122,11 +122,11 @@
 **Files:**
 - Modify: `docs/superpowers/plans/2026-05-24-sprint-10-provider-execution-audit.md`
 
-- [ ] Open PR to `develop`.
-- [ ] Wait for CI to pass.
-- [ ] Merge PR and delete feature branch.
-- [ ] Pull `develop` on `/opt/billing`.
-- [ ] Recreate Compose backend and worker.
-- [ ] Run S10 smoke command on `/opt/billing`.
-- [ ] Verify `/products`, `/admin/provisioning-jobs`, and `billing_v3_worker`.
-- [ ] Mark the plan complete on `develop`, commit, push, wait for CI, and update `/opt/billing`.
+- [x] Open PR to `develop`.
+- [x] Wait for CI to pass.
+- [x] Merge PR and delete feature branch.
+- [x] Pull `develop` on `/opt/billing`.
+- [x] Recreate Compose backend and worker.
+- [x] Run S10 smoke command on `/opt/billing`.
+- [x] Verify `/products`, `/admin/provisioning-jobs`, and `billing_v3_worker`.
+- [x] Mark the plan complete on `develop`, commit, push, wait for CI, and update `/opt/billing`.
