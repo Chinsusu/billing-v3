@@ -171,6 +171,7 @@ class ProviderActionJobQueueTest extends TestCase
         $this->travelTo(Carbon::parse('2026-05-24 09:00:00'));
         [, $service] = $this->providerBackedService();
         $job = app(ProviderActionJobDispatcher::class)->enqueue($service, 'sync', "service-sync:{$service->id}:manual");
+        $job->timestamps = false;
         $job->forceFill([
             'status' => 'processing',
             'attempts' => 1,
@@ -194,6 +195,7 @@ class ProviderActionJobQueueTest extends TestCase
         $this->travelTo(Carbon::parse('2026-05-24 09:00:00'));
         [, $service] = $this->providerBackedService();
         $job = app(ProviderActionJobDispatcher::class)->enqueue($service, 'sync', "service-sync:{$service->id}:manual");
+        $job->timestamps = false;
         $job->forceFill([
             'status' => 'processing',
             'attempts' => 3,
