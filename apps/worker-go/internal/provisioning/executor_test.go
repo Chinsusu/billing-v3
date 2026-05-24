@@ -52,14 +52,38 @@ func TestExecutorMarksJobFailedWhenProcessorFails(t *testing.T) {
 
 	processed, err := executor.ProcessOnce(context.Background())
 
-	if err == nil {
-		t.Fatal("expected processor error")
+	if err != nil {
+		t.Fatalf("expected processor error to be handled, got %v", err)
 	}
 	if !processed {
 		t.Fatal("expected failed job to count as processed attempt")
 	}
 	if store.failedError == "" {
 		t.Fatal("expected failure to be recorded")
+	}
+}
+
+func TestExecutorReturnsErrorWhenFailureStateCannotBeRecorded(t *testing.T) {
+	store := &fakeStore{
+		job: Job{
+			ID:        "job-1",
+			Type:      "provision_service",
+			OrderID:   "order-1",
+			ServiceID: "service-1",
+			Action:    "provision",
+		},
+		ok:            true,
+		markFailedErr: errors.New("database unavailable"),
+	}
+	executor := NewExecutor(store, Processor{})
+
+	processed, err := executor.ProcessOnce(context.Background())
+
+	if err == nil {
+		t.Fatal("expected failure state error")
+	}
+	if !processed {
+		t.Fatal("expected attempted job to count as processed")
 	}
 }
 
@@ -81,6 +105,7 @@ type fakeStore struct {
 	job                 Job
 	ok                  bool
 	claimErr            error
+	markFailedErr       error
 	succeededExternalID string
 	failedError         string
 }
@@ -106,6 +131,9 @@ func (f *fakeStore) MarkProcessed(_ context.Context, job Job, result Result) err
 func (f *fakeStore) MarkFailed(_ context.Context, job Job, err error) error {
 	if job.ID == "" {
 		return errors.New("missing job")
+	}
+	if f.markFailedErr != nil {
+		return f.markFailedErr
 	}
 
 	f.failedError = err.Error()

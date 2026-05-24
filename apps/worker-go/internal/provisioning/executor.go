@@ -35,7 +35,7 @@ func (e Executor) ProcessOnce(ctx context.Context) (bool, error) {
 			return true, fmt.Errorf("process job: %w; mark failed: %v", err, markErr)
 		}
 
-		return true, err
+		return true, nil
 	}
 
 	if err := e.store.MarkProcessed(ctx, job, result); err != nil {

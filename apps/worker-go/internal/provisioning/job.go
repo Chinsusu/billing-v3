@@ -16,6 +16,7 @@ type Job struct {
 	OrderID     string
 	ServiceID   string
 	UserID      int64
+	Attempts    int
 	ProductCode string
 	ProductType string
 	Action      string

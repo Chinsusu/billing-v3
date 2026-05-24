@@ -109,6 +109,38 @@ class ProvisioningOperationsTest extends TestCase
         $this->assertSame('processed', $job->refresh()->status);
     }
 
+    public function test_admin_can_see_provisioning_job_runtime_state(): void
+    {
+        $customer = $this->customerUser();
+        $service = $this->serviceFor($customer);
+        $availableAt = now()->addMinute()->startOfSecond();
+        $processedAt = now()->subMinutes(2)->startOfSecond();
+
+        ProvisioningJob::create([
+            'order_id' => $service->order_id,
+            'service_id' => $service->id,
+            'user_id' => $customer->id,
+            'type' => 'provision_service',
+            'status' => 'pending',
+            'attempts' => 2,
+            'idempotency_key' => "service-provision:{$service->id}",
+            'payload' => ['product' => ['code' => $service->product_code]],
+            'available_at' => $availableAt,
+            'processed_at' => $processedAt,
+            'last_error' => 'provider timeout, waiting for retry',
+        ]);
+        $admin = $this->adminUser();
+
+        $this->actingAs($admin)
+            ->get('/admin/provisioning-jobs')
+            ->assertOk()
+            ->assertSee('Available')
+            ->assertSee('Processed')
+            ->assertSee($availableAt->toDateTimeString())
+            ->assertSee($processedAt->toDateTimeString())
+            ->assertSee('provider timeout, waiting for retry');
+    }
+
     private function serviceFor(User $user, array $overrides = []): Service
     {
         $product = Product::factory()->create([
