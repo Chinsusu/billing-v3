@@ -119,21 +119,31 @@ class OrderCheckoutFlowTest extends TestCase
             'provider_plan_code' => 'A2',
             'provider_region' => 'sgp1',
             'provider_provision_path' => '/api/accounts/main/provision',
+            'provider_renew_path' => '/api/services/{external_id}/renew',
+            'provider_suspend_path' => '/api/services/{external_id}/suspend',
+            'provider_cancel_path' => '/api/services/{external_id}/cancel',
+            'provider_sync_path' => '/api/services/{external_id}',
             'provider_options' => ['size' => 'small', 'backups' => true],
         ]);
 
         $this->actingAs($customer)->post("/products/{$product->id}/order");
 
         $job = ProvisioningJob::firstOrFail();
-        $this->assertSame([
+        $expectedProvider = [
             'account_id' => $accountId,
             'account_slug' => 'provider-a-main',
             'driver' => 'generic_http',
             'plan_code' => 'A2',
             'region' => 'sgp1',
             'provision_path' => '/api/accounts/main/provision',
+            'renew_path' => '/api/services/{external_id}/renew',
+            'suspend_path' => '/api/services/{external_id}/suspend',
+            'cancel_path' => '/api/services/{external_id}/cancel',
+            'sync_path' => '/api/services/{external_id}',
             'options' => ['size' => 'small', 'backups' => true],
-        ], $job->payload['product']['provider']);
+        ];
+        $this->assertSame($expectedProvider, Service::firstOrFail()->meta['provider']);
+        $this->assertSame($expectedProvider, $job->payload['product']['provider']);
     }
 
     public function test_checkout_snapshots_lifecycle_policy_and_uses_calendar_month_no_overflow(): void
