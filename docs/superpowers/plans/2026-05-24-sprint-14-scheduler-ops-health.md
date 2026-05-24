@@ -34,7 +34,7 @@ Expected: commit succeeds on `develop`.
 **Files:**
 - Create: `apps/backend-laravel/tests/Feature/ScheduledTaskRunTest.php`
 
-- [ ] Add tests for the scheduled task wrapper and runner behavior.
+- [x] Add tests for the scheduled task wrapper and runner behavior.
 
 Use this test file:
 
@@ -107,7 +107,7 @@ class ScheduledTaskRunTest extends TestCase
 }
 ```
 
-- [ ] Run the targeted test on `/opt/billing` and verify RED.
+- [x] Run the targeted test on `/opt/billing` and verify RED.
 
 Run:
 
@@ -117,7 +117,7 @@ ssh --% root@10.1.1.124 "cd /opt/billing && git fetch origin develop && git rese
 
 Expected: FAIL because `ScheduledTaskRun`, `ScheduledTaskRunner`, and `scheduled-tasks:run` do not exist.
 
-- [ ] Commit RED tests.
+- [x] Commit RED tests.
 
 Run:
 
