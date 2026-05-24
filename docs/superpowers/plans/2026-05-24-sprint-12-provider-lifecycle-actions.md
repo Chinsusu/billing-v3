@@ -25,10 +25,10 @@
 - Modify: `apps/backend-laravel/tests/Feature/ProductLifecyclePolicyTest.php`
 - Modify: `apps/backend-laravel/tests/Feature/OrderCheckoutFlowTest.php`
 
-- [ ] Add a product admin test that posts `provider_renew_path`, `provider_suspend_path`, `provider_cancel_path`, and `provider_sync_path`, then asserts they are stored.
-- [ ] Add a checkout test proving `services.meta.provider` snapshots provider action paths.
-- [ ] Run targeted Laravel tests on `/opt/billing` and verify failures are missing product columns/request fields/snapshot fields.
-- [ ] Commit RED config tests.
+- [x] Add a product admin test that posts `provider_renew_path`, `provider_suspend_path`, `provider_cancel_path`, and `provider_sync_path`, then asserts they are stored.
+- [x] Add a checkout test proving `services.meta.provider` snapshots provider action paths.
+- [x] Run targeted Laravel tests on `/opt/billing` and verify failures are missing product columns/request fields/snapshot fields.
+- [x] Commit RED config tests.
 
 ### Task 3: Implement Product Action Config
 
@@ -42,13 +42,13 @@
 - Modify: `apps/backend-laravel/resources/views/admin/products/_form.blade.php`
 - Modify: `apps/backend-laravel/app/Services/Orders/OrderCheckoutService.php`
 
-- [ ] Add nullable product action path columns for renew, suspend, cancel, and sync.
-- [ ] Add model fillable/factory defaults.
-- [ ] Validate action paths as nullable strings that start with `/`.
-- [ ] Save action paths from admin product forms.
-- [ ] Include action paths in checkout service provider snapshots and provisioning job provider payloads.
-- [ ] Run config tests until green.
-- [ ] Commit product action config slice.
+- [x] Add nullable product action path columns for renew, suspend, cancel, and sync.
+- [x] Add model fillable/factory defaults.
+- [x] Validate action paths as nullable strings that start with `/`.
+- [x] Save action paths from admin product forms.
+- [x] Include action paths in checkout service provider snapshots and provisioning job provider payloads.
+- [x] Run config tests until green.
+- [x] Commit product action config slice.
 
 ### Task 4: RED Tests For Provider Renewal
 
