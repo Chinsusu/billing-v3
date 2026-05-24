@@ -56,9 +56,9 @@ class ScheduledTaskRunTest extends TestCase
     public function test_scheduled_task_wrapper_records_successful_allowed_task(): void
     {
         $this->artisan('scheduled-tasks:run provider_actions_work')
-            ->expectsOutput('Provider action jobs processed=0 failed=0.')
             ->assertExitCode(0);
 
+        $this->assertSame(1, ScheduledTaskRun::count());
         $run = ScheduledTaskRun::firstOrFail();
         $this->assertSame('provider_actions_work', $run->task);
         $this->assertSame('provider-actions:work --limit=50', $run->command);
@@ -68,6 +68,7 @@ class ScheduledTaskRunTest extends TestCase
         $this->assertNull($run->error);
         $this->assertNotNull($run->started_at);
         $this->assertNotNull($run->finished_at);
+        $this->assertGreaterThanOrEqual($run->started_at, $run->finished_at);
         $this->assertGreaterThanOrEqual(0, $run->duration_ms);
     }
 
@@ -91,6 +92,7 @@ class ScheduledTaskRunTest extends TestCase
         $exitCode = app(ScheduledTaskRunner::class)->run('test_failure', 'test:scheduled-task-fails');
 
         $this->assertSame(9, $exitCode);
+        $this->assertSame(1, ScheduledTaskRun::count());
         $run = ScheduledTaskRun::firstOrFail();
         $this->assertSame('test_failure', $run->task);
         $this->assertSame('test:scheduled-task-fails', $run->command);
@@ -98,7 +100,9 @@ class ScheduledTaskRunTest extends TestCase
         $this->assertSame(9, $run->exit_code);
         $this->assertStringContainsString('scheduled task failed deliberately', $run->output);
         $this->assertStringContainsString('Command exited with code 9.', $run->error);
+        $this->assertNotNull($run->started_at);
         $this->assertNotNull($run->finished_at);
+        $this->assertGreaterThanOrEqual($run->started_at, $run->finished_at);
     }
 }
 ```
