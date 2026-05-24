@@ -137,14 +137,14 @@
 **Files:**
 - Modify: `docs/superpowers/plans/2026-05-24-sprint-9-dynamic-provisioning-providers.md`
 
-- [ ] Push branch to GitHub and checkout it on `/opt/billing`.
-- [ ] Recreate Compose backend and worker.
-- [ ] Run `php artisan migrate --force` and `php artisan db:seed --force` through backend startup.
-- [ ] Run `php artisan runtime:smoke-provisioning --timeout=30` and verify success.
-- [ ] Run Laravel Pint and full tests on the dev server.
-- [ ] Run Go `gofmt -l`, `go vet`, and `go test ./...` on the dev server.
-- [ ] Run Docker Compose config/build and secret scan.
-- [ ] Mark completed checklist items and commit plan progress.
+- [x] Push branch to GitHub and checkout it on `/opt/billing`.
+- [x] Recreate Compose backend and worker.
+- [x] Run `php artisan migrate --force` and `php artisan db:seed --force` through backend startup.
+- [x] Run `php artisan runtime:smoke-provisioning --timeout=30` and verify success.
+- [x] Run Laravel Pint and full tests on the dev server.
+- [x] Run Go `gofmt -l`, `go vet`, and `go test ./...` on the dev server.
+- [x] Run Docker Compose config/build and secret scan.
+- [x] Mark completed checklist items and commit plan progress.
 
 ### Task 8: PR, CI, Merge, Deploy
 
