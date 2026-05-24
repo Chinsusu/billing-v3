@@ -102,10 +102,13 @@ class AdminOpsHealthTest extends TestCase
             'output' => 'No bank integrations.',
         ]);
 
-        $this->actingAs($admin)
-            ->get('/admin/ops-health')
-            ->assertOk()
-            ->assertSeeInOrder(['bank_sync_payments', 'warning', 'No successful run in the last 3 minutes.']);
+        $response = $this->actingAs($admin)->get('/admin/ops-health');
+
+        $response->assertOk();
+        $this->assertMatchesRegularExpression(
+            '/<tr>.*bank_sync_payments.*warning.*No successful run in the last 3 minutes\..*<\/tr>/s',
+            $response->getContent()
+        );
     }
 
     public function test_admin_dashboard_links_to_ops_health(): void
