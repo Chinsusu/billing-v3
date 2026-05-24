@@ -82,6 +82,7 @@ Route::middleware('auth')->group(function (): void {
         Route::get('/orders', [AdminOrderController::class, 'index'])->middleware('permission:orders.view')->name('orders.index');
         Route::get('/services', [AdminServiceController::class, 'index'])->middleware('permission:services.view')->name('services.index');
         Route::get('/provisioning-jobs', [ProvisioningJobController::class, 'index'])->middleware('permission:provisioning_jobs.view')->name('provisioning-jobs.index');
+        Route::get('/provisioning-jobs/{provisioningJob}', [ProvisioningJobController::class, 'show'])->middleware('permission:provisioning_jobs.view')->name('provisioning-jobs.show');
         Route::post('/provisioning-jobs/{provisioningJob}/retry', ProvisioningJobRetryController::class)->middleware('permission:provisioning_jobs.view')->name('provisioning-jobs.retry');
     });
 });

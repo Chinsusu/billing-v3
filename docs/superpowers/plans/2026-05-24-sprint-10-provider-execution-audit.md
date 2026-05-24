@@ -81,11 +81,11 @@
 - Modify: `apps/backend-laravel/resources/views/admin/provisioning-jobs/index.blade.php`
 - Modify: `apps/backend-laravel/routes/web.php`
 
-- [ ] Add `show` action eager-loading service, user, and execution logs.
-- [ ] Link job references on index to job detail.
-- [ ] Render execution logs with redacted request/response JSON.
-- [ ] Run admin operations test until green.
-- [ ] Commit admin job detail slice.
+- [x] Add `show` action eager-loading service, user, and execution logs.
+- [x] Link job references on index to job detail.
+- [x] Render execution logs with redacted request/response JSON.
+- [x] Run admin operations test until green.
+- [x] Commit admin job detail slice.
 
 ### Task 6: Go Worker Config Persistence
 
