@@ -27,10 +27,10 @@
 - Create: `apps/backend-laravel/tests/Feature/BankIntegrationAdminTest.php`
 - Create: `apps/backend-laravel/tests/Feature/PrivateBankPaymentSyncTest.php`
 
-- [ ] Add admin config tests for create/update/masked secrets/customer forbidden.
-- [ ] Add test connection test with `Http::fake()`.
-- [ ] Add payment sync tests for accepted, duplicate, unmatched, and rejected transactions.
-- [ ] Run both new test files on the dev server and verify they fail on missing table, routes, model, and command.
+- [x] Add admin config tests for create/update/masked secrets/customer forbidden.
+- [x] Add test connection test with `Http::fake()`.
+- [x] Add payment sync tests for accepted, duplicate, unmatched, and rejected transactions.
+- [x] Run both new test files on the dev server and verify they fail on missing table, routes, model, and command.
 
 Expected RED command:
 
@@ -45,9 +45,9 @@ docker run --rm --entrypoint sh -v /opt/billing/apps/backend-laravel:/app -w /ap
 - Create: `apps/backend-laravel/app/Models/BankIntegration.php`
 - Modify: `apps/backend-laravel/database/seeders/RolesAndPermissionsSeeder.php`
 
-- [ ] Add `bank_integrations` table with encrypted secret columns and audit fields.
-- [ ] Add `BankIntegration` model with `api_key` and `webhook_secret` encrypted casts.
-- [ ] Add `bank_integrations.manage` permission to `super_admin` and `finance`.
+- [x] Add `bank_integrations` table with encrypted secret columns and audit fields.
+- [x] Add `BankIntegration` model with `api_key` and `webhook_secret` encrypted casts.
+- [x] Add `bank_integrations.manage` permission to `super_admin` and `finance`.
 
 ### Task 4: Admin UI And Test Connection
 
@@ -63,11 +63,11 @@ docker run --rm --entrypoint sh -v /opt/billing/apps/backend-laravel:/app -w /ap
 - Modify: `apps/backend-laravel/routes/web.php`
 - Modify: `apps/backend-laravel/resources/views/admin/dashboard.blade.php`
 
-- [ ] Implement CRUD routes under `/admin/bank-integrations`.
-- [ ] Store/rotate secrets via service; blank secret input preserves current value.
-- [ ] Mask configured secrets in views.
-- [ ] Implement `POST /admin/bank-integrations/{bankIntegration}/test`.
-- [ ] Run admin config tests and fix failures.
+- [x] Implement CRUD routes under `/admin/bank-integrations`.
+- [x] Store/rotate secrets via service; blank secret input preserves current value.
+- [x] Mask configured secrets in views.
+- [x] Implement `POST /admin/bank-integrations/{bankIntegration}/test`.
+- [x] Run admin config tests and fix failures.
 
 ### Task 5: Private Bank Payment Sync
 
@@ -76,12 +76,12 @@ docker run --rm --entrypoint sh -v /opt/billing/apps/backend-laravel:/app -w /ap
 - Create: `apps/backend-laravel/app/Console/Commands/SyncPrivateBankPaymentsCommand.php`
 - Modify: `apps/backend-laravel/bootstrap/app.php`
 
-- [ ] Implement private bank transaction matching by `reference`.
-- [ ] Record `payment_events` with provider `private_bank`.
-- [ ] Credit wallet through `WalletService` with idempotency key `private_bank:{transaction_id}`.
-- [ ] Mark matched payment intents `succeeded`.
-- [ ] Register `bank:sync-payments` command.
-- [ ] Run payment sync tests and fix failures.
+- [x] Implement private bank transaction matching by `reference`.
+- [x] Record `payment_events` with provider `private_bank`.
+- [x] Credit wallet through `WalletService` with idempotency key `private_bank:{transaction_id}`.
+- [x] Mark matched payment intents `succeeded`.
+- [x] Register `bank:sync-payments` command.
+- [x] Run payment sync tests and fix failures.
 
 ### Task 6: Docs And Verification
 
@@ -89,9 +89,9 @@ docker run --rm --entrypoint sh -v /opt/billing/apps/backend-laravel:/app -w /ap
 - Modify: `README.md`
 - Modify: `docs/superpowers/plans/2026-05-24-sprint-6-private-bank-integration.md`
 
-- [ ] Document S6 admin routes and sync command.
-- [ ] Mark plan checklist complete after verification.
-- [ ] Run Laravel Pint and full tests on the dev server.
-- [ ] Run Go `gofmt`, `go vet`, and `go test`.
-- [ ] Run Docker compose config and secret scan.
+- [x] Document S6 admin routes and sync command.
+- [x] Mark plan checklist complete after verification.
+- [x] Run Laravel Pint and full tests on the dev server.
+- [x] Run Go `gofmt`, `go vet`, and `go test`.
+- [x] Run Docker compose config and secret scan.
 - [ ] Commit, push, open PR to `develop`, wait for CI, merge, and update `/opt/billing`.
