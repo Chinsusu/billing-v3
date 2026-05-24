@@ -7,6 +7,7 @@ use App\Models\Service;
 use App\Models\User;
 use App\Models\Wallet;
 use App\Services\Finance\WalletService;
+use App\Services\Notifications\NotificationOutbox;
 use App\Services\Provisioning\ProviderServiceActionService;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
@@ -19,6 +20,7 @@ class ServiceRenewalService
         private readonly WalletService $walletService,
         private readonly ServiceLifecyclePolicy $lifecyclePolicy,
         private readonly ProviderServiceActionService $providerActions,
+        private readonly NotificationOutbox $notifications,
     ) {}
 
     public function renew(Service $service, User $user): Service
@@ -115,6 +117,24 @@ class ServiceRenewalService
                 'expires_at' => $newExpiresAt,
                 'meta' => $meta,
             ])->save();
+
+            $this->notifications->enqueue(
+                $user,
+                'service_renewed',
+                $user->email,
+                'Service renewed',
+                "Your service {$lockedService->product_name} was renewed until {$newExpiresAt->toDateTimeString()}.",
+                'service',
+                $lockedService->id,
+                "service-renewed:{$lockedService->id}:".$newExpiresAt->toISOString(),
+                [
+                    'service_id' => $lockedService->id,
+                    'old_expires_at' => $oldExpiresAt->toISOString(),
+                    'new_expires_at' => $newExpiresAt->toISOString(),
+                    'amount' => $amount,
+                    'currency' => strtoupper($currency),
+                ],
+            );
 
             return $lockedService->refresh();
         });

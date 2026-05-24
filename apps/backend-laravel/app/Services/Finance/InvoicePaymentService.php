@@ -4,10 +4,14 @@ namespace App\Services\Finance;
 
 use App\Models\Invoice;
 use App\Models\LedgerEntry;
+use App\Services\Notifications\NotificationOutbox;
 
 class InvoicePaymentService
 {
-    public function __construct(private readonly WalletService $walletService) {}
+    public function __construct(
+        private readonly WalletService $walletService,
+        private readonly NotificationOutbox $notifications,
+    ) {}
 
     public function payFromWallet(Invoice $invoice): LedgerEntry
     {
@@ -34,6 +38,24 @@ class InvoicePaymentService
             'status' => 'paid',
             'paid_at' => now(),
         ]);
+
+        $this->notifications->enqueue(
+            $invoice->user,
+            'invoice_paid',
+            $invoice->user->email,
+            'Invoice paid',
+            "Invoice {$invoice->invoice_number} was paid.",
+            'invoice',
+            $invoice->id,
+            "invoice-paid:{$invoice->id}",
+            [
+                'invoice_id' => $invoice->id,
+                'invoice_number' => $invoice->invoice_number,
+                'ledger_entry_id' => $entry->id,
+                'amount' => $invoice->total_amount,
+                'currency' => $invoice->currency,
+            ],
+        );
 
         return $entry;
     }

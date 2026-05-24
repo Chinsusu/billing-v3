@@ -7,6 +7,7 @@ use App\Models\ProviderCallbackEvent;
 use App\Models\ProvisioningProviderAccount;
 use App\Models\Service;
 use App\Models\ServiceCancellation;
+use App\Services\Notifications\NotificationOutbox;
 use Illuminate\Database\QueryException;
 use Illuminate\Support\Facades\DB;
 
@@ -15,6 +16,7 @@ class ProviderCallbackProcessor
     public function __construct(
         private readonly JsonPath $jsonPath,
         private readonly PayloadRedactor $redactor,
+        private readonly NotificationOutbox $notifications,
     ) {}
 
     /**
@@ -66,6 +68,22 @@ class ProviderCallbackProcessor
 
                 if ($service instanceof Service) {
                     $this->reconcile($event, $service, $job, $action, $providerStatus);
+                } else {
+                    $this->notifications->enqueueOperator(
+                        'provider_callback_unmatched',
+                        'Provider callback unmatched',
+                        "Provider callback {$event->id} could not be matched to a service.",
+                        'provider_callback_event',
+                        $event->id,
+                        "provider-callback-unmatched:{$event->id}",
+                        [
+                            'provider_account_id' => $account->id,
+                            'provider_event_id' => $providerEventId,
+                            'external_id' => $externalId,
+                            'action' => $action,
+                            'provider_status' => $providerStatus,
+                        ],
+                    );
                 }
 
                 return [
@@ -191,7 +209,7 @@ class ProviderCallbackProcessor
             });
         }
 
-        $query->get()->each(function (ServiceCancellation $cancellation) use ($event, $job): void {
+        $query->get()->each(function (ServiceCancellation $cancellation) use ($event, $job, $service): void {
             $meta = $cancellation->meta ?? [];
             $meta['provider_callback_event_id'] = $event->id;
             $meta['provider_completed_at'] = now()->toISOString();
@@ -206,6 +224,27 @@ class ProviderCallbackProcessor
                 'completed_at' => now(),
                 'meta' => $meta,
             ])->save();
+
+            $user = $cancellation->user ?? $service->user;
+            if ($user !== null) {
+                $this->notifications->enqueue(
+                    $user,
+                    'service_cancellation_completed',
+                    $user->email,
+                    'Service cancellation completed',
+                    "Your service {$service->product_name} was cancelled.",
+                    'service',
+                    $service->id,
+                    "service-cancellation-completed:{$cancellation->id}",
+                    [
+                        'service_id' => $service->id,
+                        'service_cancellation_id' => $cancellation->id,
+                        'provider_callback_event_id' => $event->id,
+                        'provider_action_job_id' => $job?->id,
+                        'completed_by' => 'provider_callback',
+                    ],
+                );
+            }
         });
     }
 

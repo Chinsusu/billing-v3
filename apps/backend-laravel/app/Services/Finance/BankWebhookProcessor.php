@@ -4,11 +4,15 @@ namespace App\Services\Finance;
 
 use App\Models\PaymentEvent;
 use App\Models\PaymentIntent;
+use App\Services\Notifications\NotificationOutbox;
 use Illuminate\Support\Carbon;
 
 class BankWebhookProcessor
 {
-    public function __construct(private readonly WalletService $walletService) {}
+    public function __construct(
+        private readonly WalletService $walletService,
+        private readonly NotificationOutbox $notifications,
+    ) {}
 
     public function handle(string $body, ?string $signature): array
     {
@@ -93,6 +97,24 @@ class BankWebhookProcessor
             'status' => 'succeeded',
             'paid_at' => $paidAt !== '' ? Carbon::parse($paidAt) : now(),
         ]);
+
+        $this->notifications->enqueue(
+            $intent->user,
+            'wallet_credited',
+            $intent->user->email,
+            'Wallet credited',
+            "Your wallet was credited {$amount} {$currency} for reference {$reference}.",
+            'payment_intent',
+            $intent->id,
+            "wallet-credited:{$intent->id}",
+            [
+                'payment_intent_id' => $intent->id,
+                'payment_event_id' => $event->id,
+                'reference' => $reference,
+                'amount' => $amount,
+                'currency' => $currency,
+            ],
+        );
 
         return [
             'status_code' => 200,

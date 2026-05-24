@@ -5,6 +5,7 @@ namespace App\Services\Provisioning;
 use App\Models\ProviderActionJob;
 use App\Models\Service;
 use App\Models\ServiceCancellation;
+use App\Services\Notifications\NotificationOutbox;
 use Illuminate\Support\Facades\DB;
 use Throwable;
 
@@ -12,6 +13,7 @@ class ProviderActionJobProcessor
 {
     public function __construct(
         private readonly ProviderServiceActionService $providerActions,
+        private readonly NotificationOutbox $notifications,
     ) {}
 
     /**
@@ -182,6 +184,26 @@ class ProviderActionJobProcessor
             'completed_at' => $completedAt,
         ]);
         $service->forceFill(['meta' => $serviceMeta])->save();
+
+        $user = $cancellation->user ?? $service->user;
+        if ($user !== null) {
+            $this->notifications->enqueue(
+                $user,
+                'service_cancellation_completed',
+                $user->email,
+                'Service cancellation completed',
+                "Your service {$service->product_name} was cancelled.",
+                'service',
+                $service->id,
+                "service-cancellation-completed:{$cancellation->id}",
+                [
+                    'service_id' => $service->id,
+                    'service_cancellation_id' => $cancellation->id,
+                    'provider_action_job_id' => $job->id,
+                    'completed_by' => 'provider_action_job',
+                ],
+            );
+        }
     }
 
     private function recordFailure(ProviderActionJob $job, Throwable $exception): void
@@ -194,5 +216,25 @@ class ProviderActionJobProcessor
             'processed_at' => $finalAttempt ? now() : null,
             'last_error' => $exception->getMessage(),
         ])->save();
+
+        if ($finalAttempt) {
+            $this->notifications->enqueueOperator(
+                'provider_action_failed',
+                'Provider action failed',
+                "Provider {$job->action} action failed for service {$job->service_id}: {$exception->getMessage()}",
+                'provider_action_job',
+                $job->id,
+                "provider-action-failed:{$job->id}",
+                [
+                    'provider_action_job_id' => $job->id,
+                    'provider_account_id' => $job->provider_account_id,
+                    'service_id' => $job->service_id,
+                    'action' => $job->action,
+                    'attempts' => $job->attempts,
+                    'max_attempts' => $job->max_attempts,
+                    'error' => $exception->getMessage(),
+                ],
+            );
+        }
     }
 }

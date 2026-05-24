@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use App\Models\Service;
 use App\Models\ServiceCancellation;
+use App\Models\User;
+use App\Services\Notifications\NotificationOutbox;
 use App\Services\Provisioning\ProviderActionJobDispatcher;
 use App\Services\Provisioning\ProviderServiceActionService;
 use Illuminate\Http\RedirectResponse;
@@ -18,6 +20,7 @@ class ServiceCancellationController extends Controller
         Service $service,
         ProviderServiceActionService $providerActions,
         ProviderActionJobDispatcher $providerActionJobs,
+        NotificationOutbox $notifications,
     ): RedirectResponse {
         abort_unless($service->user_id === $request->user()->id, 404);
 
@@ -39,8 +42,9 @@ class ServiceCancellationController extends Controller
             return redirect("/services/{$service->id}")->with('status', 'Cancellation already requested.');
         }
 
-        $message = DB::transaction(function () use ($service, $request, $providerActions, $providerActionJobs, $validated): string {
+        $message = DB::transaction(function () use ($service, $request, $providerActions, $providerActionJobs, $notifications, $validated): string {
             $lockedService = Service::whereKey($service->id)->lockForUpdate()->firstOrFail();
+            $user = $request->user();
             $meta = $lockedService->meta ?? [];
             $reason = $validated['reason'] ?? null;
 
@@ -52,10 +56,10 @@ class ServiceCancellationController extends Controller
                 ];
                 $lockedService->forceFill(['meta' => $meta])->save();
 
-                ServiceCancellation::create([
+                $cancellation = ServiceCancellation::create([
                     'service_id' => $lockedService->id,
                     'user_id' => $lockedService->user_id,
-                    'requested_by_id' => $request->user()->id,
+                    'requested_by_id' => $user->id,
                     'mode' => 'period_end',
                     'status' => 'scheduled',
                     'reason' => $reason,
@@ -63,13 +67,15 @@ class ServiceCancellationController extends Controller
                     'requested_at' => now(),
                 ]);
 
+                $this->enqueueCancellationRequested($notifications, $user, $lockedService, $cancellation);
+
                 return 'Cancellation scheduled for period end.';
             }
 
             $cancellation = ServiceCancellation::create([
                 'service_id' => $lockedService->id,
                 'user_id' => $lockedService->user_id,
-                'requested_by_id' => $request->user()->id,
+                'requested_by_id' => $user->id,
                 'mode' => 'immediate',
                 'status' => 'requested',
                 'reason' => $reason,
@@ -80,7 +86,7 @@ class ServiceCancellationController extends Controller
             if ($providerActions->hasConfiguredAction($lockedService, 'cancel')) {
                 $job = $providerActionJobs->enqueue($lockedService, 'cancel', "service-cancel:{$lockedService->id}:customer-request", [
                     'cancelled_at' => now()->toISOString(),
-                    'requested_by_id' => $request->user()->id,
+                    'requested_by_id' => $user->id,
                     'service_cancellation_id' => $cancellation->id,
                 ]);
 
@@ -98,6 +104,8 @@ class ServiceCancellationController extends Controller
                     'reason' => $reason,
                 ];
                 $lockedService->forceFill(['meta' => $meta])->save();
+
+                $this->enqueueCancellationRequested($notifications, $user, $lockedService, $cancellation);
 
                 return 'Provider cancellation queued.';
             }
@@ -120,9 +128,51 @@ class ServiceCancellationController extends Controller
                 'meta' => ['cancelled_at' => $meta['cancelled_at']],
             ])->save();
 
+            $this->enqueueCancellationRequested($notifications, $user, $lockedService, $cancellation);
+            $this->enqueueCancellationCompleted($notifications, $user, $lockedService, $cancellation);
+
             return 'Service cancelled.';
         });
 
         return redirect("/services/{$service->id}")->with('status', $message);
+    }
+
+    private function enqueueCancellationRequested(NotificationOutbox $notifications, User $user, Service $service, ServiceCancellation $cancellation): void
+    {
+        $notifications->enqueue(
+            $user,
+            'service_cancellation_requested',
+            $user->email,
+            'Service cancellation requested',
+            "Cancellation was requested for service {$service->product_name}.",
+            'service_cancellation',
+            $cancellation->id,
+            "service-cancellation-requested:{$cancellation->id}",
+            [
+                'service_id' => $service->id,
+                'service_cancellation_id' => $cancellation->id,
+                'mode' => $cancellation->mode,
+                'status' => $cancellation->status,
+            ],
+        );
+    }
+
+    private function enqueueCancellationCompleted(NotificationOutbox $notifications, User $user, Service $service, ServiceCancellation $cancellation): void
+    {
+        $notifications->enqueue(
+            $user,
+            'service_cancellation_completed',
+            $user->email,
+            'Service cancelled',
+            "Service {$service->product_name} was cancelled.",
+            'service',
+            $service->id,
+            "service-cancellation-completed:{$cancellation->id}",
+            [
+                'service_id' => $service->id,
+                'service_cancellation_id' => $cancellation->id,
+                'mode' => $cancellation->mode,
+            ],
+        );
     }
 }

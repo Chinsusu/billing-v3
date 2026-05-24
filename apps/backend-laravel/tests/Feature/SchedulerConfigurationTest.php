@@ -14,6 +14,7 @@ class SchedulerConfigurationTest extends TestCase
             ->expectsOutputToContain('scheduled-tasks:run services_expire')
             ->expectsOutputToContain('scheduled-tasks:run service_cancellations_process_scheduled')
             ->expectsOutputToContain('scheduled-tasks:run provider_actions_recover_stuck')
+            ->expectsOutputToContain('scheduled-tasks:run notifications_send')
             ->assertExitCode(0);
     }
 

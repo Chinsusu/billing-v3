@@ -12,6 +12,7 @@ use App\Models\ProvisioningProviderAccount;
 use App\Models\Service;
 use App\Models\User;
 use App\Models\Wallet;
+use App\Services\Scheduler\ScheduledTaskRegistry;
 use Database\Seeders\RolesAndPermissionsSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Carbon;
@@ -202,7 +203,7 @@ class NotificationOutboxTest extends TestCase
             ->assertExitCode(0);
         $this->assertSame(1, DB::table('notification_events')->where('type', 'service_expiry_warning')->count());
 
-        $this->assertSame('notifications:send --limit=50', app(\App\Services\Scheduler\ScheduledTaskRegistry::class)->commandFor('notifications_send'));
+        $this->assertSame('notifications:send --limit=50', app(ScheduledTaskRegistry::class)->commandFor('notifications_send'));
         $this->artisan('schedule:list')
             ->expectsOutputToContain('scheduled-tasks:run notifications_send')
             ->assertExitCode(0);

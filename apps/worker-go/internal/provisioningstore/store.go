@@ -2,9 +2,11 @@ package provisioningstore
 
 import (
 	"context"
+	"crypto/rand"
 	"database/sql"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"time"
 
 	"github.com/Chinsusu/billing-v3/apps/worker-go/internal/provisioning"
@@ -110,6 +112,28 @@ func (s *Store) MarkProcessed(ctx context.Context, job Job, result Result) error
 		return err
 	}
 
+	notificationID, err := newUUID()
+	if err != nil {
+		_ = tx.Rollback()
+
+		return err
+	}
+	notificationPayload, err := json.Marshal(map[string]any{
+		"external_id":         result.ExternalID,
+		"provisioning_job_id": job.ID,
+	})
+	if err != nil {
+		_ = tx.Rollback()
+
+		return err
+	}
+
+	if _, err := tx.ExecContext(ctx, `insert into notification_events (id, user_id, channel, type, recipient_email, subject, body_text, source_type, source_id, idempotency_key, status, attempts, max_attempts, available_at, payload, created_at, updated_at) select $1, services.user_id, 'email', 'service_provisioned', users.email, $2, $3, 'service', services.id, $4, 'pending', 0, 3, now(), $5, now(), now() from services join users on users.id = services.user_id where services.id = $6 on conflict (idempotency_key) do nothing`, notificationID, "Service provisioned", fmt.Sprintf("Your service is active. External ID: %s.", result.ExternalID), fmt.Sprintf("service-provisioned:%s", job.ServiceID), string(notificationPayload), job.ServiceID); err != nil {
+		_ = tx.Rollback()
+
+		return err
+	}
+
 	if _, err := tx.ExecContext(ctx, `update provisioning_jobs set status = 'processed', processed_at = now(), last_error = null, updated_at = now() where id = $1`, job.ID); err != nil {
 		_ = tx.Rollback()
 
@@ -117,6 +141,18 @@ func (s *Store) MarkProcessed(ctx context.Context, job Job, result Result) error
 	}
 
 	return tx.Commit()
+}
+
+func newUUID() (string, error) {
+	var bytes [16]byte
+	if _, err := rand.Read(bytes[:]); err != nil {
+		return "", err
+	}
+
+	bytes[6] = (bytes[6] & 0x0f) | 0x40
+	bytes[8] = (bytes[8] & 0x3f) | 0x80
+
+	return fmt.Sprintf("%x-%x-%x-%x-%x", bytes[0:4], bytes[4:6], bytes[6:8], bytes[8:10], bytes[10:]), nil
 }
 
 func (s *Store) MarkFailed(ctx context.Context, job Job, cause error) error {
