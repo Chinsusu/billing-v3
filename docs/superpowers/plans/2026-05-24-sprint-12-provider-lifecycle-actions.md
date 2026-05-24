@@ -86,23 +86,23 @@
 **Files:**
 - Modify: `apps/backend-laravel/tests/Feature/ServiceRenewalLifecycleTest.php`
 
-- [ ] Add test: `services:expire` calls provider suspend before marking overdue service expired.
-- [ ] Assert suspend audit log action is `provider_service_suspend`.
-- [ ] Add test: provider suspend failure leaves overdue service active and command exits non-zero.
-- [ ] Run expiry tests on `/opt/billing` and verify failures are missing suspend implementation.
-- [ ] Commit RED expiry suspend tests.
+- [x] Add test: `services:expire` calls provider suspend before marking overdue service expired.
+- [x] Assert suspend audit log action is `provider_service_suspend`.
+- [x] Add test: provider suspend failure leaves overdue service active and command exits non-zero.
+- [x] Run expiry tests on `/opt/billing` and verify failures are missing suspend implementation.
+- [x] Commit RED expiry suspend tests.
 
 ### Task 7: Implement Expiry Suspension
 
 **Files:**
 - Modify: `apps/backend-laravel/app/Console/Commands/ExpireServicesCommand.php`
 
-- [ ] Inject provider action service into `services:expire`.
-- [ ] Call provider suspend for overdue services with configured suspend path.
-- [ ] Mark local expired only when provider suspend succeeds or no suspend path is configured.
-- [ ] Count failures, print `Expired X services. Failed Y services.`, and return non-zero when any provider suspend fails.
-- [ ] Run expiry tests until green.
-- [ ] Commit expiry suspension slice.
+- [x] Inject provider action service into `services:expire`.
+- [x] Call provider suspend for overdue services with configured suspend path.
+- [x] Mark local expired only when provider suspend succeeds or no suspend path is configured.
+- [x] Count failures, print `Expired X services. Failed Y services.`, and return non-zero when any provider suspend fails.
+- [x] Run expiry tests until green.
+- [x] Commit expiry suspension slice.
 
 ### Task 8: RED Tests For Admin Provider Sync
 
