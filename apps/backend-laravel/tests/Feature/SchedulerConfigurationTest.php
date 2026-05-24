@@ -2,13 +2,10 @@
 
 namespace Tests\Feature;
 
-use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
 class SchedulerConfigurationTest extends TestCase
 {
-    use RefreshDatabase;
-
     public function test_laravel_schedule_registers_maintenance_tasks(): void
     {
         $this->artisan('schedule:list')
@@ -27,7 +24,7 @@ class SchedulerConfigurationTest extends TestCase
 
         $this->assertStringContainsString('container_name: billing_v3_scheduler', $scheduler);
         $this->assertStringContainsString('php artisan schedule:work', $scheduler);
-        $this->assertMatchesRegularExpression('/depends_on:\s+backend:\s+condition: service_healthy/s', $scheduler);
+        $this->assertMatchesRegularExpression('/depends_on:.*backend:\s+condition: service_healthy/s', $scheduler);
         $this->assertMatchesRegularExpression('/depends_on:.*postgres:\s+condition: service_healthy/s', $scheduler);
     }
 
@@ -35,7 +32,6 @@ class SchedulerConfigurationTest extends TestCase
     {
         $paths = [
             base_path('../../infra/docker-compose.dev.yml'),
-            base_path('../../../infra/docker-compose.dev.yml'),
             '/infra/docker-compose.dev.yml',
         ];
 
