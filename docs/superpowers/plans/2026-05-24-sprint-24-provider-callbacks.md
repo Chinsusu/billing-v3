@@ -81,10 +81,10 @@
 - [x] Load provider callback events on admin service runbook.
 - [x] Render callback history without exposing raw secrets.
 - [x] Update README with S24 endpoint/config behavior.
-- [ ] Push branch and check it out on `/opt/billing`.
-- [ ] Run Laravel Pint and full Laravel tests on `/opt/billing`.
-- [ ] Run Go checks on `/opt/billing`.
-- [ ] Run Docker Compose config/build and secret scan.
-- [ ] Verify webhook route, `/admin/services`, and `/up` smoke behavior.
-- [ ] Mark verification steps complete in this plan, commit, and push.
+- [x] Push branch and check it out on `/opt/billing`.
+- [x] Run Laravel Pint and full Laravel tests on `/opt/billing`.
+- [x] Run Go checks on `/opt/billing`.
+- [x] Run Docker Compose config/build and secret scan.
+- [x] Verify webhook route, `/admin/services`, and `/up` smoke behavior.
+- [x] Mark verification steps complete in this plan, commit, and push.
 - [ ] Open PR to `develop`, wait for CI, merge, delete feature branch, and deploy `/opt/billing`.
