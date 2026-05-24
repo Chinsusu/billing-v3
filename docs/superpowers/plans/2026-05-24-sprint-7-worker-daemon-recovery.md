@@ -42,14 +42,14 @@
 - Modify: `apps/worker-go/internal/provisioningstore/store.go`
 - Modify: `apps/worker-go/internal/provisioningstore/store_test.go`
 
-- [ ] Add runtime config fields and duration parsing.
-- [ ] Add `Attempts` to provisioning jobs.
-- [ ] Add `RetryPolicy` and `NewStoreWithPolicy`.
-- [ ] Keep `NewStore` compatible with existing tests by using max attempts `1`.
-- [ ] Update `ClaimNext` to return attempt count after claim.
-- [ ] Update `MarkFailed` to either requeue with backoff or fail permanently.
-- [ ] Add `RecoverStuck` to move old `processing` jobs to `pending` or `failed`.
-- [ ] Run Go store/config tests and fix failures.
+- [x] Add runtime config fields and duration parsing.
+- [x] Add `Attempts` to provisioning jobs.
+- [x] Add `RetryPolicy` and `NewStoreWithPolicy`.
+- [x] Keep `NewStore` compatible with existing tests by using max attempts `1`.
+- [x] Update `ClaimNext` to return attempt count after claim.
+- [x] Update `MarkFailed` to either requeue with backoff or fail permanently.
+- [x] Add `RecoverStuck` to move old `processing` jobs to `pending` or `failed`.
+- [x] Run Go store/config tests and fix failures.
 
 ### Task 4: Worker Daemon Loop
 
@@ -57,11 +57,11 @@
 - Create: `apps/worker-go/internal/provisioning/daemon.go`
 - Modify: `apps/worker-go/cmd/worker/main.go`
 
-- [ ] Add a testable daemon runner that accepts an executor, recovery callback, poll interval, and sleep function.
-- [ ] Add `--daemon` flag while preserving `--once` behavior by default.
-- [ ] In daemon mode, recover stuck jobs before processing each job.
-- [ ] Use OS signal cancellation for long-running mode.
-- [ ] Run Go daemon tests and `go test ./...`.
+- [x] Add a testable daemon runner that accepts an executor, recovery callback, poll interval, and sleep function.
+- [x] Add `--daemon` flag while preserving `--once` behavior by default.
+- [x] In daemon mode, recover stuck jobs before processing each job.
+- [x] Use OS signal cancellation for long-running mode.
+- [x] Run Go daemon tests and `go test ./...`.
 
 ### Task 5: Docker And Admin Visibility
 
@@ -71,11 +71,11 @@
 - Modify: `apps/backend-laravel/tests/Feature/ProvisioningOperationsTest.php`
 - Modify: `README.md`
 
-- [ ] Add Compose `worker` service using `golang:1.26.3` and `go run ./cmd/worker --daemon`.
-- [ ] Add admin table columns for `available_at`, `processed_at`, and `last_error`.
-- [ ] Add Laravel feature coverage that admin can see backoff/recovery timestamps and error text.
-- [ ] Document S7 worker daemon and recovery environment variables.
-- [ ] Run Laravel targeted tests and Docker compose config.
+- [x] Add Compose `worker` service using `golang:1.26.3` and `go run ./cmd/worker --daemon`.
+- [x] Add admin table columns for `available_at`, `processed_at`, and `last_error`.
+- [x] Add Laravel feature coverage that admin can see backoff/recovery timestamps and error text.
+- [x] Document S7 worker daemon and recovery environment variables.
+- [x] Run Laravel targeted tests and Docker compose config.
 
 ### Task 6: Final Verification And Publish
 
@@ -83,8 +83,8 @@
 - Modify: `docs/superpowers/plans/2026-05-24-sprint-7-worker-daemon-recovery.md`
 
 - [ ] Mark plan checklist complete after verification.
-- [ ] Run Laravel Pint and full tests on the dev server.
-- [ ] Run Go `gofmt`, `go vet`, and `go test`.
-- [ ] Run Docker compose config and secret scan.
+- [x] Run Laravel Pint and full tests on the dev server.
+- [x] Run Go `gofmt`, `go vet`, and `go test`.
+- [x] Run Docker compose config and secret scan.
 - [ ] Commit and push branch.
 - [ ] Open PR to `develop`, wait for CI, merge, and update `/opt/billing`.
