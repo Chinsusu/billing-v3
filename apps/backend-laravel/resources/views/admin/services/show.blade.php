@@ -26,6 +26,41 @@
     </p>
 </div>
 
+@can('wallets.adjust')
+<div class="panel">
+    <h2>Refund Credit</h2>
+    <form method="POST" action="/admin/services/{{ $service->id }}/refund-credit">
+        @csrf
+        <label>Amount<input name="amount" type="number" min="1" required></label>
+        <label>Currency<input name="currency" value="VND" maxlength="3" required></label>
+        <label>Reason<textarea name="reason" rows="3" required></textarea></label>
+        <label>Reference<input name="reference" placeholder="Optional idempotency reference"></label>
+        <button type="submit">Credit Refund</button>
+    </form>
+</div>
+@endcan
+
+<div class="panel">
+    <h2>Cancellation Requests</h2>
+    <table>
+        <thead><tr><th>Mode</th><th>Status</th><th>Requested</th><th>Completed</th><th>Reason</th><th>Provider Job</th></tr></thead>
+        <tbody>
+            @forelse ($service->cancellations as $cancellation)
+                <tr>
+                    <td>{{ $cancellation->mode }}</td>
+                    <td>{{ $cancellation->status }}</td>
+                    <td>{{ $cancellation->requested_at?->toDateTimeString() ?? '-' }}</td>
+                    <td>{{ $cancellation->completed_at?->toDateTimeString() ?? '-' }}</td>
+                    <td>{{ $cancellation->reason ?? '-' }}</td>
+                    <td>{{ $cancellation->provider_action_job_id ?? '-' }}</td>
+                </tr>
+            @empty
+                <tr><td colspan="6" class="muted">No cancellation requests yet.</td></tr>
+            @endforelse
+        </tbody>
+    </table>
+</div>
+
 <div class="panel">
     <h2>Provisioning Jobs</h2>
     <table>

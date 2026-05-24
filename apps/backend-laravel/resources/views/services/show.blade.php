@@ -16,7 +16,38 @@
             @csrf
             <button type="submit">Renew</button>
         </form>
+        <form method="POST" action="/services/{{ $service->id }}/cancel" style="margin-top:16px">
+            @csrf
+            <label>Cancellation mode
+                <select name="mode">
+                    <option value="period_end">period_end</option>
+                    <option value="immediate">immediate</option>
+                </select>
+            </label>
+            <label>Reason<textarea name="reason" rows="3"></textarea></label>
+            <button class="button danger" type="submit">Request Cancellation</button>
+        </form>
     @endif
+</div>
+
+<div class="panel">
+    <h2>Cancellation History</h2>
+    <table>
+        <thead><tr><th>Mode</th><th>Status</th><th>Requested</th><th>Completed</th><th>Reason</th></tr></thead>
+        <tbody>
+            @forelse ($service->cancellations as $cancellation)
+                <tr>
+                    <td>{{ $cancellation->mode }}</td>
+                    <td>{{ $cancellation->status }}</td>
+                    <td>{{ $cancellation->requested_at?->format('Y-m-d H:i') ?? '-' }}</td>
+                    <td>{{ $cancellation->completed_at?->format('Y-m-d H:i') ?? '-' }}</td>
+                    <td>{{ $cancellation->reason ?? '-' }}</td>
+                </tr>
+            @empty
+                <tr><td colspan="5" class="muted">No cancellation requests yet.</td></tr>
+            @endforelse
+        </tbody>
+    </table>
 </div>
 
 <div class="panel">
