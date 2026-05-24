@@ -682,7 +682,7 @@ git push origin feature/sprint-14-scheduler-ops-health
 **Files:**
 - Create: `apps/backend-laravel/tests/Feature/AdminOpsHealthTest.php`
 
-- [x] Add tests for admin ops health access, counts, and stale task warnings.
+- [x] Add tests for admin ops health access, counts, stale task warnings, and the admin dashboard link.
 
 Use:
 
@@ -795,7 +795,7 @@ class AdminOpsHealthTest extends TestCase
 
         $response->assertOk();
         $this->assertMatchesRegularExpression(
-            '/<tr>.*bank_sync_payments.*warning.*No successful run in the last 3 minutes\..*<\/tr>/s',
+            '/<tr>(?:(?!<\/tr>).)*bank_sync_payments(?:(?!<\/tr>).)*warning(?:(?!<\/tr>).)*No successful run in the last 3 minutes\.(?:(?!<\/tr>).)*<\/tr>/s',
             $response->getContent()
         );
     }
@@ -1091,7 +1091,7 @@ Run:
 ssh --% root@10.1.1.124 "cd /opt/billing && git fetch origin feature/sprint-14-scheduler-ops-health && git reset --hard origin/feature/sprint-14-scheduler-ops-health && docker compose -f infra/docker-compose.dev.yml exec -T backend sh -lc 'APP_ENV=testing php artisan test --filter=AdminOpsHealthTest'"
 ```
 
-Expected: PASS with 3 tests.
+Expected: PASS with 4 tests.
 
 - [ ] Commit ops health slice.
 

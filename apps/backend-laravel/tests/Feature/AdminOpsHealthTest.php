@@ -106,7 +106,7 @@ class AdminOpsHealthTest extends TestCase
 
         $response->assertOk();
         $this->assertMatchesRegularExpression(
-            '/<tr>.*bank_sync_payments.*warning.*No successful run in the last 3 minutes\..*<\/tr>/s',
+            '/<tr>(?:(?!<\/tr>).)*bank_sync_payments(?:(?!<\/tr>).)*warning(?:(?!<\/tr>).)*No successful run in the last 3 minutes\.(?:(?!<\/tr>).)*<\/tr>/s',
             $response->getContent()
         );
     }
