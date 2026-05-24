@@ -50,6 +50,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - run: docker compose -f infra/docker-compose.dev.yml config
+      - run: docker compose -f infra/docker-compose.dev.yml build backend
 
   security-secrets:
     runs-on: ubuntu-latest

@@ -128,6 +128,24 @@ Runtime environment:
 
 The dev Compose file includes a `worker` service that runs `go run ./cmd/worker --daemon` against the Compose Postgres service.
 
+## Sprint 8 Shared Postgres Runtime
+
+The dev Compose runtime runs Laravel and the worker against the same Postgres database:
+
+```bash
+docker compose -f infra/docker-compose.dev.yml up -d --build postgres rabbitmq redis mailpit backend worker
+```
+
+The backend service builds `apps/backend-laravel/Dockerfile.dev`, provides `pdo_pgsql`, runs Composer install, applies migrations, seeds idempotent dev data, and serves the app on port `8000`.
+
+Run the shared-runtime smoke check with:
+
+```bash
+docker compose -f infra/docker-compose.dev.yml exec backend php artisan runtime:smoke-provisioning --timeout=30
+```
+
+The smoke command tops up the seeded customer if needed, checks out `proxy-vn-30d`, waits for the Go daemon to process the provisioning job, and verifies the service becomes `active`.
+
 Seeded accounts after `php artisan db:seed`:
 
 ```text
