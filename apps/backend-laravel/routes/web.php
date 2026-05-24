@@ -9,11 +9,13 @@ use App\Http\Controllers\Admin\PaymentEventController;
 use App\Http\Controllers\Admin\ProductController;
 use App\Http\Controllers\Admin\ProvisioningJobController;
 use App\Http\Controllers\Admin\ProvisioningJobRetryController;
+use App\Http\Controllers\Admin\ProvisioningProviderAccountController;
 use App\Http\Controllers\Admin\ServiceController as AdminServiceController;
 use App\Http\Controllers\Auth\AuthenticatedSessionController;
 use App\Http\Controllers\Auth\RegisteredUserController;
 use App\Http\Controllers\BankWebhookSandboxController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\Internal\ProvisioningJobExecutionController;
 use App\Http\Controllers\InvoiceController;
 use App\Http\Controllers\OrderController;
 use App\Http\Controllers\ProductCatalogController;
@@ -22,11 +24,15 @@ use App\Http\Controllers\ServiceController;
 use App\Http\Controllers\ServiceRenewalController;
 use App\Http\Controllers\WalletController;
 use App\Http\Controllers\WalletTopUpController;
+use Illuminate\Foundation\Http\Middleware\ValidateCsrfToken;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', fn () => redirect('/products'));
 Route::get('/products', ProductCatalogController::class)->name('products.index');
 Route::post('/webhooks/bank/sandbox', BankWebhookSandboxController::class)->name('webhooks.bank-sandbox');
+Route::post('/internal/provisioning/jobs/{job}/execute', ProvisioningJobExecutionController::class)
+    ->withoutMiddleware([ValidateCsrfToken::class])
+    ->name('internal.provisioning-jobs.execute');
 
 Route::middleware('guest')->group(function (): void {
     Route::get('/register', [RegisteredUserController::class, 'create'])->name('register');
@@ -66,6 +72,11 @@ Route::middleware('auth')->group(function (): void {
         Route::get('/bank-integrations/{bankIntegration}/edit', [BankIntegrationController::class, 'edit'])->middleware('permission:bank_integrations.manage')->name('bank-integrations.edit');
         Route::put('/bank-integrations/{bankIntegration}', [BankIntegrationController::class, 'update'])->middleware('permission:bank_integrations.manage')->name('bank-integrations.update');
         Route::post('/bank-integrations/{bankIntegration}/test', BankIntegrationTestController::class)->middleware('permission:bank_integrations.manage')->name('bank-integrations.test');
+        Route::get('/provisioning-provider-accounts', [ProvisioningProviderAccountController::class, 'index'])->middleware('permission:provisioning_provider_accounts.manage')->name('provisioning-provider-accounts.index');
+        Route::get('/provisioning-provider-accounts/create', [ProvisioningProviderAccountController::class, 'create'])->middleware('permission:provisioning_provider_accounts.manage')->name('provisioning-provider-accounts.create');
+        Route::post('/provisioning-provider-accounts', [ProvisioningProviderAccountController::class, 'store'])->middleware('permission:provisioning_provider_accounts.manage')->name('provisioning-provider-accounts.store');
+        Route::get('/provisioning-provider-accounts/{provisioningProviderAccount}/edit', [ProvisioningProviderAccountController::class, 'edit'])->middleware('permission:provisioning_provider_accounts.manage')->name('provisioning-provider-accounts.edit');
+        Route::put('/provisioning-provider-accounts/{provisioningProviderAccount}', [ProvisioningProviderAccountController::class, 'update'])->middleware('permission:provisioning_provider_accounts.manage')->name('provisioning-provider-accounts.update');
         Route::get('/orders', [AdminOrderController::class, 'index'])->middleware('permission:orders.view')->name('orders.index');
         Route::get('/services', [AdminServiceController::class, 'index'])->middleware('permission:services.view')->name('services.index');
         Route::get('/provisioning-jobs', [ProvisioningJobController::class, 'index'])->middleware('permission:provisioning_jobs.view')->name('provisioning-jobs.index');

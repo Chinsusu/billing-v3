@@ -4,6 +4,7 @@ namespace Database\Seeders;
 
 use App\Models\Invoice;
 use App\Models\Product;
+use App\Models\ProvisioningProviderAccount;
 use App\Models\User;
 use App\Models\Wallet;
 use Illuminate\Database\Seeder;
@@ -44,6 +45,22 @@ class DatabaseSeeder extends Seeder
             ]
         );
 
+        $sandboxProvider = ProvisioningProviderAccount::firstOrCreate(
+            ['slug' => 'sandbox'],
+            [
+                'name' => 'Sandbox Provisioning',
+                'driver' => 'sandbox',
+                'auth_type' => 'none',
+                'enabled' => true,
+                'timeout_seconds' => 15,
+                'request_template' => [],
+                'response_external_id_path' => 'external_id',
+                'response_status_path' => 'status',
+                'created_by_id' => $admin->id,
+                'updated_by_id' => $admin->id,
+            ]
+        );
+
         Product::firstOrCreate(
             ['code' => 'proxy-vn-30d'],
             [
@@ -55,8 +72,10 @@ class DatabaseSeeder extends Seeder
                 'duration_days' => 30,
                 'description' => 'Starter proxy plan for Sprint 1 catalog validation.',
                 'config' => [],
+                'provider_account_id' => $sandboxProvider->id,
+                'provider_options' => [],
             ]
-        );
+        )->update(['provider_account_id' => $sandboxProvider->id]);
 
         Product::firstOrCreate(
             ['code' => 'vps-basic-30d'],
@@ -69,7 +88,9 @@ class DatabaseSeeder extends Seeder
                 'duration_days' => 30,
                 'description' => 'Starter VPS plan for Sprint 1 catalog validation.',
                 'config' => [],
+                'provider_account_id' => $sandboxProvider->id,
+                'provider_options' => [],
             ]
-        );
+        )->update(['provider_account_id' => $sandboxProvider->id]);
     }
 }

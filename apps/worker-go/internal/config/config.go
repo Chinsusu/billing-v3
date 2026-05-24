@@ -11,27 +11,34 @@ const (
 	defaultProvisioningStuckAfter   = 5 * time.Minute
 	defaultProvisioningMaxAttempts  = 3
 	defaultProvisioningRetryBackoff = time.Minute
+	defaultProvisioningTimeout      = 30 * time.Second
 )
 
 type Config struct {
-	DatabaseURL              string
-	RabbitMQURL              string
-	LogLevel                 string
-	WorkerPollInterval       time.Duration
-	ProvisioningStuckAfter   time.Duration
-	ProvisioningMaxAttempts  int
-	ProvisioningRetryBackoff time.Duration
+	DatabaseURL                 string
+	RabbitMQURL                 string
+	LogLevel                    string
+	WorkerPollInterval          time.Duration
+	ProvisioningStuckAfter      time.Duration
+	ProvisioningMaxAttempts     int
+	ProvisioningRetryBackoff    time.Duration
+	BackendInternalURL          string
+	InternalProvisioningToken   string
+	ProvisioningExecutorTimeout time.Duration
 }
 
 func Load() Config {
 	return Config{
-		DatabaseURL:              envOrDefault("DATABASE_URL", "postgres://billing:billing_secret@localhost:5432/billing_v3?sslmode=disable"),
-		RabbitMQURL:              envOrDefault("RABBITMQ_URL", "amqp://billing:billing_secret@localhost:5672/"),
-		LogLevel:                 envOrDefault("LOG_LEVEL", "info"),
-		WorkerPollInterval:       durationEnvOrDefault("WORKER_POLL_INTERVAL", defaultWorkerPollInterval),
-		ProvisioningStuckAfter:   durationEnvOrDefault("PROVISIONING_STUCK_AFTER", defaultProvisioningStuckAfter),
-		ProvisioningMaxAttempts:  intEnvOrDefault("PROVISIONING_MAX_ATTEMPTS", defaultProvisioningMaxAttempts),
-		ProvisioningRetryBackoff: durationEnvOrDefault("PROVISIONING_RETRY_BACKOFF", defaultProvisioningRetryBackoff),
+		DatabaseURL:                 envOrDefault("DATABASE_URL", "postgres://billing:billing_secret@localhost:5432/billing_v3?sslmode=disable"),
+		RabbitMQURL:                 envOrDefault("RABBITMQ_URL", "amqp://billing:billing_secret@localhost:5672/"),
+		LogLevel:                    envOrDefault("LOG_LEVEL", "info"),
+		WorkerPollInterval:          durationEnvOrDefault("WORKER_POLL_INTERVAL", defaultWorkerPollInterval),
+		ProvisioningStuckAfter:      durationEnvOrDefault("PROVISIONING_STUCK_AFTER", defaultProvisioningStuckAfter),
+		ProvisioningMaxAttempts:     intEnvOrDefault("PROVISIONING_MAX_ATTEMPTS", defaultProvisioningMaxAttempts),
+		ProvisioningRetryBackoff:    durationEnvOrDefault("PROVISIONING_RETRY_BACKOFF", defaultProvisioningRetryBackoff),
+		BackendInternalURL:          envOrDefault("BACKEND_INTERNAL_URL", "http://localhost:8000"),
+		InternalProvisioningToken:   envOrDefault("INTERNAL_PROVISIONING_TOKEN", "local-internal-provisioning-token"),
+		ProvisioningExecutorTimeout: durationEnvOrDefault("PROVISIONING_EXECUTOR_TIMEOUT", defaultProvisioningTimeout),
 	}
 }
 

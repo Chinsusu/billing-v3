@@ -25,6 +25,11 @@ class ProductFactory extends Factory
             'duration_days' => 30,
             'description' => fake()->sentence(),
             'config' => [],
+            'provider_account_id' => null,
+            'provider_plan_code' => null,
+            'provider_region' => null,
+            'provider_provision_path' => null,
+            'provider_options' => [],
         ];
     }
 }

@@ -33,7 +33,8 @@ func main() {
 		MaxAttempts:  cfg.ProvisioningMaxAttempts,
 		RetryBackoff: cfg.ProvisioningRetryBackoff,
 	})
-	executor := provisioning.NewExecutor(store, provisioning.Processor{})
+	processor := provisioning.NewInternalExecutorProcessor(cfg.BackendInternalURL, cfg.InternalProvisioningToken, cfg.ProvisioningExecutorTimeout)
+	executor := provisioning.NewExecutor(store, processor)
 	if *daemonMode {
 		ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
 		defer stop()
@@ -50,7 +51,7 @@ func main() {
 			return nil
 		}, cfg.WorkerPollInterval)
 
-		fmt.Fprintf(os.Stdout, "billing worker ready log_level=%s mode=daemon poll_interval=%s stuck_after=%s max_attempts=%d retry_backoff=%s\n", cfg.LogLevel, cfg.WorkerPollInterval, cfg.ProvisioningStuckAfter, cfg.ProvisioningMaxAttempts, cfg.ProvisioningRetryBackoff)
+		fmt.Fprintf(os.Stdout, "billing worker ready log_level=%s mode=daemon poll_interval=%s stuck_after=%s max_attempts=%d retry_backoff=%s backend_internal_url=%s\n", cfg.LogLevel, cfg.WorkerPollInterval, cfg.ProvisioningStuckAfter, cfg.ProvisioningMaxAttempts, cfg.ProvisioningRetryBackoff, cfg.BackendInternalURL)
 		if err := daemon.Run(ctx); err != nil {
 			fmt.Fprintf(os.Stderr, "run provisioning daemon: %v\n", err)
 			os.Exit(1)
@@ -66,7 +67,7 @@ func main() {
 			os.Exit(1)
 		}
 
-		fmt.Fprintf(os.Stdout, "billing worker ready log_level=%s mode=provisioning-sandbox processed=%t\n", cfg.LogLevel, processed)
+		fmt.Fprintf(os.Stdout, "billing worker ready log_level=%s mode=internal-executor processed=%t backend_internal_url=%s\n", cfg.LogLevel, processed, cfg.BackendInternalURL)
 		if *once || !processed {
 			return
 		}

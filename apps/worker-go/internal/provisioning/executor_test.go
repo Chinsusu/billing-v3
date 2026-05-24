@@ -19,7 +19,8 @@ func TestExecutorProcessesClaimedJob(t *testing.T) {
 		},
 		ok: true,
 	}
-	executor := NewExecutor(store, Processor{})
+	processor := &fakeProcessor{result: Result{Status: "processed", ExternalID: "provider-service-123"}}
+	executor := NewExecutor(store, processor)
 
 	processed, err := executor.ProcessOnce(context.Background())
 
@@ -29,7 +30,10 @@ func TestExecutorProcessesClaimedJob(t *testing.T) {
 	if !processed {
 		t.Fatal("expected job to be processed")
 	}
-	if store.succeededExternalID != "sandbox-proxy-service-1" {
+	if processor.processedJobID != "job-1" {
+		t.Fatalf("unexpected processed job %q", processor.processedJobID)
+	}
+	if store.succeededExternalID != "provider-service-123" {
 		t.Fatalf("unexpected external id %q", store.succeededExternalID)
 	}
 	if store.failedError != "" {
@@ -48,7 +52,7 @@ func TestExecutorMarksJobFailedWhenProcessorFails(t *testing.T) {
 		},
 		ok: true,
 	}
-	executor := NewExecutor(store, Processor{})
+	executor := NewExecutor(store, &fakeProcessor{err: errors.New("provider timeout")})
 
 	processed, err := executor.ProcessOnce(context.Background())
 
@@ -75,7 +79,7 @@ func TestExecutorReturnsErrorWhenFailureStateCannotBeRecorded(t *testing.T) {
 		ok:            true,
 		markFailedErr: errors.New("database unavailable"),
 	}
-	executor := NewExecutor(store, Processor{})
+	executor := NewExecutor(store, &fakeProcessor{err: errors.New("provider timeout")})
 
 	processed, err := executor.ProcessOnce(context.Background())
 
@@ -89,7 +93,7 @@ func TestExecutorReturnsErrorWhenFailureStateCannotBeRecorded(t *testing.T) {
 
 func TestExecutorReturnsFalseWhenNoJobClaimed(t *testing.T) {
 	store := &fakeStore{ok: false}
-	executor := NewExecutor(store, Processor{})
+	executor := NewExecutor(store, &fakeProcessor{})
 
 	processed, err := executor.ProcessOnce(context.Background())
 
@@ -108,6 +112,21 @@ type fakeStore struct {
 	markFailedErr       error
 	succeededExternalID string
 	failedError         string
+}
+
+type fakeProcessor struct {
+	result         Result
+	err            error
+	processedJobID string
+}
+
+func (f *fakeProcessor) Process(_ context.Context, job Job) (Result, error) {
+	f.processedJobID = job.ID
+	if f.err != nil {
+		return Result{}, f.err
+	}
+
+	return f.result, nil
 }
 
 func (f *fakeStore) ClaimNext(context.Context) (Job, bool, error) {

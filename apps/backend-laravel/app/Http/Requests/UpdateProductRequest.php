@@ -27,6 +27,11 @@ class UpdateProductRequest extends FormRequest
             'currency' => ['required', 'string', 'size:3'],
             'duration_days' => ['required', 'integer', 'min:1', 'max:3650'],
             'description' => ['nullable', 'string', 'max:2000'],
+            'provider_account_id' => ['nullable', 'uuid', 'exists:provisioning_provider_accounts,id'],
+            'provider_plan_code' => ['nullable', 'string', 'max:120'],
+            'provider_region' => ['nullable', 'string', 'max:80'],
+            'provider_provision_path' => ['nullable', 'string', 'max:255', 'starts_with:/'],
+            'provider_options' => ['nullable', 'json'],
         ];
     }
 }

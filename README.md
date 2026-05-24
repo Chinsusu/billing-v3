@@ -125,8 +125,22 @@ Runtime environment:
 - `PROVISIONING_STUCK_AFTER`: old `processing` job recovery threshold, default `5m`.
 - `PROVISIONING_MAX_ATTEMPTS`: max processing attempts before permanent failure, default `3`.
 - `PROVISIONING_RETRY_BACKOFF`: delay before retrying a failed attempt, default `60s`.
+- `BACKEND_INTERNAL_URL`: Laravel internal executor base URL, default `http://localhost:8000`.
+- `INTERNAL_PROVISIONING_TOKEN`: shared token sent to Laravel internal executor.
+- `PROVISIONING_EXECUTOR_TIMEOUT`: HTTP timeout for executor calls, default `30s`.
 
 The dev Compose file includes a `worker` service that runs `go run ./cmd/worker --daemon` against the Compose Postgres service.
+
+## Sprint 9 Dynamic Provisioning Providers
+
+Routes:
+
+- `GET /admin/provisioning-provider-accounts`
+- `POST /admin/provisioning-provider-accounts`
+- `PUT /admin/provisioning-provider-accounts/{provisioningProviderAccount}`
+- `POST /internal/provisioning/jobs/{provisioningJob}/execute`
+
+Admins can define multiple provider accounts with the same driver shape but different endpoint/API key values, then map each product to a provider account, plan code, region, provision path, and JSON options. Secrets are encrypted by Laravel and never sent to the Go worker. The worker only claims jobs and calls the Laravel internal executor with `INTERNAL_PROVISIONING_TOKEN`.
 
 ## Sprint 8 Shared Postgres Runtime
 

@@ -11,6 +11,10 @@ type Store interface {
 	MarkFailed(context.Context, Job, error) error
 }
 
+type Processor interface {
+	Process(context.Context, Job) (Result, error)
+}
+
 type Executor struct {
 	store     Store
 	processor Processor
@@ -29,7 +33,7 @@ func (e Executor) ProcessOnce(ctx context.Context) (bool, error) {
 		return false, nil
 	}
 
-	result, err := e.processor.Process(job)
+	result, err := e.processor.Process(ctx, job)
 	if err != nil {
 		if markErr := e.store.MarkFailed(ctx, job, err); markErr != nil {
 			return true, fmt.Errorf("process job: %w; mark failed: %v", err, markErr)

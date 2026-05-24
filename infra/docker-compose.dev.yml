@@ -55,7 +55,7 @@ services:
       dockerfile: Dockerfile.dev
     container_name: billing_v3_backend
     working_dir: /app
-    command: ["sh", "-lc", "composer install --no-interaction --prefer-dist && if [ ! -f .env ]; then cp .env.compose.example .env && php artisan key:generate --ansi --force; fi && php artisan config:clear && php artisan migrate --force && php artisan db:seed --force && php artisan serve --host=0.0.0.0 --port=8000"]
+    command: ["sh", "-lc", "composer install --no-interaction --prefer-dist && if [ ! -f .env ] || ! grep -q '^DB_CONNECTION=pgsql$' .env; then old_key=$(grep '^APP_KEY=' .env 2>/dev/null | cut -d= -f2-); cp .env.compose.example .env; if [ -n \"$$old_key\" ]; then sed -i \"s|^APP_KEY=.*|APP_KEY=$$old_key|\" .env; else php artisan key:generate --ansi --force; fi; fi && php artisan config:clear && php artisan migrate --force && php artisan db:seed --force && php artisan serve --host=0.0.0.0 --port=8000"]
     environment:
       APP_ENV: local
       APP_DEBUG: "true"
@@ -75,6 +75,7 @@ services:
       MAIL_HOST: mailpit
       MAIL_PORT: 1025
       BANK_SANDBOX_WEBHOOK_SECRET: local-bank-sandbox-secret
+      INTERNAL_PROVISIONING_TOKEN: local-internal-provisioning-token
     ports:
       - "8000:8000"
     volumes:
@@ -101,6 +102,9 @@ services:
       PROVISIONING_STUCK_AFTER: 5m
       PROVISIONING_MAX_ATTEMPTS: 3
       PROVISIONING_RETRY_BACKOFF: 60s
+      PROVISIONING_EXECUTOR_TIMEOUT: 30s
+      BACKEND_INTERNAL_URL: http://backend:8000
+      INTERNAL_PROVISIONING_TOKEN: local-internal-provisioning-token
     volumes:
       - ../apps/worker-go:/app
     depends_on:
