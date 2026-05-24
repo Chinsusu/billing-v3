@@ -15,54 +15,97 @@ use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Http;
 use Tests\TestCase;
 
-class AdminServiceProviderSyncTest extends TestCase
+class AdminProviderActionJobTest extends TestCase
 {
     use RefreshDatabase;
 
-    public function test_admin_can_queue_service_provider_sync(): void
+    public function test_admin_can_queue_service_provider_cancel(): void
     {
         $this->travelTo(Carbon::parse('2026-05-24 09:00:00'));
         $admin = $this->adminUser();
-        [$account, $service] = $this->providerBackedService([
-            'status' => 'expired',
-            'expires_at' => now()->subDay(),
-        ]);
-
+        [$account, $service] = $this->providerBackedService();
         Http::fake();
 
         $this->actingAs($admin)
             ->from('/admin/services')
-            ->post("/admin/services/{$service->id}/sync-provider")
+            ->post("/admin/services/{$service->id}/cancel-provider")
             ->assertRedirect('/admin/services')
-            ->assertSessionHas('status', 'Provider sync queued.');
+            ->assertSessionHas('status', 'Provider cancel queued.');
 
-        $service->refresh();
-        $this->assertSame('expired', $service->status);
+        $this->assertSame('active', $service->refresh()->status);
         $this->assertDatabaseHas('provider_action_jobs', [
             'service_id' => $service->id,
             'provider_account_id' => $account->id,
-            'action' => 'sync',
+            'action' => 'cancel',
             'status' => 'pending',
             'attempts' => 0,
-            'idempotency_key' => "service-sync:{$service->id}:2026-05-24T09:00:00.000000Z",
+            'idempotency_key' => "service-cancel:{$service->id}:2026-05-24T09:00:00.000000Z",
         ]);
-        $this->assertSame(1, ProviderActionJob::count());
+        $this->assertSame(now()->toISOString(), data_get(ProviderActionJob::firstOrFail()->payload, 'context.cancelled_at'));
 
         Http::assertNothingSent();
     }
 
-    public function test_admin_services_index_shows_provider_sync_form(): void
+    public function test_admin_can_list_provider_action_jobs(): void
     {
         $admin = $this->adminUser();
         [, $service] = $this->providerBackedService();
+        $job = $this->providerActionJob($service, [
+            'action' => 'suspend',
+            'status' => 'failed',
+            'attempts' => 3,
+            'last_error' => 'Provider is down.',
+        ]);
 
         $this->actingAs($admin)
-            ->get('/admin/services')
+            ->get('/admin/provider-action-jobs')
             ->assertOk()
-            ->assertSee("action=\"/admin/services/{$service->id}/sync-provider\"", false)
-            ->assertSee('Sync Provider')
-            ->assertSee("action=\"/admin/services/{$service->id}/cancel-provider\"", false)
-            ->assertSee('Cancel Provider');
+            ->assertSee('Provider Action Jobs')
+            ->assertSee($job->idempotency_key)
+            ->assertSee('suspend')
+            ->assertSee('failed')
+            ->assertSee('Provider is down.');
+    }
+
+    public function test_admin_can_retry_failed_provider_action_job(): void
+    {
+        $this->travelTo(Carbon::parse('2026-05-24 09:00:00'));
+        $admin = $this->adminUser();
+        [, $service] = $this->providerBackedService();
+        $job = $this->providerActionJob($service, [
+            'status' => 'failed',
+            'attempts' => 3,
+            'processed_at' => now(),
+            'last_error' => 'Provider is down.',
+        ]);
+
+        $this->actingAs($admin)
+            ->from('/admin/provider-action-jobs')
+            ->post("/admin/provider-action-jobs/{$job->id}/retry")
+            ->assertRedirect('/admin/provider-action-jobs')
+            ->assertSessionHas('status', 'Provider action job queued for retry.');
+
+        $job->refresh();
+        $this->assertSame('pending', $job->status);
+        $this->assertSame(0, $job->attempts);
+        $this->assertNull($job->available_at);
+        $this->assertNull($job->processed_at);
+        $this->assertNull($job->last_error);
+    }
+
+    private function providerActionJob(Service $service, array $overrides = []): ProviderActionJob
+    {
+        return ProviderActionJob::create($overrides + [
+            'service_id' => $service->id,
+            'user_id' => $service->user_id,
+            'provider_account_id' => data_get($service->meta, 'provider.account_id'),
+            'action' => 'sync',
+            'status' => 'pending',
+            'attempts' => 0,
+            'max_attempts' => 3,
+            'idempotency_key' => "service-sync:{$service->id}:manual",
+            'payload' => ['context' => []],
+        ]);
     }
 
     private function adminUser(): User

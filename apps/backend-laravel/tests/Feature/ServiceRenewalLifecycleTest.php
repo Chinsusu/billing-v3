@@ -6,6 +6,7 @@ use App\Models\LedgerEntry;
 use App\Models\Order;
 use App\Models\OrderItem;
 use App\Models\Product;
+use App\Models\ProviderActionJob;
 use App\Models\ProvisioningProviderAccount;
 use App\Models\Service;
 use App\Models\User;
@@ -304,7 +305,7 @@ class ServiceRenewalLifecycleTest extends TestCase
         ], ['code' => 'proxy-vn-60d']);
 
         $this->artisan('services:expire')
-            ->expectsOutput('Expired 1 services. Failed 0 services.')
+            ->expectsOutput('Expired 1 services. Queued 0 provider action jobs.')
             ->assertExitCode(0);
 
         $this->assertSame('expired', $overdue->refresh()->status);
@@ -312,7 +313,7 @@ class ServiceRenewalLifecycleTest extends TestCase
         $this->assertSame('active', $future->refresh()->status);
     }
 
-    public function test_services_expire_command_suspends_provider_service_before_marking_expired(): void
+    public function test_services_expire_command_enqueues_provider_suspend_and_leaves_service_active_until_worker_runs(): void
     {
         $now = Carbon::parse('2026-05-24 09:00:00');
         $this->travelTo($now);
@@ -322,67 +323,56 @@ class ServiceRenewalLifecycleTest extends TestCase
             'expires_at' => $now->copy()->subMinute(),
         ]);
 
-        Http::fake([
-            'https://provider-a.example.test/api/services/provider-service-123/suspend' => Http::response([
-                'status' => 'success',
-            ]),
-        ]);
+        Http::fake();
 
         $this->artisan('services:expire')
-            ->expectsOutput('Expired 1 services. Failed 0 services.')
+            ->expectsOutput('Expired 0 services. Queued 1 provider action jobs.')
             ->assertExitCode(0);
-
-        $this->assertSame('expired', $overdue->refresh()->status);
-        $this->assertSame($now->toISOString(), $overdue->meta['expired_at']);
-        $this->assertDatabaseHas('provisioning_execution_logs', [
-            'service_id' => $overdue->id,
-            'provider_account_id' => $account->id,
-            'action' => 'provider_service_suspend',
-            'status' => 'success',
-            'http_status' => 200,
-        ]);
-
-        Http::assertSent(function ($request) use ($overdue): bool {
-            $payload = $request->data();
-
-            return $request->method() === 'POST'
-                && $request->url() === 'https://provider-a.example.test/api/services/provider-service-123/suspend'
-                && $request->hasHeader('Authorization', 'Bearer provider-secret-1234')
-                && $payload['action'] === 'suspend'
-                && $payload['idempotency_key'] === "service-suspend:{$overdue->id}:2026-05-24T09:00:00.000000Z";
-        });
-    }
-
-    public function test_services_expire_command_keeps_service_active_when_provider_suspend_fails(): void
-    {
-        $now = Carbon::parse('2026-05-24 09:00:00');
-        $this->travelTo($now);
-        $customer = $this->customerUser();
-        [$account, $overdue] = $this->providerBackedServiceFor($customer, [
-            'status' => 'active',
-            'expires_at' => $now->copy()->subMinute(),
-        ]);
-
-        Http::fake([
-            'https://provider-a.example.test/api/services/provider-service-123/suspend' => Http::response([
-                'message' => 'cannot suspend',
-            ], 500),
-        ]);
-
-        $this->artisan('services:expire')
-            ->expectsOutput('Expired 0 services. Failed 1 services.')
-            ->assertExitCode(1);
 
         $this->assertSame('active', $overdue->refresh()->status);
         $this->assertArrayNotHasKey('expired_at', $overdue->meta ?? []);
-        $this->assertDatabaseHas('provisioning_execution_logs', [
+        $this->assertDatabaseHas('provider_action_jobs', [
             'service_id' => $overdue->id,
             'provider_account_id' => $account->id,
-            'action' => 'provider_service_suspend',
-            'status' => 'failed',
-            'http_status' => 500,
-            'error_code' => 'provider_action_http_error',
+            'action' => 'suspend',
+            'status' => 'pending',
+            'attempts' => 0,
+            'idempotency_key' => "service-suspend:{$overdue->id}:2026-05-24T09:00:00.000000Z",
         ]);
+        $job = ProviderActionJob::firstOrFail();
+        $this->assertSame($overdue->expires_at->toISOString(), data_get($job->payload, 'context.expires_at'));
+        $this->assertSame($now->toISOString(), data_get($job->payload, 'context.expired_at'));
+
+        Http::assertNothingSent();
+    }
+
+    public function test_services_expire_command_does_not_duplicate_existing_provider_suspend_job(): void
+    {
+        $now = Carbon::parse('2026-05-24 09:00:00');
+        $this->travelTo($now);
+        $customer = $this->customerUser();
+        [, $overdue] = $this->providerBackedServiceFor($customer, [
+            'status' => 'active',
+            'expires_at' => $now->copy()->subMinute(),
+        ]);
+        ProviderActionJob::create([
+            'service_id' => $overdue->id,
+            'user_id' => $overdue->user_id,
+            'provider_account_id' => data_get($overdue->meta, 'provider.account_id'),
+            'action' => 'suspend',
+            'status' => 'pending',
+            'attempts' => 0,
+            'max_attempts' => 3,
+            'idempotency_key' => "service-suspend:{$overdue->id}:2026-05-24T09:00:00.000000Z",
+            'payload' => ['context' => ['expired_at' => $now->toISOString()]],
+        ]);
+
+        $this->artisan('services:expire')
+            ->expectsOutput('Expired 0 services. Queued 1 provider action jobs.')
+            ->assertExitCode(0);
+
+        $this->assertSame('active', $overdue->refresh()->status);
+        $this->assertSame(1, ProviderActionJob::count());
     }
 
     private function serviceFor(
