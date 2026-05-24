@@ -23,6 +23,7 @@ use App\Http\Controllers\Admin\ProvisioningProviderAccountTestController;
 use App\Http\Controllers\Admin\ServiceController as AdminServiceController;
 use App\Http\Controllers\Admin\ServiceProviderCancelController;
 use App\Http\Controllers\Admin\ServiceProviderSyncController;
+use App\Http\Controllers\Admin\ServiceRefundCreditController;
 use App\Http\Controllers\Auth\AuthenticatedSessionController;
 use App\Http\Controllers\Auth\RegisteredUserController;
 use App\Http\Controllers\BankWebhookSandboxController;
@@ -33,6 +34,7 @@ use App\Http\Controllers\OrderController;
 use App\Http\Controllers\ProductCatalogController;
 use App\Http\Controllers\ProductOrderController;
 use App\Http\Controllers\ServiceController;
+use App\Http\Controllers\ServiceCancellationController;
 use App\Http\Controllers\ServiceRenewalController;
 use App\Http\Controllers\WalletController;
 use App\Http\Controllers\WalletTopUpController;
@@ -69,6 +71,7 @@ Route::middleware('auth')->group(function (): void {
     Route::get('/services', [ServiceController::class, 'index'])->name('services.index');
     Route::get('/services/{service}', [ServiceController::class, 'show'])->name('services.show');
     Route::post('/services/{service}/renew', ServiceRenewalController::class)->name('services.renew');
+    Route::post('/services/{service}/cancel', ServiceCancellationController::class)->name('services.cancel');
 
     Route::middleware('permission:admin.access')->prefix('admin')->name('admin.')->group(function (): void {
         Route::get('/', AdminDashboardController::class)->name('dashboard');
@@ -99,6 +102,7 @@ Route::middleware('auth')->group(function (): void {
         Route::get('/orders', [AdminOrderController::class, 'index'])->middleware('permission:orders.view')->name('orders.index');
         Route::get('/services', [AdminServiceController::class, 'index'])->middleware('permission:services.view')->name('services.index');
         Route::get('/services/{service}', [AdminServiceController::class, 'show'])->middleware('permission:services.view')->name('services.show');
+        Route::post('/services/{service}/refund-credit', ServiceRefundCreditController::class)->middleware('permission:wallets.adjust')->name('services.refund-credit');
         Route::post('/services/{service}/sync-provider', ServiceProviderSyncController::class)->middleware('permission:services.view')->name('services.sync-provider');
         Route::post('/services/{service}/cancel-provider', ServiceProviderCancelController::class)->middleware('permission:services.view')->name('services.cancel-provider');
         Route::get('/provider-action-jobs', [ProviderActionJobController::class, 'index'])->middleware('permission:provisioning_jobs.view')->name('provider-action-jobs.index');
