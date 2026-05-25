@@ -14,15 +14,15 @@
 
 **Files:**
 - Create: `apps/backend-laravel/tests/Feature/OperatorAccountSecurityTest.php`
-- Create: `apps/backend-laravel/database/migrations/2026_05_25_000001_add_security_fields_to_users_table.php`
+- Create: `apps/backend-laravel/database/migrations/2026_05_25_130000_add_security_fields_to_users_table.php`
 - Modify: `apps/backend-laravel/app/Models/User.php`
 
-- [ ] Write failing tests for disabled login blocking, disabled active-session logout, successful login metadata, and audit rows.
-- [ ] Run the targeted test on the server and verify RED because columns and middleware do not exist.
-- [ ] Add the user security migration and model datetime casts.
-- [ ] Update login handling to block disabled accounts, update login metadata, and write audit rows.
-- [ ] Add account-enabled middleware for authenticated pages.
-- [ ] Re-run targeted tests and commit.
+- [x] Write failing tests for disabled login blocking, disabled active-session logout, successful login metadata, and audit rows.
+- [x] Run the targeted test on the server and verify RED because columns and middleware do not exist.
+- [x] Add the user security migration and model datetime casts.
+- [x] Update login handling to block disabled accounts, update login metadata, and write audit rows.
+- [x] Add account-enabled middleware for authenticated pages.
+- [x] Re-run targeted tests and commit.
 
 ### Task 2: Admin Security Actions
 
@@ -34,12 +34,12 @@
 - Modify: `apps/backend-laravel/resources/views/admin/users/index.blade.php`
 - Modify: `apps/backend-laravel/tests/Feature/OperatorAccountSecurityTest.php`
 
-- [ ] Add failing tests for reset-link generation, force reset flagging/clearing, disable/enable, route permissions, and audit payloads.
-- [ ] Run the targeted test and verify RED because routes and controller do not exist.
-- [ ] Implement `UserSecurityController` actions with `users.manage` protection.
-- [ ] Add safety helpers for self-disable and last enabled `super_admin`.
-- [ ] Add admin user detail/index security status UI.
-- [ ] Re-run targeted tests and commit.
+- [x] Add failing tests for reset-link generation, force reset flagging/clearing, disable/enable, route permissions, and audit payloads.
+- [x] Run the targeted test and verify RED because routes and controller do not exist.
+- [x] Implement `UserSecurityController` actions with `users.manage` protection.
+- [x] Add safety helpers for self-disable and last enabled `super_admin`.
+- [x] Add admin user detail/index security status UI.
+- [x] Re-run targeted tests and commit.
 
 ### Task 3: Password Setup and Forced Reset Flows
 
@@ -53,12 +53,12 @@
 - Modify: `apps/backend-laravel/routes/web.php`
 - Modify: `apps/backend-laravel/tests/Feature/OperatorAccountSecurityTest.php`
 
-- [ ] Add failing tests for completing a setup link, rejecting invalid tokens, forced reset redirects, and forced reset completion.
-- [ ] Run the targeted test and verify RED because routes, views, and middleware do not exist.
-- [ ] Implement token creation/verification against `password_reset_tokens` without logging plaintext tokens.
-- [ ] Implement forced reset middleware and password update controller.
-- [ ] Register middleware aliases and restructure authenticated routes so logout/reset remain reachable.
-- [ ] Re-run targeted tests and commit.
+- [x] Add failing tests for completing a setup link, rejecting invalid tokens, forced reset redirects, and forced reset completion.
+- [x] Run the targeted test and verify RED because routes, views, and middleware do not exist.
+- [x] Implement token creation/verification against `password_reset_tokens` without logging plaintext tokens.
+- [x] Implement forced reset middleware and password update controller.
+- [x] Register middleware aliases and restructure authenticated routes so logout/reset remain reachable.
+- [x] Re-run targeted tests and commit.
 
 ### Task 4: Documentation and Verification
 
@@ -66,7 +66,7 @@
 - Modify: `README.md`
 - Modify: `docs/superpowers/plans/2026-05-25-sprint-33-operator-account-security.md`
 
-- [ ] Document S33 routes, admin actions, safety behavior, and audit actions in `README.md`.
+- [x] Document S33 routes, admin actions, safety behavior, and audit actions in `README.md`.
 - [ ] Mark the plan checklist complete.
 - [ ] Run targeted Laravel tests for `OperatorAccountSecurityTest`, `AdminUserRoleManagementTest`, and `AdminAuditLogTest`.
 - [ ] Run full Laravel Pint and PHPUnit on the server test environment.
