@@ -1,7 +1,7 @@
 @extends('layouts.app', ['title' => 'Admin Users'])
 @section('content')
 <div class="panel">
-    <h1>Users & Roles</h1>
+    <h1>Users &amp; Roles</h1>
     <p>
         @can('users.manage')
             <a class="button" href="/admin/users/create">Create User</a>

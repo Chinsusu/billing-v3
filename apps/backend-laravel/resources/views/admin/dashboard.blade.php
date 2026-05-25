@@ -37,7 +37,7 @@
             <a class="button secondary" href="/admin/audit-logs">Audit Logs</a>
         @endcan
         @can('users.view')
-            <a class="button secondary" href="/admin/users">Users & Roles</a>
+            <a class="button secondary" href="/admin/users">Users &amp; Roles</a>
         @endcan
     </p>
 </div>
