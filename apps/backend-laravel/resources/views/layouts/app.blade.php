@@ -34,6 +34,8 @@
             <a href="/orders">Orders</a>
             <a href="/services">Services</a>
             <a href="/notification-preferences">Notifications</a>
+            <a href="/api-keys">API Keys</a>
+            @if (auth()->user()?->hasRole('reseller'))<a href="/reseller/customers">Reseller</a>@endif
             @can('admin.access')<a href="/admin">Admin</a>@endcan
             <form method="POST" action="/logout" style="display:inline">@csrf<button type="submit" style="background:transparent;border:0;padding:0;text-decoration:underline">Logout</button></form>
         @else
@@ -43,6 +45,15 @@
     </nav>
 </header>
 <main>
+    @if (session('impersonator_id'))
+        <div class="panel">
+            Impersonating {{ session('impersonated_user_email') }} as {{ session('impersonator_email') }}.
+            <form method="POST" action="/impersonation/stop" style="display:inline">
+                @csrf
+                <button type="submit" class="secondary">Stop Impersonation</button>
+            </form>
+        </div>
+    @endif
     @if (session('status'))<div class="panel">{{ session('status') }}</div>@endif
     @if ($errors->any())<div class="panel error"><ul>@foreach ($errors->all() as $error)<li>{{ $error }}</li>@endforeach</ul></div>@endif
     @yield('content')

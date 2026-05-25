@@ -6,6 +6,7 @@ use Database\Factories\UserFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\Hidden;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
@@ -27,6 +28,10 @@ class User extends Authenticatable
             'invited_at' => 'datetime',
             'last_password_reset_at' => 'datetime',
             'last_login_at' => 'datetime',
+            'mfa_secret' => 'encrypted',
+            'mfa_enabled_at' => 'datetime',
+            'mfa_required_at' => 'datetime',
+            'mfa_recovery_codes' => 'encrypted:array',
             'password' => 'hashed',
         ];
     }
@@ -59,6 +64,31 @@ class User extends Authenticatable
     public function notificationPreferences(): HasMany
     {
         return $this->hasMany(NotificationPreference::class);
+    }
+
+    public function supportTickets(): HasMany
+    {
+        return $this->hasMany(SupportTicket::class);
+    }
+
+    public function reseller(): BelongsTo
+    {
+        return $this->belongsTo(self::class, 'reseller_id');
+    }
+
+    public function resellerCustomers(): HasMany
+    {
+        return $this->hasMany(self::class, 'reseller_id');
+    }
+
+    public function resellerPriceOverrides(): HasMany
+    {
+        return $this->hasMany(ResellerPriceOverride::class, 'reseller_id');
+    }
+
+    public function apiKeys(): HasMany
+    {
+        return $this->hasMany(ApiKey::class);
     }
 
     public function adminAuditLogs(): HasMany

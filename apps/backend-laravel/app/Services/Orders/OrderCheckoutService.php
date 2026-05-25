@@ -9,6 +9,7 @@ use App\Models\ProvisioningProviderAccount;
 use App\Models\Service;
 use App\Models\User;
 use App\Services\Finance\WalletService;
+use App\Services\Resellers\ResellerPricingService;
 use App\Services\Services\ServiceLifecyclePolicy;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
@@ -18,6 +19,7 @@ class OrderCheckoutService
     public function __construct(
         private readonly WalletService $walletService,
         private readonly ServiceLifecyclePolicy $lifecyclePolicy,
+        private readonly ResellerPricingService $resellerPricing,
     ) {}
 
     public function checkout(User $user, Product $product): Order
@@ -27,16 +29,17 @@ class OrderCheckoutService
             $providerAccount = $product->providerAccount ?: ProvisioningProviderAccount::where('slug', 'sandbox')->first();
             $lifecyclePolicy = $this->lifecyclePolicy->forProduct($product);
             $providerSnapshot = $this->providerSnapshot($product, $providerAccount);
+            $price = $this->resellerPricing->priceFor($user, $product);
             $expiresAt = $this->lifecyclePolicy->expiresAt(now(), $lifecyclePolicy);
 
             $order = Order::create([
                 'user_id' => $user->id,
                 'order_number' => $this->newOrderNumber(),
                 'status' => 'pending',
-                'subtotal_amount' => $product->price_amount,
-                'total_amount' => $product->price_amount,
-                'currency' => $product->currency,
-                'meta' => [],
+                'subtotal_amount' => $price['amount'],
+                'total_amount' => $price['amount'],
+                'currency' => $price['currency'],
+                'meta' => ['price' => $price],
             ]);
 
             $item = $order->items()->create([
@@ -45,9 +48,9 @@ class OrderCheckoutService
                 'product_name' => $product->name,
                 'product_type' => $product->type,
                 'quantity' => 1,
-                'unit_amount' => $product->price_amount,
-                'subtotal_amount' => $product->price_amount,
-                'currency' => $product->currency,
+                'unit_amount' => $price['amount'],
+                'subtotal_amount' => $price['amount'],
+                'currency' => $price['currency'],
                 'duration_days' => $product->duration_days,
                 'config_snapshot' => $product->config ?? [],
             ]);
@@ -55,13 +58,13 @@ class OrderCheckoutService
             $wallet = $this->walletService->walletFor($user, $product->currency);
             $this->walletService->debit(
                 $wallet,
-                $product->price_amount,
-                $product->currency,
+                $price['amount'],
+                $price['currency'],
                 'order',
                 $order->id,
                 "order-payment:{$order->id}",
                 "Order {$order->order_number}",
-                ['product_code' => $product->code]
+                ['product_code' => $product->code, 'price_source' => $price['source']]
             );
 
             $order->update([
@@ -109,6 +112,7 @@ class OrderCheckoutService
                         'config' => $product->config ?? [],
                         'lifecycle_policy' => $lifecyclePolicy,
                         'provider' => $providerSnapshot,
+                        'price' => $price,
                     ],
                 ],
                 'available_at' => now(),

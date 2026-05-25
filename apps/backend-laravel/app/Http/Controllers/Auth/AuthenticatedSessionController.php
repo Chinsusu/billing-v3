@@ -57,6 +57,7 @@ class AuthenticatedSessionController extends Controller
             'last_login_ip' => $request->ip(),
             'last_login_user_agent' => $request->userAgent(),
         ])->save();
+        $request->session()->put('mfa_passed', $user->mfa_enabled_at === null && $user->mfa_required_at === null);
 
         $auditLogger->record(
             $user,
@@ -68,6 +69,14 @@ class AuthenticatedSessionController extends Controller
             $request,
             $user->email,
         );
+
+        if ($user->mfa_enabled_at !== null) {
+            return redirect('/mfa/challenge');
+        }
+
+        if ($user->mfa_required_at !== null) {
+            return redirect('/mfa/setup');
+        }
 
         return redirect()->intended('/dashboard');
     }

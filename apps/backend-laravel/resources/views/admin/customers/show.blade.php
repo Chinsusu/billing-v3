@@ -3,7 +3,31 @@
 <div class="panel">
     <h1>{{ $customer->name }}</h1>
     <p>{{ $customer->email }}</p>
-    <p><a class="button secondary" href="/admin/customers">Back to Customers</a></p>
+    <p>
+        <a class="button secondary" href="/admin/customers">Back to Customers</a>
+        @can('customers.view')
+            <form method="POST" action="/admin/customers/{{ $customer->id }}/impersonate" style="display:inline">
+                @csrf
+                <button type="submit">Impersonate</button>
+            </form>
+        @endcan
+    </p>
+</div>
+
+<div class="panel">
+    <h2>Reseller</h2>
+    <p>Current: {{ $customer->reseller?->email ?? 'Direct customer' }}</p>
+    <form method="POST" action="/admin/customers/{{ $customer->id }}/reseller">
+        @csrf
+        <label for="reseller_id">Assigned reseller</label>
+        <select id="reseller_id" name="reseller_id">
+            <option value="">Direct customer</option>
+            @foreach ($resellers as $reseller)
+                <option value="{{ $reseller->id }}" @selected($customer->reseller_id === $reseller->id)>{{ $reseller->email }}</option>
+            @endforeach
+        </select>
+        <button type="submit">Save Reseller</button>
+    </form>
 </div>
 
 <div class="panel">

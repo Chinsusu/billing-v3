@@ -34,8 +34,11 @@ class CustomerController extends Controller
 
     public function show(User $user): View
     {
+        $user->load('reseller');
+
         return view('admin.customers.show', [
             'customer' => $user,
+            'resellers' => User::role('reseller')->orderBy('email')->get(),
             'wallets' => $user->wallets()->latest()->get(),
             'ledgerEntries' => LedgerEntry::where('user_id', $user->id)->latest()->limit(20)->get(),
             'invoices' => $user->invoices()->latest()->limit(10)->get(),
