@@ -59,6 +59,8 @@ class RoleController extends Controller
 
     public function edit(Role $role): View
     {
+        $this->abortUnlessWebRole($role);
+
         return view('admin.roles.edit', [
             'role' => $role->load('permissions'),
             'permissions' => Permission::where('guard_name', 'web')->orderBy('name')->get(),
@@ -72,6 +74,8 @@ class RoleController extends Controller
         AuditLogger $auditLogger,
         AdminAuthorizationSafety $authorizationSafety,
     ): RedirectResponse {
+        $this->abortUnlessWebRole($role);
+
         $validated = $request->validate([
             'permissions' => ['nullable', 'array'],
             'permissions.*' => ['string', Rule::exists('permissions', 'name')->where('guard_name', 'web')],
@@ -96,6 +100,11 @@ class RoleController extends Controller
         });
 
         return redirect('/admin/roles')->with('status', 'Role permissions updated.');
+    }
+
+    private function abortUnlessWebRole(Role $role): void
+    {
+        abort_unless($role->guard_name === 'web', 404);
     }
 
     /**
