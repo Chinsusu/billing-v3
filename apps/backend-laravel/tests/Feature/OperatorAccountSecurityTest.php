@@ -4,11 +4,15 @@ namespace Tests\Feature;
 
 use App\Models\AdminAuditLog;
 use App\Models\User;
+use App\Services\Audit\AuditLogger;
 use Database\Seeders\RolesAndPermissionsSeeder;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Schema;
+use RuntimeException;
 use Spatie\Permission\Models\Permission;
 use Tests\TestCase;
 
@@ -272,6 +276,29 @@ class OperatorAccountSecurityTest extends TestCase
         $this->assertDatabaseHas('password_reset_tokens', ['email' => 's33-invalid-token@example.test']);
     }
 
+    public function test_password_setup_rejects_expired_token(): void
+    {
+        $this->seed(RolesAndPermissionsSeeder::class);
+        $user = $this->customer('s33-expired-token@example.test');
+        $oldPassword = $user->password;
+        $this->storePasswordResetToken($user, 'expired-token', now()->subMinutes(61));
+
+        $this->from('/password/setup/expired-token?email=s33-expired-token%40example.test')
+            ->post('/password/setup', [
+                'email' => 's33-expired-token@example.test',
+                'token' => 'expired-token',
+                'password' => 'NewPassword123!',
+                'password_confirmation' => 'NewPassword123!',
+            ])
+            ->assertRedirect('/password/setup/expired-token?email=s33-expired-token%40example.test')
+            ->assertSessionHasErrors('token');
+
+        $user = User::findOrFail($user->id);
+        $this->assertSame($oldPassword, $user->password);
+        $this->assertDatabaseMissing('password_reset_tokens', ['email' => 's33-expired-token@example.test']);
+        $this->assertSame(0, AdminAuditLog::where('action', 'user_password_reset_completed')->count());
+    }
+
     public function test_forced_password_reset_gates_authenticated_routes_until_completed(): void
     {
         $this->seed(RolesAndPermissionsSeeder::class);
@@ -304,6 +331,75 @@ class OperatorAccountSecurityTest extends TestCase
         $this->assertSame(1, AdminAuditLog::where('action', 'user_forced_password_reset_completed')->count());
 
         $this->actingAs($user)->get('/dashboard')->assertOk();
+    }
+
+    public function test_forced_password_reset_user_cannot_bypass_gate_with_setup_link(): void
+    {
+        $this->seed(RolesAndPermissionsSeeder::class);
+        $user = $this->customer('s33-forced-setup-bypass@example.test');
+        $oldPassword = $user->password;
+        $user->forceFill(['force_password_reset_at' => now()])->save();
+        $this->storePasswordResetToken($user, 'forced-setup-token');
+
+        $this->actingAs($user)
+            ->get('/password/setup/forced-setup-token?email=s33-forced-setup-bypass%40example.test')
+            ->assertRedirect('/password/forced-reset');
+
+        $this->actingAs($user)
+            ->from('/password/setup/forced-setup-token?email=s33-forced-setup-bypass%40example.test')
+            ->post('/password/setup', [
+                'email' => 's33-forced-setup-bypass@example.test',
+                'token' => 'forced-setup-token',
+                'password' => 'BypassPassword123!',
+                'password_confirmation' => 'BypassPassword123!',
+            ])
+            ->assertRedirect('/password/forced-reset');
+
+        $user = User::findOrFail($user->id);
+        $this->assertSame($oldPassword, $user->password);
+        $this->assertNotNull($user->force_password_reset_at);
+        $this->assertDatabaseHas('password_reset_tokens', ['email' => 's33-forced-setup-bypass@example.test']);
+        $this->assertSame(0, AdminAuditLog::where('action', 'user_password_reset_completed')->count());
+    }
+
+    public function test_admin_security_mutations_roll_back_when_audit_fails(): void
+    {
+        $admin = $this->superAdmin('s33-audit-failure-admin@example.test');
+        $target = $this->customer('s33-audit-failure-target@example.test');
+        $this->bindFailingAuditLogger();
+        $this->withoutExceptionHandling();
+
+        $this->assertAuditFailure(function () use ($admin, $target): void {
+            $this->actingAs($admin)->post("/admin/users/{$target->id}/security/force-password-reset");
+        });
+        $this->assertNull(User::findOrFail($target->id)->force_password_reset_at);
+
+        $target->forceFill(['force_password_reset_at' => now()])->save();
+        $this->assertAuditFailure(function () use ($admin, $target): void {
+            $this->actingAs($admin)->post("/admin/users/{$target->id}/security/clear-force-password-reset");
+        });
+        $this->assertNotNull(User::findOrFail($target->id)->force_password_reset_at);
+
+        $target->forceFill(['force_password_reset_at' => null])->save();
+        $this->assertAuditFailure(function () use ($admin, $target): void {
+            $this->actingAs($admin)->post("/admin/users/{$target->id}/security/disable", ['reason' => 'Audit failure']);
+        });
+        $this->assertNull(User::findOrFail($target->id)->disabled_at);
+
+        $target->forceFill(['disabled_at' => now(), 'disabled_reason' => 'Pre-existing disable'])->save();
+        $this->assertAuditFailure(function () use ($admin, $target): void {
+            $this->actingAs($admin)->post("/admin/users/{$target->id}/security/enable");
+        });
+        $target = User::findOrFail($target->id);
+        $this->assertNotNull($target->disabled_at);
+        $this->assertSame('Pre-existing disable', $target->disabled_reason);
+
+        $this->assertSame(0, AdminAuditLog::whereIn('action', [
+            'user_force_password_reset_required',
+            'user_force_password_reset_cleared',
+            'user_disabled',
+            'user_enabled',
+        ])->count());
     }
 
     private function superAdmin(string $email): User
@@ -341,11 +437,45 @@ class OperatorAccountSecurityTest extends TestCase
         return $user;
     }
 
-    private function storePasswordResetToken(User $user, string $token): void
+    private function storePasswordResetToken(User $user, string $token, ?\DateTimeInterface $createdAt = null): void
     {
         DB::table('password_reset_tokens')->updateOrInsert(
             ['email' => $user->email],
-            ['token' => Hash::make($token), 'created_at' => now()],
+            ['token' => Hash::make($token), 'created_at' => $createdAt ?? now()],
         );
+    }
+
+    private function bindFailingAuditLogger(): void
+    {
+        $this->app->instance(AuditLogger::class, new class extends AuditLogger
+        {
+            /**
+             * @param  array<string, mixed>  $before
+             * @param  array<string, mixed>  $after
+             * @param  array<string, mixed>  $metadata
+             */
+            public function record(
+                ?User $actor,
+                string $action,
+                Model $auditable,
+                array $before = [],
+                array $after = [],
+                array $metadata = [],
+                ?Request $request = null,
+                ?string $label = null,
+            ): AdminAuditLog {
+                throw new RuntimeException('audit failed');
+            }
+        });
+    }
+
+    private function assertAuditFailure(callable $request): void
+    {
+        try {
+            $request();
+            $this->fail('Expected audit failure.');
+        } catch (RuntimeException $exception) {
+            $this->assertSame('audit failed', $exception->getMessage());
+        }
     }
 }
