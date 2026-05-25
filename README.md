@@ -416,6 +416,23 @@ Disabled users cannot log in, and active sessions for newly disabled users are l
 
 Safety rules block self-disable and block disabling the last enabled `super_admin`. Security actions write `admin_audit_logs` actions `user_password_setup_link_created`, `user_force_password_reset_required`, `user_force_password_reset_cleared`, `user_disabled`, `user_enabled`, `user_password_reset_completed`, `user_forced_password_reset_completed`, `user_login_succeeded`, and `user_login_blocked_disabled`.
 
+## Sprint 34-40 Platform Hardening
+
+Routes and commands:
+
+- `GET /mfa/setup`, `POST /mfa/enable`, `GET /mfa/challenge`, `POST /mfa/challenge`
+- `POST /admin/customers/{user}/impersonate`, `POST /impersonation/stop`
+- `GET /support/tickets`, `POST /support/tickets`, `GET /admin/support-tickets`
+- `GET /api-keys`, `POST /api-keys`, `POST /api-keys/{apiKey}/revoke`, `GET /api/v1/me`
+- `GET /reseller/customers`, `POST /admin/customers/{user}/reseller`, `GET /admin/reseller-price-overrides`, `POST /admin/reseller-price-overrides`
+- `GET /admin/reports/billing`, `GET /admin/reports/billing/invoices.csv`, `GET /admin/reports/billing/ledger.csv`, `GET /admin/reports/billing/payment-events.csv`
+- `GET /ops/readiness`
+- `php artisan ops:purge-audit-logs --days=90`
+
+Operators can require or reset MFA, revoke sessions, impersonate customers with a visible banner, operate support tickets, create scoped customer API keys, assign customers to resellers, set reseller product price overrides, and export audited billing CSV reports. Checkout uses reseller-specific price overrides when present.
+
+Production hardening adds `/ops/readiness`, configurable audit log retention through `AUDIT_LOG_RETENTION_DAYS`, and `docs/operations/production-runbook.md`.
+
 ## Sprint 8 Shared Postgres Runtime
 
 The dev Compose runtime runs Laravel and the worker against the same Postgres database:

@@ -5,6 +5,7 @@ use App\Console\Commands\EvaluateOpsAlertsCommand;
 use App\Console\Commands\ExpirePaymentIntentsCommand;
 use App\Console\Commands\ExpireServicesCommand;
 use App\Console\Commands\ProcessScheduledServiceCancellationsCommand;
+use App\Console\Commands\PurgeAuditLogsCommand;
 use App\Console\Commands\RecoverStuckProviderActionJobsCommand;
 use App\Console\Commands\RunScheduledTaskCommand;
 use App\Console\Commands\SendNotificationsCommand;
@@ -34,6 +35,7 @@ return Application::configure(basePath: dirname(__DIR__))
         ExpireServicesCommand::class,
         EvaluateOpsAlertsCommand::class,
         ProcessScheduledServiceCancellationsCommand::class,
+        PurgeAuditLogsCommand::class,
         RecoverStuckProviderActionJobsCommand::class,
         RunScheduledTaskCommand::class,
         SendNotificationsCommand::class,

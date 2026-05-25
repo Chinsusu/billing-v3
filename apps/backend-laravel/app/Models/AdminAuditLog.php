@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
-#[Fillable(['actor_id', 'actor_email', 'action', 'auditable_type', 'auditable_id', 'auditable_label', 'route_name', 'ip_address', 'user_agent', 'before', 'after', 'metadata'])]
+#[Fillable(['actor_id', 'actor_email', 'action', 'auditable_type', 'auditable_id', 'auditable_label', 'route_name', 'ip_address', 'user_agent', 'before', 'after', 'metadata', 'created_at'])]
 class AdminAuditLog extends Model
 {
     use HasUuids;

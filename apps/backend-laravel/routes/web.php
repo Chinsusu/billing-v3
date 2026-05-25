@@ -58,6 +58,7 @@ use App\Http\Controllers\InvoiceController;
 use App\Http\Controllers\MfaController;
 use App\Http\Controllers\NotificationPreferenceController;
 use App\Http\Controllers\OrderController;
+use App\Http\Controllers\OpsReadinessController;
 use App\Http\Controllers\ProductCatalogController;
 use App\Http\Controllers\ProductOrderController;
 use App\Http\Controllers\ProviderCallbackController;
@@ -73,6 +74,7 @@ use Illuminate\Foundation\Http\Middleware\ValidateCsrfToken;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', fn () => redirect('/products'));
+Route::get('/ops/readiness', OpsReadinessController::class)->name('ops.readiness');
 Route::get('/products', ProductCatalogController::class)->name('products.index');
 Route::post('/webhooks/bank/sandbox', BankWebhookSandboxController::class)->name('webhooks.bank-sandbox');
 Route::post('/webhooks/providers/{provisioningProviderAccount}', ProviderCallbackController::class)->name('webhooks.providers');
