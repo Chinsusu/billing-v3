@@ -22,7 +22,9 @@
         <a class="button secondary" href="/admin/provisioning-provider-accounts">Provider Accounts</a>
         <a class="button secondary" href="/admin/orders">Orders</a>
         <a class="button secondary" href="/admin/services">Services</a>
-        <a class="button secondary" href="/admin/renewals">Renewal Reporting</a>
+        @can('renewals.view')
+            <a class="button secondary" href="/admin/renewals">Renewal Reporting</a>
+        @endcan
         <a class="button secondary" href="/admin/provisioning-jobs">Provisioning Jobs</a>
         @can('notifications.manage')
             <a class="button secondary" href="/admin/notification-events">Notification Events</a>

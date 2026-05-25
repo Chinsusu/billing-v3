@@ -2,7 +2,12 @@
 @section('content')
 <div class="panel">
     <h1>Services</h1>
-    <p><a href="/admin/provider-action-jobs">Provider Action Jobs</a> | <a href="/admin/renewals">Renewal Reporting</a></p>
+    <p>
+        <a href="/admin/provider-action-jobs">Provider Action Jobs</a>
+        @can('renewals.view')
+            | <a href="/admin/renewals">Renewal Reporting</a>
+        @endcan
+    </p>
     <table>
         <thead><tr><th>Customer</th><th>Product</th><th>Type</th><th>Status</th><th>Expires</th><th>Auto-renew</th><th>Latest renewal</th><th>Actions</th></tr></thead>
         <tbody>

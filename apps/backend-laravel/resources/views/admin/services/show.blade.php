@@ -30,19 +30,21 @@
     </p>
 </div>
 
-<div class="panel">
-    <h2>Admin Auto-renew Control</h2>
-    <form method="POST" action="/admin/services/{{ $service->id }}/auto-renew">
-        @csrf
-        <input type="hidden" name="enabled" value="{{ $service->auto_renew_enabled ? '0' : '1' }}">
-        <label>Reason
-            <textarea name="reason" rows="2" required placeholder="Required audit reason"></textarea>
-        </label>
-        <button class="button secondary" type="submit">
-            {{ $service->auto_renew_enabled ? 'Disable Auto-renew' : 'Enable Auto-renew' }}
-        </button>
-    </form>
-</div>
+@can('renewals.manage')
+    <div class="panel">
+        <h2>Admin Auto-renew Control</h2>
+        <form method="POST" action="/admin/services/{{ $service->id }}/auto-renew">
+            @csrf
+            <input type="hidden" name="enabled" value="{{ $service->auto_renew_enabled ? '0' : '1' }}">
+            <label>Reason
+                <textarea name="reason" rows="2" required placeholder="Required audit reason"></textarea>
+            </label>
+            <button class="button secondary" type="submit">
+                {{ $service->auto_renew_enabled ? 'Disable Auto-renew' : 'Enable Auto-renew' }}
+            </button>
+        </form>
+    </div>
+@endcan
 
 <div class="panel">
     <h2>Auto-Renewal Attempts</h2>
