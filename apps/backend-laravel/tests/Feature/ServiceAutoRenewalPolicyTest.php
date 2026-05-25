@@ -141,6 +141,46 @@ class ServiceAutoRenewalPolicyTest extends TestCase
         ]);
     }
 
+    public function test_policy_window_skips_do_not_starve_later_eligible_services(): void
+    {
+        $now = Carbon::parse('2026-05-25 09:00:00');
+        $this->travelTo($now);
+        $customer = $this->customerUser('policy-starvation@example.test');
+        Wallet::factory()->for($customer)->create(['balance_amount' => 300000]);
+
+        for ($i = 1; $i <= 3; $i++) {
+            $this->serviceFor($customer, [
+                'status' => 'active',
+                'auto_renew_enabled' => true,
+                'expires_at' => $now->copy()->addHours(2),
+            ], [
+                'code' => "policy-outside-short-window-{$i}",
+                'auto_renew_window_hours' => 1,
+            ]);
+        }
+
+        $eligible = $this->serviceFor($customer, [
+            'status' => 'active',
+            'auto_renew_enabled' => true,
+            'expires_at' => $now->copy()->addHours(10),
+        ], [
+            'code' => 'policy-eligible-after-short-window',
+            'auto_renew_window_hours' => 24,
+        ]);
+
+        $this->artisan('services:auto-renew --limit=1')
+            ->expectsOutput('Auto-renew processed=1 succeeded=1 failed=0 skipped=3.')
+            ->assertExitCode(0);
+
+        $this->assertTrue($eligible->refresh()->expires_at->isSameSecond($now->copy()->addDays(30)->addHours(10)));
+        $this->assertSame(201000, Wallet::firstOrFail()->balance_amount);
+        $this->assertSame(1, DB::table('service_auto_renewal_attempts')->count());
+        $this->assertDatabaseHas('service_auto_renewal_attempts', [
+            'service_id' => $eligible->id,
+            'status' => 'succeeded',
+        ]);
+    }
+
     public function test_retry_delay_and_max_attempts_follow_product_policy(): void
     {
         $now = Carbon::parse('2026-05-25 09:00:00');
@@ -215,6 +255,20 @@ class ServiceAutoRenewalPolicyTest extends TestCase
             'attempts' => 1,
             'renewed_expires_at' => $now->copy()->addDays(30),
         ]);
+        $old = $this->serviceFor($customer, [
+            'status' => 'active',
+            'auto_renew_enabled' => true,
+            'expires_at' => $now->copy()->addHours(5),
+        ], [
+            'code' => 'report-old-product',
+            'name' => 'Report Old Product',
+        ]);
+        $this->insertAutoRenewAttempt($old, [
+            'status' => 'failed',
+            'attempts' => 1,
+            'created_at' => $now->copy()->subDays(10),
+            'updated_at' => $now->copy()->subDays(10),
+        ]);
 
         $this->actingAs($admin)
             ->get('/admin/renewals')
@@ -222,7 +276,8 @@ class ServiceAutoRenewalPolicyTest extends TestCase
             ->assertSee('Renewal Reporting')
             ->assertSee('Auto-renew enabled')
             ->assertSee('Failed attempts')
-            ->assertSee('Exhausted attempts');
+            ->assertSee('Exhausted attempts')
+            ->assertDontSee($old->id);
 
         $this->actingAs($admin)
             ->get("/admin/renewals?status=failed&product_id={$target->product_id}&customer=report-customer")
@@ -273,6 +328,46 @@ class ServiceAutoRenewalPolicyTest extends TestCase
             ->assertSee('Customer Renewal Product')
             ->assertSee('failed')
             ->assertSee('Next retry');
+    }
+
+    public function test_customer_reporting_ignores_attempts_for_old_expiry_targets(): void
+    {
+        $now = Carbon::parse('2026-05-25 09:00:00');
+        $this->travelTo($now);
+        $customer = $this->customerUser('customer-current-expiry@example.test');
+        $service = $this->serviceFor($customer, [
+            'status' => 'active',
+            'auto_renew_enabled' => true,
+            'expires_at' => $now->copy()->addHours(6),
+        ], [
+            'name' => 'Current Expiry Renewal Product',
+        ]);
+        $this->insertAutoRenewAttempt($service, [
+            'status' => 'failed',
+            'attempts' => 2,
+            'next_attempt_at' => $now->copy()->addMinutes(30),
+            'last_error' => 'Wallet balance is not enough to pay this invoice.',
+        ]);
+        $service->forceFill(['expires_at' => $now->copy()->addDays(30)])->save();
+
+        $this->actingAs($customer)
+            ->get('/dashboard')
+            ->assertOk()
+            ->assertSee('0</strong><br>Failed auto-renew', false);
+
+        $this->actingAs($customer)
+            ->get('/services')
+            ->assertOk()
+            ->assertSee('Current Expiry Renewal Product')
+            ->assertSee('Latest renewal')
+            ->assertDontSee('failed')
+            ->assertDontSee('Next retry');
+
+        $this->actingAs($customer)
+            ->get("/services/{$service->id}")
+            ->assertOk()
+            ->assertSee('No auto-renewal attempts yet.')
+            ->assertDontSee('Wallet balance is not enough to pay this invoice.');
     }
 
     private function productPayload(array $overrides = []): array
