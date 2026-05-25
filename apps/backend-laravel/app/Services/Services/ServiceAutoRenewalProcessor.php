@@ -13,7 +13,9 @@ use Throwable;
 class ServiceAutoRenewalProcessor
 {
     private const DUE_WINDOW_HOURS = 24;
+
     private const RETRY_DELAY_MINUTES = 60;
+
     private const STALE_PROCESSING_MINUTES = 15;
 
     public function __construct(
