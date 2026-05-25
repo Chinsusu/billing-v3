@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Service;
+use App\Services\Audit\AuditLogger;
 use App\Services\Finance\WalletService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -11,7 +12,10 @@ use Illuminate\Support\Str;
 
 class ServiceRefundCreditController extends Controller
 {
-    public function __construct(private readonly WalletService $wallets) {}
+    public function __construct(
+        private readonly WalletService $wallets,
+        private readonly AuditLogger $audit,
+    ) {}
 
     public function __invoke(Request $request, Service $service): RedirectResponse
     {
@@ -30,7 +34,7 @@ class ServiceRefundCreditController extends Controller
             : 'service-refund:'.$service->id.':'.Str::uuid()->toString();
         $actor = $request->user();
 
-        $this->wallets->credit(
+        $entry = $this->wallets->credit(
             $this->wallets->walletFor($service->user, $currency),
             (int) $validated['amount'],
             $currency,
@@ -44,6 +48,25 @@ class ServiceRefundCreditController extends Controller
                 'service_id' => $service->id,
                 'reference' => $reference,
             ],
+        );
+
+        $this->audit->record(
+            $actor,
+            'service_refund_credited',
+            $service,
+            [],
+            [],
+            [
+                'amount' => (int) $validated['amount'],
+                'currency' => $currency,
+                'reason' => $validated['reason'],
+                'reference' => $reference,
+                'ledger_entry_id' => $entry->id,
+                'user_id' => $service->user_id,
+                'idempotency_key' => $idempotencyKey,
+            ],
+            $request,
+            $service->product_name,
         );
 
         return redirect("/admin/services/{$service->id}")->with('status', 'Refund credit recorded.');

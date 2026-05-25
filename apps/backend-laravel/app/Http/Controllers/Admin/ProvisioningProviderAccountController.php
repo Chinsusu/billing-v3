@@ -7,11 +7,14 @@ use App\Http\Requests\StoreProvisioningProviderAccountRequest;
 use App\Http\Requests\UpdateProvisioningProviderAccountRequest;
 use App\Models\ProvisioningProviderAccount;
 use App\Models\User;
+use App\Services\Audit\AuditLogger;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\View\View;
 
 class ProvisioningProviderAccountController extends Controller
 {
+    private const AUDIT_FIELDS = ['slug', 'name', 'driver', 'base_url', 'provision_path', 'auth_type', 'auth_header_name', 'api_key', 'api_key_last_four', 'callback_secret', 'callback_secret_last_four', 'enabled', 'timeout_seconds', 'request_template', 'response_external_id_path', 'response_status_path', 'response_config_path', 'callback_event_id_path', 'callback_external_id_path', 'callback_action_path', 'callback_status_path'];
+
     public function index(): View
     {
         return view('admin.provisioning-provider-accounts.index', [
@@ -38,9 +41,18 @@ class ProvisioningProviderAccountController extends Controller
         ]);
     }
 
-    public function store(StoreProvisioningProviderAccountRequest $request): RedirectResponse
+    public function store(StoreProvisioningProviderAccountRequest $request, AuditLogger $audit): RedirectResponse
     {
-        ProvisioningProviderAccount::create($this->attributesForSave($request->validated(), null, $request->user()));
+        $providerAccount = ProvisioningProviderAccount::create($this->attributesForSave($request->validated(), null, $request->user()));
+        $audit->record(
+            $request->user(),
+            'created',
+            $providerAccount,
+            [],
+            $audit->snapshot($providerAccount, self::AUDIT_FIELDS),
+            [],
+            $request,
+        );
 
         return redirect('/admin/provisioning-provider-accounts')->with('status', 'Provider account created.');
     }
@@ -52,9 +64,13 @@ class ProvisioningProviderAccountController extends Controller
         ]);
     }
 
-    public function update(UpdateProvisioningProviderAccountRequest $request, ProvisioningProviderAccount $provisioningProviderAccount): RedirectResponse
+    public function update(UpdateProvisioningProviderAccountRequest $request, ProvisioningProviderAccount $provisioningProviderAccount, AuditLogger $audit): RedirectResponse
     {
+        $before = $audit->snapshot($provisioningProviderAccount, self::AUDIT_FIELDS);
         $provisioningProviderAccount->update($this->attributesForSave($request->validated(), $provisioningProviderAccount, $request->user()));
+        $provisioningProviderAccount->refresh();
+        [$beforeChanges, $afterChanges] = $audit->diff($before, $audit->snapshot($provisioningProviderAccount, self::AUDIT_FIELDS));
+        $audit->record($request->user(), 'updated', $provisioningProviderAccount, $beforeChanges, $afterChanges, [], $request);
 
         return redirect('/admin/provisioning-provider-accounts')->with('status', 'Provider account updated.');
     }

@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\BankIntegration;
+use App\Services\Audit\AuditLogger;
 use App\Services\Finance\BankIntegrationService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -12,6 +13,8 @@ use Illuminate\View\View;
 
 class BankIntegrationController extends Controller
 {
+    private const AUDIT_FIELDS = ['provider', 'name', 'base_url', 'transactions_path', 'account_number', 'enabled', 'api_key', 'api_key_last_four', 'webhook_secret', 'webhook_secret_last_four'];
+
     public function index(): View
     {
         return view('admin.bank-integrations.index', [
@@ -30,9 +33,18 @@ class BankIntegrationController extends Controller
         ]);
     }
 
-    public function store(Request $request, BankIntegrationService $service): RedirectResponse
+    public function store(Request $request, BankIntegrationService $service, AuditLogger $audit): RedirectResponse
     {
-        $service->create($this->validated($request), $request->user());
+        $bankIntegration = $service->create($this->validated($request), $request->user());
+        $audit->record(
+            $request->user(),
+            'created',
+            $bankIntegration,
+            [],
+            $audit->snapshot($bankIntegration, self::AUDIT_FIELDS),
+            [],
+            $request,
+        );
 
         return redirect('/admin/bank-integrations')->with('status', 'Bank integration created.');
     }
@@ -42,9 +54,12 @@ class BankIntegrationController extends Controller
         return view('admin.bank-integrations.edit', ['bankIntegration' => $bankIntegration]);
     }
 
-    public function update(Request $request, BankIntegration $bankIntegration, BankIntegrationService $service): RedirectResponse
+    public function update(Request $request, BankIntegration $bankIntegration, BankIntegrationService $service, AuditLogger $audit): RedirectResponse
     {
-        $service->update($bankIntegration, $this->validated($request, $bankIntegration), $request->user());
+        $before = $audit->snapshot($bankIntegration, self::AUDIT_FIELDS);
+        $updated = $service->update($bankIntegration, $this->validated($request, $bankIntegration), $request->user());
+        [$beforeChanges, $afterChanges] = $audit->diff($before, $audit->snapshot($updated, self::AUDIT_FIELDS));
+        $audit->record($request->user(), 'updated', $updated, $beforeChanges, $afterChanges, [], $request);
 
         return redirect('/admin/bank-integrations')->with('status', 'Bank integration updated.');
     }

@@ -28,6 +28,9 @@
         <a class="button secondary" href="/admin/ops-health">Ops Health</a>
         <a class="button secondary" href="/admin/ops-alert-events">Ops Alerts</a>
         <a class="button secondary" href="/admin/scheduled-task-runs">Scheduled Task Runs</a>
+        @can('audit_logs.view')
+            <a class="button secondary" href="/admin/audit-logs">Audit Logs</a>
+        @endcan
     </p>
 </div>
 @endsection

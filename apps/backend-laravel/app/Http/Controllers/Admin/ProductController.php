@@ -7,11 +7,14 @@ use App\Http\Requests\StoreProductRequest;
 use App\Http\Requests\UpdateProductRequest;
 use App\Models\Product;
 use App\Models\ProvisioningProviderAccount;
+use App\Services\Audit\AuditLogger;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\View\View;
 
 class ProductController extends Controller
 {
+    private const AUDIT_FIELDS = ['code', 'name', 'type', 'status', 'price_amount', 'currency', 'duration_days', 'description', 'provider_account_id', 'provider_plan_code', 'provider_region', 'provider_provision_path', 'provider_options', 'lifecycle_source', 'lifecycle_unit', 'lifecycle_count', 'provider_lifecycle_path', 'provider_lifecycle_ordered_at_path', 'provider_lifecycle_expires_at_path', 'provider_lifecycle_date_format', 'provider_lifecycle_timezone', 'provider_renew_path', 'provider_suspend_path', 'provider_cancel_path', 'provider_sync_path'];
+
     public function index(): View
     {
         return view('admin.products.index', [
@@ -27,9 +30,10 @@ class ProductController extends Controller
         ]);
     }
 
-    public function store(StoreProductRequest $request): RedirectResponse
+    public function store(StoreProductRequest $request, AuditLogger $audit): RedirectResponse
     {
-        Product::create($this->attributesForSave($request->validated(), null));
+        $product = Product::create($this->attributesForSave($request->validated(), null));
+        $audit->record($request->user(), 'created', $product, [], $audit->snapshot($product, self::AUDIT_FIELDS), [], $request);
 
         return redirect('/admin/products')->with('status', 'Product created.');
     }
@@ -42,18 +46,26 @@ class ProductController extends Controller
         ]);
     }
 
-    public function update(UpdateProductRequest $request, Product $product): RedirectResponse
+    public function update(UpdateProductRequest $request, Product $product, AuditLogger $audit): RedirectResponse
     {
+        $before = $audit->snapshot($product, self::AUDIT_FIELDS);
         $product->update($this->attributesForSave($request->validated(), $product));
+        $product->refresh();
+        [$beforeChanges, $afterChanges] = $audit->diff($before, $audit->snapshot($product, self::AUDIT_FIELDS));
+        $audit->record($request->user(), 'updated', $product, $beforeChanges, $afterChanges, [], $request);
 
         return redirect('/admin/products')->with('status', 'Product updated.');
     }
 
-    public function destroy(Product $product): RedirectResponse
+    public function destroy(Product $product, AuditLogger $audit): RedirectResponse
     {
         abort_unless(request()->user()?->can('products.delete'), 403);
 
+        $before = $audit->snapshot($product, self::AUDIT_FIELDS);
         $product->update(['status' => 'archived']);
+        $product->refresh();
+        [$beforeChanges, $afterChanges] = $audit->diff($before, $audit->snapshot($product, self::AUDIT_FIELDS));
+        $audit->record(request()->user(), 'archived', $product, $beforeChanges, $afterChanges, [], request());
 
         return redirect('/admin/products')->with('status', 'Product archived.');
     }
