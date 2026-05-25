@@ -407,6 +407,14 @@ class ServiceAutoRenewalOpsTest extends TestCase
         $admin = $this->adminWithDirectPermissions('services-view-only@example.test', ['admin.access', 'services.view']);
 
         $this->actingAs($admin)->get('/admin/renewals')->assertForbidden();
+        $this->actingAs($admin)
+            ->get('/admin')
+            ->assertOk()
+            ->assertDontSee('href="/admin/renewals"', false);
+        $this->actingAs($admin)
+            ->get('/admin/services')
+            ->assertOk()
+            ->assertDontSee('href="/admin/renewals"', false);
     }
 
     public function test_services_view_without_renewal_manage_can_view_runbook_without_auto_renew_control(): void
