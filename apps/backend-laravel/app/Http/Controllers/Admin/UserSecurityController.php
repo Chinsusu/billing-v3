@@ -11,6 +11,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
+use Illuminate\Validation\ValidationException;
 
 class UserSecurityController extends Controller
 {
@@ -47,40 +48,46 @@ class UserSecurityController extends Controller
 
     public function forcePasswordReset(User $user, Request $request, AuditLogger $auditLogger): RedirectResponse
     {
-        $before = ['force_password_reset_at' => $user->force_password_reset_at];
+        DB::transaction(function () use ($auditLogger, $request, $user): void {
+            $lockedUser = User::whereKey($user->id)->lockForUpdate()->firstOrFail();
+            $before = ['force_password_reset_at' => $lockedUser->force_password_reset_at];
 
-        $user->forceFill(['force_password_reset_at' => now()])->save();
+            $lockedUser->forceFill(['force_password_reset_at' => now()])->save();
 
-        $auditLogger->record(
-            $request->user(),
-            'user_force_password_reset_required',
-            $user,
-            $before,
-            ['force_password_reset_at' => $user->force_password_reset_at],
-            [],
-            $request,
-            $user->email,
-        );
+            $auditLogger->record(
+                $request->user(),
+                'user_force_password_reset_required',
+                $lockedUser,
+                $before,
+                ['force_password_reset_at' => $lockedUser->force_password_reset_at],
+                [],
+                $request,
+                $lockedUser->email,
+            );
+        });
 
         return redirect("/admin/users/{$user->id}")->with('status', 'Password reset will be required at next login.');
     }
 
     public function clearForcePasswordReset(User $user, Request $request, AuditLogger $auditLogger): RedirectResponse
     {
-        $before = ['force_password_reset_at' => $user->force_password_reset_at];
+        DB::transaction(function () use ($auditLogger, $request, $user): void {
+            $lockedUser = User::whereKey($user->id)->lockForUpdate()->firstOrFail();
+            $before = ['force_password_reset_at' => $lockedUser->force_password_reset_at];
 
-        $user->forceFill(['force_password_reset_at' => null])->save();
+            $lockedUser->forceFill(['force_password_reset_at' => null])->save();
 
-        $auditLogger->record(
-            $request->user(),
-            'user_force_password_reset_cleared',
-            $user,
-            $before,
-            ['force_password_reset_at' => null],
-            [],
-            $request,
-            $user->email,
-        );
+            $auditLogger->record(
+                $request->user(),
+                'user_force_password_reset_cleared',
+                $lockedUser,
+                $before,
+                ['force_password_reset_at' => null],
+                [],
+                $request,
+                $lockedUser->email,
+            );
+        });
 
         return redirect("/admin/users/{$user->id}")->with('status', 'Forced password reset cleared.');
     }
@@ -99,59 +106,68 @@ class UserSecurityController extends Controller
             return back()->withErrors(['security' => 'You cannot disable your own account.']);
         }
 
-        if (! $authorizationSafety->canDisableUser($user)) {
-            return back()->withErrors(['security' => 'You cannot disable the last enabled super admin.']);
-        }
+        DB::transaction(function () use ($auditLogger, $authorizationSafety, $request, $user, $validated): void {
+            $lockedUser = User::whereKey($user->id)->lockForUpdate()->firstOrFail();
 
-        $before = [
-            'disabled_at' => $user->disabled_at,
-            'disabled_reason' => $user->disabled_reason,
-        ];
+            if (! $authorizationSafety->canDisableUser($lockedUser, true)) {
+                throw ValidationException::withMessages([
+                    'security' => 'You cannot disable the last enabled super admin.',
+                ]);
+            }
 
-        $user->forceFill([
-            'disabled_at' => now(),
-            'disabled_reason' => $validated['reason'],
-        ])->save();
+            $before = [
+                'disabled_at' => $lockedUser->disabled_at,
+                'disabled_reason' => $lockedUser->disabled_reason,
+            ];
 
-        $auditLogger->record(
-            $request->user(),
-            'user_disabled',
-            $user,
-            $before,
-            [
-                'disabled_at' => $user->disabled_at,
-                'disabled_reason' => $user->disabled_reason,
-            ],
-            [],
-            $request,
-            $user->email,
-        );
+            $lockedUser->forceFill([
+                'disabled_at' => now(),
+                'disabled_reason' => $validated['reason'],
+            ])->save();
+
+            $auditLogger->record(
+                $request->user(),
+                'user_disabled',
+                $lockedUser,
+                $before,
+                [
+                    'disabled_at' => $lockedUser->disabled_at,
+                    'disabled_reason' => $lockedUser->disabled_reason,
+                ],
+                [],
+                $request,
+                $lockedUser->email,
+            );
+        });
 
         return redirect("/admin/users/{$user->id}")->with('status', 'User disabled.');
     }
 
     public function enable(User $user, Request $request, AuditLogger $auditLogger): RedirectResponse
     {
-        $before = [
-            'disabled_at' => $user->disabled_at,
-            'disabled_reason' => $user->disabled_reason,
-        ];
+        DB::transaction(function () use ($auditLogger, $request, $user): void {
+            $lockedUser = User::whereKey($user->id)->lockForUpdate()->firstOrFail();
+            $before = [
+                'disabled_at' => $lockedUser->disabled_at,
+                'disabled_reason' => $lockedUser->disabled_reason,
+            ];
 
-        $user->forceFill([
-            'disabled_at' => null,
-            'disabled_reason' => null,
-        ])->save();
+            $lockedUser->forceFill([
+                'disabled_at' => null,
+                'disabled_reason' => null,
+            ])->save();
 
-        $auditLogger->record(
-            $request->user(),
-            'user_enabled',
-            $user,
-            $before,
-            ['disabled_at' => null, 'disabled_reason' => null],
-            [],
-            $request,
-            $user->email,
-        );
+            $auditLogger->record(
+                $request->user(),
+                'user_enabled',
+                $lockedUser,
+                $before,
+                ['disabled_at' => null, 'disabled_reason' => null],
+                [],
+                $request,
+                $lockedUser->email,
+            );
+        });
 
         return redirect("/admin/users/{$user->id}")->with('status', 'User enabled.');
     }

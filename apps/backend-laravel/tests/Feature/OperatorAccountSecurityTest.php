@@ -6,6 +6,7 @@ use App\Models\AdminAuditLog;
 use App\Models\User;
 use App\Services\Audit\AuditLogger;
 use Database\Seeders\RolesAndPermissionsSeeder;
+use DateTimeInterface;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\Request;
@@ -437,7 +438,7 @@ class OperatorAccountSecurityTest extends TestCase
         return $user;
     }
 
-    private function storePasswordResetToken(User $user, string $token, ?\DateTimeInterface $createdAt = null): void
+    private function storePasswordResetToken(User $user, string $token, ?DateTimeInterface $createdAt = null): void
     {
         DB::table('password_reset_tokens')->updateOrInsert(
             ['email' => $user->email],

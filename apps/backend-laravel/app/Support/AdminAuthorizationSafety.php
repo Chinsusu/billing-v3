@@ -53,16 +53,23 @@ class AdminAuthorizationSafety
         return $this->hasCriticalPermissions($this->normalizeNames($effectivePermissionNames));
     }
 
-    public function canDisableUser(User $target): bool
+    public function canDisableUser(User $target, bool $lock = false): bool
     {
         if (! $target->hasRole('super_admin')) {
             return true;
         }
 
-        return User::role('super_admin')
+        $query = User::role('super_admin')
             ->whereNull('disabled_at')
-            ->where('id', '!=', $target->id)
-            ->exists();
+            ->orderBy('users.id');
+
+        if ($lock) {
+            $query->lockForUpdate();
+        }
+
+        return $query
+            ->pluck('users.id')
+            ->contains(fn (int $id): bool => $id !== $target->id);
     }
 
     /**
