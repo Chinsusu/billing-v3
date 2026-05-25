@@ -4,6 +4,7 @@ use App\Http\Controllers\Admin\AdminAuditLogController;
 use App\Http\Controllers\Admin\AdminDashboardController;
 use App\Http\Controllers\Admin\BankIntegrationController;
 use App\Http\Controllers\Admin\BankIntegrationTestController;
+use App\Http\Controllers\Admin\BillingReportController;
 use App\Http\Controllers\Admin\CustomerController;
 use App\Http\Controllers\Admin\CustomerImpersonationController;
 use App\Http\Controllers\Admin\CustomerResellerController;
@@ -168,6 +169,10 @@ Route::middleware('auth')->group(function (): void {
                 Route::get('/payment-events', [PaymentEventController::class, 'index'])->middleware('permission:payment_events.view')->name('payment-events.index');
                 Route::get('/payment-events/{paymentEvent}', [PaymentEventController::class, 'show'])->middleware('permission:payment_events.view')->name('payment-events.show');
                 Route::post('/payment-events/{paymentEvent}/reconcile-wallet', PaymentEventReconciliationController::class)->middleware('permission:wallets.adjust')->name('payment-events.reconcile-wallet');
+                Route::get('/reports/billing', [BillingReportController::class, 'index'])->middleware('permission:invoices.view')->name('reports.billing');
+                Route::get('/reports/billing/invoices.csv', [BillingReportController::class, 'invoices'])->middleware('permission:invoices.view')->name('reports.billing.invoices');
+                Route::get('/reports/billing/ledger.csv', [BillingReportController::class, 'ledger'])->middleware('permission:wallets.adjust')->name('reports.billing.ledger');
+                Route::get('/reports/billing/payment-events.csv', [BillingReportController::class, 'paymentEvents'])->middleware('permission:payment_events.view')->name('reports.billing.payment-events');
                 Route::get('/customers', [CustomerController::class, 'index'])->middleware('permission:customers.view')->name('customers.index');
                 Route::get('/customers/{user}', [CustomerController::class, 'show'])->middleware('permission:customers.view')->name('customers.show');
                 Route::post('/customers/{user}/impersonate', [CustomerImpersonationController::class, 'start'])->middleware('permission:customers.view')->name('customers.impersonate');
