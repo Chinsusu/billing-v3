@@ -27,6 +27,7 @@ class ServiceFactory extends Factory
             'status' => 'pending_provision',
             'config' => [],
             'meta' => [],
+            'auto_renew_enabled' => false,
         ];
     }
 }
