@@ -9,10 +9,15 @@ use App\Models\Service;
 use App\Models\ServiceCancellation;
 use App\Models\User;
 use App\Models\Wallet;
+use App\Services\Notifications\NotificationOutbox;
+use App\Services\Services\ServiceAutoRenewalProcessor;
+use App\Services\Services\ServiceRenewalService;
 use Database\Seeders\RolesAndPermissionsSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
+use RuntimeException;
 use Tests\TestCase;
 
 class ServiceAutoRenewalTest extends TestCase
@@ -192,6 +197,142 @@ class ServiceAutoRenewalTest extends TestCase
         ]);
     }
 
+    public function test_auto_renew_skips_stale_candidate_when_auto_renew_was_disabled_before_charge(): void
+    {
+        $now = Carbon::parse('2026-05-25 09:00:00');
+        $this->travelTo($now);
+        $customer = $this->customerUser('auto-stale-disabled@example.test');
+        Wallet::factory()->for($customer)->create(['balance_amount' => 250000]);
+        $service = $this->serviceFor($customer, [
+            'status' => 'active',
+            'auto_renew_enabled' => true,
+            'expires_at' => $now->copy()->addHours(4),
+        ]);
+        $staleCandidate = Service::with(['user', 'product', 'orderItem'])->findOrFail($service->id);
+        $service->forceFill(['auto_renew_enabled' => false])->save();
+
+        $result = $this->processOne($staleCandidate);
+
+        $this->assertSame('skipped', $result);
+        $this->assertTrue($service->refresh()->expires_at->isSameSecond($now->copy()->addHours(4)));
+        $this->assertSame(250000, Wallet::firstOrFail()->balance_amount);
+        $this->assertSame(0, DB::table('ledger_entries')->count());
+        $this->assertDatabaseHas('service_auto_renewal_attempts', [
+            'service_id' => $service->id,
+            'status' => 'skipped',
+            'attempts' => 0,
+        ]);
+    }
+
+    public function test_auto_renew_skips_stale_candidate_when_expiry_changed_before_charge(): void
+    {
+        $now = Carbon::parse('2026-05-25 09:00:00');
+        $this->travelTo($now);
+        $customer = $this->customerUser('auto-stale-expiry@example.test');
+        Wallet::factory()->for($customer)->create(['balance_amount' => 250000]);
+        $service = $this->serviceFor($customer, [
+            'status' => 'active',
+            'auto_renew_enabled' => true,
+            'expires_at' => $now->copy()->addHours(4),
+        ]);
+        $staleCandidate = Service::with(['user', 'product', 'orderItem'])->findOrFail($service->id);
+        $manualRenewedExpiresAt = $now->copy()->addDays(30)->addHours(4);
+        $service->forceFill(['expires_at' => $manualRenewedExpiresAt])->save();
+
+        $result = $this->processOne($staleCandidate);
+
+        $this->assertSame('skipped', $result);
+        $this->assertTrue($service->refresh()->expires_at->isSameSecond($manualRenewedExpiresAt));
+        $this->assertSame(250000, Wallet::firstOrFail()->balance_amount);
+        $this->assertSame(0, DB::table('ledger_entries')->count());
+        $this->assertDatabaseHas('service_auto_renewal_attempts', [
+            'service_id' => $service->id,
+            'status' => 'skipped',
+            'attempts' => 0,
+        ]);
+    }
+
+    public function test_retry_blocked_attempts_do_not_consume_command_limit_for_eligible_services(): void
+    {
+        $now = Carbon::parse('2026-05-25 09:00:00');
+        $this->travelTo($now);
+        $customer = $this->customerUser('auto-limit@example.test');
+        Wallet::factory()->for($customer)->create(['balance_amount' => 250000]);
+
+        for ($i = 1; $i <= 50; $i++) {
+            $blocked = $this->serviceFor($customer, [
+                'status' => 'active',
+                'auto_renew_enabled' => true,
+                'expires_at' => $now->copy()->addMinutes($i),
+            ], ['code' => "auto-blocked-{$i}"]);
+
+            DB::table('service_auto_renewal_attempts')->insert([
+                'id' => (string) Str::uuid(),
+                'service_id' => $blocked->id,
+                'user_id' => $customer->id,
+                'expires_at' => $blocked->expires_at,
+                'status' => 'failed',
+                'attempts' => 1,
+                'next_attempt_at' => $now->copy()->addHour(),
+                'renewed_expires_at' => null,
+                'amount' => 99000,
+                'currency' => 'VND',
+                'last_error' => 'Wallet balance is not enough to pay this invoice.',
+                'idempotency_key' => "service-auto-renew:{$blocked->id}:{$blocked->expires_at->toISOString()}",
+                'created_at' => $now,
+                'updated_at' => $now,
+            ]);
+        }
+
+        $eligible = $this->serviceFor($customer, [
+            'status' => 'active',
+            'auto_renew_enabled' => true,
+            'expires_at' => $now->copy()->addHours(12),
+        ], ['code' => 'auto-eligible-after-blocked']);
+
+        $this->artisan('services:auto-renew --limit=50')
+            ->expectsOutput('Auto-renew processed=1 succeeded=1 failed=0 skipped=0.')
+            ->assertExitCode(0);
+
+        $this->assertTrue($eligible->refresh()->expires_at->isSameSecond($now->copy()->addDays(30)->addHours(12)));
+        $this->assertSame(151000, Wallet::firstOrFail()->balance_amount);
+    }
+
+    public function test_internal_auto_renew_errors_are_sanitized_before_storage_and_customer_display(): void
+    {
+        $now = Carbon::parse('2026-05-25 09:00:00');
+        $this->travelTo($now);
+        $customer = $this->customerUser('auto-sanitized@example.test');
+        Wallet::factory()->for($customer)->create(['balance_amount' => 250000]);
+        $service = $this->serviceFor($customer, [
+            'status' => 'active',
+            'auto_renew_enabled' => true,
+            'expires_at' => $now->copy()->addHours(4),
+        ]);
+        $renewals = \Mockery::mock(ServiceRenewalService::class);
+        $renewals->shouldReceive('renew')
+            ->once()
+            ->andThrow(new RuntimeException('SQLSTATE[08006] host=db.internal token=secret'));
+        $processor = new ServiceAutoRenewalProcessor($renewals, app(NotificationOutbox::class));
+
+        $result = $this->processOne($service->load(['user', 'product', 'orderItem']), $processor);
+
+        $this->assertSame('failed', $result);
+        $this->assertDatabaseHas('service_auto_renewal_attempts', [
+            'service_id' => $service->id,
+            'status' => 'failed',
+            'last_error' => 'Auto-renew failed. We will retry automatically.',
+        ]);
+
+        $this->actingAs($customer)
+            ->get("/services/{$service->id}")
+            ->assertOk()
+            ->assertSee('Auto-renew failed. We will retry automatically.')
+            ->assertDontSee('SQLSTATE')
+            ->assertDontSee('db.internal')
+            ->assertDontSee('token=secret');
+    }
+
     public function test_admin_service_runbook_shows_auto_renewal_attempts(): void
     {
         $admin = $this->adminUser();
@@ -287,5 +428,13 @@ class ServiceAutoRenewalTest extends TestCase
         $admin->assignRole('super_admin');
 
         return $admin;
+    }
+
+    private function processOne(Service $service, ?ServiceAutoRenewalProcessor $processor = null): string
+    {
+        $method = new \ReflectionMethod(ServiceAutoRenewalProcessor::class, 'processOne');
+        $method->setAccessible(true);
+
+        return $method->invoke($processor ?? app(ServiceAutoRenewalProcessor::class), $service);
     }
 }
