@@ -65,6 +65,11 @@ class User extends Authenticatable
         return $this->hasMany(NotificationPreference::class);
     }
 
+    public function supportTickets(): HasMany
+    {
+        return $this->hasMany(SupportTicket::class);
+    }
+
     public function adminAuditLogs(): HasMany
     {
         return $this->hasMany(AdminAuditLog::class, 'actor_id');

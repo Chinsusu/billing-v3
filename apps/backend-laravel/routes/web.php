@@ -37,6 +37,7 @@ use App\Http\Controllers\Admin\ServiceProviderCancelController;
 use App\Http\Controllers\Admin\ServiceProviderSyncController;
 use App\Http\Controllers\Admin\ServiceRefundCreditController;
 use App\Http\Controllers\Admin\ServiceRenewalReportController;
+use App\Http\Controllers\Admin\SupportTicketController as AdminSupportTicketController;
 use App\Http\Controllers\Admin\UserController as AdminUserController;
 use App\Http\Controllers\Admin\UserMfaController;
 use App\Http\Controllers\Admin\UserSecurityController;
@@ -59,6 +60,7 @@ use App\Http\Controllers\ServiceAutoRenewalController;
 use App\Http\Controllers\ServiceCancellationController;
 use App\Http\Controllers\ServiceController;
 use App\Http\Controllers\ServiceRenewalController;
+use App\Http\Controllers\SupportTicketController;
 use App\Http\Controllers\WalletController;
 use App\Http\Controllers\WalletTopUpController;
 use Illuminate\Foundation\Http\Middleware\ValidateCsrfToken;
@@ -115,6 +117,11 @@ Route::middleware('auth')->group(function (): void {
             Route::post('/services/{service}/cancel', ServiceCancellationController::class)->name('services.cancel');
             Route::get('/notification-preferences', [NotificationPreferenceController::class, 'edit'])->name('notification-preferences.edit');
             Route::post('/notification-preferences', [NotificationPreferenceController::class, 'update'])->name('notification-preferences.update');
+            Route::get('/support/tickets', [SupportTicketController::class, 'index'])->name('support-tickets.index');
+            Route::get('/support/tickets/create', [SupportTicketController::class, 'create'])->name('support-tickets.create');
+            Route::post('/support/tickets', [SupportTicketController::class, 'store'])->name('support-tickets.store');
+            Route::get('/support/tickets/{ticket}', [SupportTicketController::class, 'show'])->name('support-tickets.show');
+            Route::post('/support/tickets/{ticket}/notes', [SupportTicketController::class, 'note'])->name('support-tickets.notes.store');
 
             Route::middleware('permission:admin.access')->prefix('admin')->name('admin.')->group(function (): void {
                 Route::get('/', AdminDashboardController::class)->name('dashboard');
@@ -155,6 +162,10 @@ Route::middleware('auth')->group(function (): void {
                 Route::get('/customers/{user}', [CustomerController::class, 'show'])->middleware('permission:customers.view')->name('customers.show');
                 Route::post('/customers/{user}/impersonate', [CustomerImpersonationController::class, 'start'])->middleware('permission:customers.view')->name('customers.impersonate');
                 Route::post('/customers/{user}/wallet-adjustments', CustomerWalletAdjustmentController::class)->middleware('permission:wallets.adjust')->name('customers.wallet-adjustments.store');
+                Route::get('/support-tickets', [AdminSupportTicketController::class, 'index'])->middleware('permission:support_tickets.view')->name('support-tickets.index');
+                Route::get('/support-tickets/{ticket}', [AdminSupportTicketController::class, 'show'])->middleware('permission:support_tickets.view')->name('support-tickets.show');
+                Route::put('/support-tickets/{ticket}', [AdminSupportTicketController::class, 'update'])->middleware('permission:support_tickets.manage')->name('support-tickets.update');
+                Route::post('/support-tickets/{ticket}/notes', [AdminSupportTicketController::class, 'note'])->middleware('permission:support_tickets.manage')->name('support-tickets.notes.store');
                 Route::get('/bank-integrations', [BankIntegrationController::class, 'index'])->middleware('permission:bank_integrations.manage')->name('bank-integrations.index');
                 Route::get('/bank-integrations/create', [BankIntegrationController::class, 'create'])->middleware('permission:bank_integrations.manage')->name('bank-integrations.create');
                 Route::post('/bank-integrations', [BankIntegrationController::class, 'store'])->middleware('permission:bank_integrations.manage')->name('bank-integrations.store');
