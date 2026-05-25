@@ -80,7 +80,7 @@
 
 - [x] Document policy fields, command behavior, and report paths.
 - [x] Mark completed plan checklist items.
-- [ ] Run `./vendor/bin/pint --test`.
-- [ ] Run `APP_ENV=testing php artisan test`.
-- [ ] Run Go format/vet/test and Compose config/build backend checks used by CI.
+- [x] Run `./vendor/bin/pint --test`.
+- [x] Run `APP_ENV=testing php artisan test`.
+- [x] Run Go format/vet/test and Compose config/build backend checks used by CI.
 - [ ] Push `feature/sprint-29-renewal-policy-reporting`, open a PR to `develop`, wait for CI, merge, deploy to `/opt/billing`, run migrations/seeds, and smoke admin/customer renewal pages.
