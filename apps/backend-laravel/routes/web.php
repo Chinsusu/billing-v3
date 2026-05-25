@@ -42,6 +42,8 @@ use App\Http\Controllers\Admin\UserController as AdminUserController;
 use App\Http\Controllers\Admin\UserMfaController;
 use App\Http\Controllers\Admin\UserSecurityController;
 use App\Http\Controllers\Admin\UserSessionController;
+use App\Http\Controllers\Api\MeController;
+use App\Http\Controllers\ApiKeyController;
 use App\Http\Controllers\Auth\AuthenticatedSessionController;
 use App\Http\Controllers\Auth\ForcedPasswordResetController;
 use App\Http\Controllers\Auth\PasswordSetupController;
@@ -70,6 +72,7 @@ Route::get('/', fn () => redirect('/products'));
 Route::get('/products', ProductCatalogController::class)->name('products.index');
 Route::post('/webhooks/bank/sandbox', BankWebhookSandboxController::class)->name('webhooks.bank-sandbox');
 Route::post('/webhooks/providers/{provisioningProviderAccount}', ProviderCallbackController::class)->name('webhooks.providers');
+Route::get('/api/v1/me', MeController::class)->middleware('api.key:account.read')->name('api.v1.me');
 Route::post('/internal/provisioning/jobs/{job}/execute', ProvisioningJobExecutionController::class)
     ->withoutMiddleware([ValidateCsrfToken::class])
     ->name('internal.provisioning-jobs.execute');
@@ -117,6 +120,9 @@ Route::middleware('auth')->group(function (): void {
             Route::post('/services/{service}/cancel', ServiceCancellationController::class)->name('services.cancel');
             Route::get('/notification-preferences', [NotificationPreferenceController::class, 'edit'])->name('notification-preferences.edit');
             Route::post('/notification-preferences', [NotificationPreferenceController::class, 'update'])->name('notification-preferences.update');
+            Route::get('/api-keys', [ApiKeyController::class, 'index'])->name('api-keys.index');
+            Route::post('/api-keys', [ApiKeyController::class, 'store'])->name('api-keys.store');
+            Route::post('/api-keys/{apiKey}/revoke', [ApiKeyController::class, 'revoke'])->name('api-keys.revoke');
             Route::get('/support/tickets', [SupportTicketController::class, 'index'])->name('support-tickets.index');
             Route::get('/support/tickets/create', [SupportTicketController::class, 'create'])->name('support-tickets.create');
             Route::post('/support/tickets', [SupportTicketController::class, 'store'])->name('support-tickets.store');

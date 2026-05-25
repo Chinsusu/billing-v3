@@ -11,6 +11,7 @@ use App\Console\Commands\SendNotificationsCommand;
 use App\Console\Commands\SmokeProvisioningRuntimeCommand;
 use App\Console\Commands\SyncPrivateBankPaymentsCommand;
 use App\Console\Commands\WorkProviderActionJobsCommand;
+use App\Http\Middleware\AuthenticateApiKey;
 use App\Http\Middleware\EnsureAccountIsEnabled;
 use App\Http\Middleware\EnsureMfaIsVerified;
 use App\Http\Middleware\EnsurePasswordResetIsNotForced;
@@ -46,6 +47,7 @@ return Application::configure(basePath: dirname(__DIR__))
             'permission' => PermissionMiddleware::class,
             'role_or_permission' => RoleOrPermissionMiddleware::class,
             'account.enabled' => EnsureAccountIsEnabled::class,
+            'api.key' => AuthenticateApiKey::class,
             'mfa.verified' => EnsureMfaIsVerified::class,
             'password.reset.not_forced' => EnsurePasswordResetIsNotForced::class,
         ]);
