@@ -307,6 +307,17 @@ class AdminUserRoleManagementTest extends TestCase
         $this->assertSame(0, AdminAuditLog::where('action', 'role_permissions_updated')->count());
     }
 
+    public function test_non_web_guard_roles_are_not_editable_from_admin_role_routes(): void
+    {
+        $admin = $this->superAdmin('s32-non-web-role-admin@example.test');
+        $role = Role::create(['name' => 'api_operator', 'guard_name' => 'api']);
+
+        $this->actingAs($admin)->get("/admin/roles/{$role->id}/edit")->assertNotFound();
+        $this->actingAs($admin)->put("/admin/roles/{$role->id}", [
+            'permissions' => ['admin.access'],
+        ])->assertNotFound();
+    }
+
     private function superAdmin(string $email): User
     {
         $this->seed(RolesAndPermissionsSeeder::class);
