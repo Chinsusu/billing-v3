@@ -108,23 +108,35 @@ class ServiceAutoRenewalOpsService
     public function bulkRetry(array $attemptIds, User $actor, string $reason, Request $request): array
     {
         $counts = ['applied' => 0, 'skipped' => 0];
-        $attempts = $this->attemptsForBulk($attemptIds);
+        $selectedAttemptIds = $this->uniqueAttemptIds($attemptIds);
+        $appliedAttemptIds = [];
+        $skippedAttemptIds = [];
+        $attempts = $this->attemptsForBulk($selectedAttemptIds);
 
         foreach ($attempts as $attempt) {
             try {
                 $this->retryNow($attempt, $actor, $reason, $request);
                 $counts['applied']++;
-            } catch (ValidationException) {
+                $appliedAttemptIds[] = $attempt->id;
+            } catch (ValidationException $exception) {
                 $counts['skipped']++;
+                $skippedAttemptIds[$attempt->id] = $this->firstValidationError($exception);
             }
         }
 
-        $counts['skipped'] += max(0, count(array_unique($attemptIds)) - $attempts->count());
+        foreach (array_values(array_diff($selectedAttemptIds, $attempts->pluck('id')->all())) as $missingAttemptId) {
+            $counts['skipped']++;
+            $skippedAttemptIds[$missingAttemptId] = 'Attempt not found.';
+        }
+
         $this->audit->record($actor, 'service_auto_renew_bulk_retry', $actor, [], [], [
             'reason' => $reason,
-            'selected' => count(array_unique($attemptIds)),
+            'selected' => count($selectedAttemptIds),
             'applied' => $counts['applied'],
             'skipped' => $counts['skipped'],
+            'selected_attempt_ids' => $selectedAttemptIds,
+            'applied_attempt_ids' => $appliedAttemptIds,
+            'skipped_attempt_ids' => $skippedAttemptIds,
         ], $request, $actor->email);
 
         return $counts;
@@ -137,12 +149,24 @@ class ServiceAutoRenewalOpsService
     public function bulkDisable(array $attemptIds, User $actor, string $reason, Request $request): array
     {
         $counts = ['applied' => 0, 'skipped' => 0];
+        $selectedAttemptIds = $this->uniqueAttemptIds($attemptIds);
+        $appliedAttemptIds = [];
+        $skippedAttemptIds = [];
         $seenServiceIds = [];
+        $attempts = $this->attemptsForBulk($selectedAttemptIds);
 
-        foreach ($this->attemptsForBulk($attemptIds) as $attempt) {
+        foreach ($attempts as $attempt) {
             $service = $attempt->service;
-            if ($service === null || isset($seenServiceIds[$service->id])) {
+            if ($service === null) {
                 $counts['skipped']++;
+                $skippedAttemptIds[$attempt->id] = 'Attempt is missing its service.';
+
+                continue;
+            }
+
+            if (isset($seenServiceIds[$service->id])) {
+                $counts['skipped']++;
+                $skippedAttemptIds[$attempt->id] = 'Service already handled in this bulk action.';
 
                 continue;
             }
@@ -150,14 +174,22 @@ class ServiceAutoRenewalOpsService
             $seenServiceIds[$service->id] = true;
             $this->toggleService($service, false, $actor, $reason, $request);
             $counts['applied']++;
+            $appliedAttemptIds[] = $attempt->id;
         }
 
-        $counts['skipped'] += max(0, count(array_unique($attemptIds)) - count($seenServiceIds));
+        foreach (array_values(array_diff($selectedAttemptIds, $attempts->pluck('id')->all())) as $missingAttemptId) {
+            $counts['skipped']++;
+            $skippedAttemptIds[$missingAttemptId] = 'Attempt not found.';
+        }
+
         $this->audit->record($actor, 'service_auto_renew_bulk_disable', $actor, [], [], [
             'reason' => $reason,
-            'selected' => count(array_unique($attemptIds)),
+            'selected' => count($selectedAttemptIds),
             'applied' => $counts['applied'],
             'skipped' => $counts['skipped'],
+            'selected_attempt_ids' => $selectedAttemptIds,
+            'applied_attempt_ids' => $appliedAttemptIds,
+            'skipped_attempt_ids' => $skippedAttemptIds,
         ], $request, $actor->email);
 
         return $counts;
@@ -225,5 +257,25 @@ class ServiceAutoRenewalOpsService
         return ServiceAutoRenewalAttempt::with(['service.product', 'service.user', 'service.orderItem', 'service.cancellations', 'user'])
             ->whereIn('id', array_unique($attemptIds))
             ->get();
+    }
+
+    /**
+     * @param  array<int, string>  $attemptIds
+     * @return list<string>
+     */
+    private function uniqueAttemptIds(array $attemptIds): array
+    {
+        return array_values(array_unique(array_map('strval', $attemptIds)));
+    }
+
+    private function firstValidationError(ValidationException $exception): string
+    {
+        foreach ($exception->errors() as $messages) {
+            if (isset($messages[0])) {
+                return (string) $messages[0];
+            }
+        }
+
+        return 'Validation failed.';
     }
 }

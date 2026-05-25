@@ -315,6 +315,9 @@ class ServiceAutoRenewalOpsTest extends TestCase
         $this->assertSame(2, $audit->metadata['selected']);
         $this->assertSame(1, $audit->metadata['applied']);
         $this->assertSame(1, $audit->metadata['skipped']);
+        $this->assertSame([$firstAttempt->id, $secondAttempt->id], $audit->metadata['selected_attempt_ids']);
+        $this->assertSame([$firstAttempt->id], $audit->metadata['applied_attempt_ids']);
+        $this->assertSame('Service already handled in this bulk action.', $audit->metadata['skipped_attempt_ids'][$secondAttempt->id]);
     }
 
     public function test_admin_renewal_report_and_runbook_show_ops_controls(): void
