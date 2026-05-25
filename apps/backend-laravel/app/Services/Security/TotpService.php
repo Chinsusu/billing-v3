@@ -25,11 +25,11 @@ class TotpService
         $counter = intdiv($timestamp, 30);
         $binaryCounter = pack('N*', 0).pack('N*', $counter);
         $hash = hash_hmac('sha1', $binaryCounter, $this->base32Decode($secret), true);
-        $offset = ord(substr($hash, -1)) & 0x0f;
-        $value = ((ord($hash[$offset]) & 0x7f) << 24)
-            | ((ord($hash[$offset + 1]) & 0xff) << 16)
-            | ((ord($hash[$offset + 2]) & 0xff) << 8)
-            | (ord($hash[$offset + 3]) & 0xff);
+        $offset = ord(substr($hash, -1)) & 0x0F;
+        $value = ((ord($hash[$offset]) & 0x7F) << 24)
+            | ((ord($hash[$offset + 1]) & 0xFF) << 16)
+            | ((ord($hash[$offset + 2]) & 0xFF) << 8)
+            | (ord($hash[$offset + 3]) & 0xFF);
 
         return str_pad((string) ($value % 1000000), 6, '0', STR_PAD_LEFT);
     }

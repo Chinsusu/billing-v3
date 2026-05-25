@@ -5,7 +5,6 @@ namespace Tests\Feature;
 use App\Models\AdminAuditLog;
 use App\Models\Order;
 use App\Models\Product;
-use App\Models\ResellerPriceOverride;
 use App\Models\User;
 use App\Models\Wallet;
 use Database\Seeders\RolesAndPermissionsSeeder;
