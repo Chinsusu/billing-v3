@@ -11,13 +11,20 @@
         <div><strong>Provisioned</strong><br>{{ $service->provisioned_at?->format('Y-m-d H:i') ?? '-' }}</div>
         <div><strong>Expires</strong><br>{{ $service->expires_at?->format('Y-m-d H:i') ?? '-' }}</div>
         <div><strong>Auto-renew</strong><br>{{ $service->auto_renew_enabled ? 'Enabled' : 'Disabled' }}</div>
+        <div><strong>Auto-renew Policy</strong><br>{{ $autoRenewalPolicy['allowed'] ? 'Allowed' : 'Unavailable' }}</div>
+        <div><strong>Renewal Window</strong><br>{{ $autoRenewalPolicy['window_hours'] }} hours</div>
+        <div><strong>Retry Policy</strong><br>{{ $autoRenewalPolicy['retry_delay_minutes'] }} minutes, {{ $autoRenewalPolicy['max_attempts'] }} max attempts</div>
     </div>
     @if ($service->status === 'active')
-        <form method="POST" action="/services/{{ $service->id }}/auto-renew" style="margin-top:16px">
-            @csrf
-            <input type="hidden" name="enabled" value="{{ $service->auto_renew_enabled ? '0' : '1' }}">
-            <button class="button secondary" type="submit">{{ $service->auto_renew_enabled ? 'Disable Auto-renew' : 'Enable Auto-renew' }}</button>
-        </form>
+        @if ($service->auto_renew_enabled || $autoRenewalPolicy['allowed'])
+            <form method="POST" action="/services/{{ $service->id }}/auto-renew" style="margin-top:16px">
+                @csrf
+                <input type="hidden" name="enabled" value="{{ $service->auto_renew_enabled ? '0' : '1' }}">
+                <button class="button secondary" type="submit">{{ $service->auto_renew_enabled ? 'Disable Auto-renew' : 'Enable Auto-renew' }}</button>
+            </form>
+        @else
+            <p class="muted">Auto-renew is not available for this product.</p>
+        @endif
         <form method="POST" action="/services/{{ $service->id }}/renew" style="margin-top:16px">
             @csrf
             <button type="submit">Renew</button>
@@ -38,16 +45,16 @@
 
 <div class="panel">
     <h2>Auto-Renewal</h2>
-    @php($latestAutoRenewalAttempt = $service->autoRenewalAttempts->first())
+    @php($latestAutoRenewalAttempt = $service->latestAutoRenewalAttemptForCurrentExpiry())
     @if ($latestAutoRenewalAttempt)
         <div class="grid">
             <div><strong>Status</strong><br>{{ $latestAutoRenewalAttempt->status }}</div>
-            <div><strong>Attempts</strong><br>{{ $latestAutoRenewalAttempt->attempts }}</div>
+            <div><strong>Attempts</strong><br>{{ $latestAutoRenewalAttempt->attempts }} / {{ $autoRenewalPolicy['max_attempts'] }}</div>
             <div><strong>Target Expiry</strong><br>{{ $latestAutoRenewalAttempt->expires_at?->format('Y-m-d H:i') ?? '-' }}</div>
             <div><strong>Next Retry</strong><br>{{ $latestAutoRenewalAttempt->next_attempt_at?->format('Y-m-d H:i') ?? '-' }}</div>
         </div>
         @if ($latestAutoRenewalAttempt->status === 'failed')
-            <p class="error">Auto-renew failed. We will retry automatically.</p>
+            <p class="error">{{ $latestAutoRenewalAttempt->next_attempt_at ? 'Auto-renew failed. We will retry automatically.' : 'Auto-renew failed. Maximum retry attempts reached.' }}</p>
         @endif
     @else
         <p class="muted">No auto-renewal attempts yet.</p>

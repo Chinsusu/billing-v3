@@ -2,17 +2,20 @@
 @section('content')
 <div class="panel">
     <h1>Services</h1>
-    <p><a href="/admin/provider-action-jobs">Provider Action Jobs</a></p>
+    <p><a href="/admin/provider-action-jobs">Provider Action Jobs</a> | <a href="/admin/renewals">Renewal Reporting</a></p>
     <table>
-        <thead><tr><th>Customer</th><th>Product</th><th>Type</th><th>Status</th><th>Expires</th><th>Actions</th></tr></thead>
+        <thead><tr><th>Customer</th><th>Product</th><th>Type</th><th>Status</th><th>Expires</th><th>Auto-renew</th><th>Latest renewal</th><th>Actions</th></tr></thead>
         <tbody>
             @forelse ($services as $service)
+                @php($latestAutoRenewalAttempt = $service->latestAutoRenewalAttemptForCurrentExpiry())
                 <tr>
                     <td>{{ $service->user->email }}</td>
                     <td><a href="/admin/services/{{ $service->id }}">{{ $service->product_name }}</a></td>
                     <td>{{ $service->product_type }}</td>
                     <td>{{ $service->status }}</td>
                     <td>{{ $service->expires_at?->format('Y-m-d') }}</td>
+                    <td>{{ $service->auto_renew_enabled ? 'Enabled' : 'Disabled' }}</td>
+                    <td>{{ $latestAutoRenewalAttempt?->status ?? '-' }}</td>
                     <td>
                         <form method="POST" action="/admin/services/{{ $service->id }}/sync-provider" style="display:inline">
                             @csrf
@@ -25,7 +28,7 @@
                     </td>
                 </tr>
             @empty
-                <tr><td colspan="6" class="muted">No services yet.</td></tr>
+                <tr><td colspan="8" class="muted">No services yet.</td></tr>
             @endforelse
         </tbody>
     </table>

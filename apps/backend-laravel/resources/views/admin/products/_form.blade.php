@@ -18,6 +18,14 @@
 <label>Price Amount<input type="number" name="price_amount" value="{{ old('price_amount', $product->price_amount) }}" min="1" required></label>
 <label>Currency<input name="currency" value="{{ old('currency', $product->currency ?: 'VND') }}" maxlength="3" required></label>
 <label>Duration Days<input type="number" name="duration_days" value="{{ old('duration_days', $product->duration_days ?: 30) }}" min="1" required></label>
+<fieldset>
+    <legend>Auto-renew Policy</legend>
+    <input type="hidden" name="auto_renew_allowed" value="0">
+    <label><input type="checkbox" name="auto_renew_allowed" value="1" @checked(old('auto_renew_allowed', $product->exists ? $product->auto_renew_allowed : true))> Allow auto-renewal</label>
+    <label>Renewal Window Hours<input type="number" name="auto_renew_window_hours" value="{{ old('auto_renew_window_hours', $product->auto_renew_window_hours ?: 24) }}" min="1" max="24" required></label>
+    <label>Retry Delay Minutes<input type="number" name="auto_renew_retry_delay_minutes" value="{{ old('auto_renew_retry_delay_minutes', $product->auto_renew_retry_delay_minutes ?: 60) }}" min="5" max="10080" required></label>
+    <label>Renewal Max Attempts<input type="number" name="auto_renew_max_attempts" value="{{ old('auto_renew_max_attempts', $product->auto_renew_max_attempts ?: 3) }}" min="1" max="20" required></label>
+</fieldset>
 <label>Lifecycle Source
     <select name="lifecycle_source" required>
         @foreach (['local_policy' => 'Local Policy', 'provider_response' => 'Provider Response', 'provider_lookup' => 'Provider Lookup'] as $value => $label)

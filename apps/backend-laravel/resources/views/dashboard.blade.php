@@ -6,6 +6,9 @@
         <div class="panel"><strong>{{ number_format($wallet->balance_amount) }} {{ $wallet->currency }}</strong><br>Wallet balance</div>
         <div class="panel"><strong>{{ $openInvoiceCount }}</strong><br>Open invoices</div>
         <div class="panel"><strong>{{ $activeServiceCount }}</strong><br>Active services</div>
+        <div class="panel"><strong>{{ $autoRenewEnabledCount }}</strong><br>Auto-renew enabled</div>
+        <div class="panel"><strong>{{ $dueForAutoRenewCount }}</strong><br>Due for auto-renew</div>
+        <div class="panel"><strong>{{ $failedAutoRenewCount }}</strong><br>Failed auto-renew</div>
     </div>
     <p>
         <a class="button" href="/wallet">Open Wallet</a>
@@ -46,7 +49,12 @@
         <table>
             <tbody>
                 @forelse ($recentServices as $service)
-                    <tr><td><a href="/services/{{ $service->id }}">{{ $service->product_name }}</a></td><td>{{ $service->status }}</td></tr>
+                    @php($latestAutoRenewalAttempt = $service->latestAutoRenewalAttemptForCurrentExpiry())
+                    <tr>
+                        <td><a href="/services/{{ $service->id }}">{{ $service->product_name }}</a></td>
+                        <td>{{ $service->status }}</td>
+                        <td>{{ $latestAutoRenewalAttempt?->status ?? '-' }}</td>
+                    </tr>
                 @empty
                     <tr><td class="muted">No services yet.</td></tr>
                 @endforelse

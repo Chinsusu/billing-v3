@@ -14,6 +14,9 @@
         <div><strong>Provisioned</strong><br>{{ $service->provisioned_at?->toDateTimeString() ?? '-' }}</div>
         <div><strong>Expires</strong><br>{{ $service->expires_at?->toDateTimeString() ?? '-' }}</div>
         <div><strong>Auto-renew</strong><br>{{ $service->auto_renew_enabled ? 'Enabled' : 'Disabled' }}</div>
+        <div><strong>Auto-renew Policy</strong><br>{{ $autoRenewalPolicy['allowed'] ? 'Allowed' : 'Disabled' }}</div>
+        <div><strong>Renewal Window</strong><br>{{ $autoRenewalPolicy['window_hours'] }} hours</div>
+        <div><strong>Retry Policy</strong><br>{{ $autoRenewalPolicy['retry_delay_minutes'] }} minutes, {{ $autoRenewalPolicy['max_attempts'] }} max attempts</div>
     </div>
     <p>
         <form method="POST" action="/admin/services/{{ $service->id }}/sync-provider" style="display:inline">
@@ -35,7 +38,7 @@
             @forelse ($service->autoRenewalAttempts as $attempt)
                 <tr>
                     <td>{{ $attempt->status }}</td>
-                    <td>{{ $attempt->attempts }}</td>
+                    <td>{{ $attempt->attempts }} / {{ $autoRenewalPolicy['max_attempts'] }}</td>
                     <td>{{ $attempt->expires_at?->toDateTimeString() ?? '-' }}</td>
                     <td>{{ $attempt->renewed_expires_at?->toDateTimeString() ?? '-' }}</td>
                     <td>{{ $attempt->next_attempt_at?->toDateTimeString() ?? '-' }}</td>

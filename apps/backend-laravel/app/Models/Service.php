@@ -76,4 +76,19 @@ class Service extends Model
     {
         return $this->hasMany(ServiceAutoRenewalAttempt::class);
     }
+
+    public function latestAutoRenewalAttemptForCurrentExpiry(): ?ServiceAutoRenewalAttempt
+    {
+        if ($this->expires_at === null) {
+            return null;
+        }
+
+        $attempts = $this->relationLoaded('autoRenewalAttempts')
+            ? $this->autoRenewalAttempts
+            : $this->autoRenewalAttempts()->latest()->get();
+
+        return $attempts->first(
+            fn (ServiceAutoRenewalAttempt $attempt): bool => $attempt->expires_at?->isSameSecond($this->expires_at) ?? false
+        );
+    }
 }
