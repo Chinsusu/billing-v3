@@ -61,7 +61,7 @@
 - [x] Add Sprint 31 README section documenting permissions, routes, role defaults, and deployment seeding.
 - [x] Mark completed plan checklist items.
 - [x] Run S31 targeted tests.
-- [ ] Commit docs/checklist changes.
+- [x] Commit docs/checklist changes.
 
 ### Task 5: Verification, PR, Merge, Deploy
 
