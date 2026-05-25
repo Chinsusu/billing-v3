@@ -5,6 +5,7 @@ use App\Http\Controllers\Admin\AdminDashboardController;
 use App\Http\Controllers\Admin\BankIntegrationController;
 use App\Http\Controllers\Admin\BankIntegrationTestController;
 use App\Http\Controllers\Admin\CustomerController;
+use App\Http\Controllers\Admin\CustomerImpersonationController;
 use App\Http\Controllers\Admin\CustomerWalletAdjustmentController;
 use App\Http\Controllers\Admin\InvoiceController as AdminInvoiceController;
 use App\Http\Controllers\Admin\NotificationEventController;
@@ -83,6 +84,7 @@ Route::post('/password/setup', [PasswordSetupController::class, 'store'])->name(
 
 Route::middleware('auth')->group(function (): void {
     Route::post('/logout', [AuthenticatedSessionController::class, 'destroy'])->name('logout');
+    Route::post('/impersonation/stop', [CustomerImpersonationController::class, 'stop'])->name('impersonation.stop');
 
     Route::middleware('account.enabled')->group(function (): void {
         Route::get('/password/forced-reset', [ForcedPasswordResetController::class, 'edit'])->name('password.forced-reset.edit');
@@ -151,6 +153,7 @@ Route::middleware('auth')->group(function (): void {
                 Route::post('/payment-events/{paymentEvent}/reconcile-wallet', PaymentEventReconciliationController::class)->middleware('permission:wallets.adjust')->name('payment-events.reconcile-wallet');
                 Route::get('/customers', [CustomerController::class, 'index'])->middleware('permission:customers.view')->name('customers.index');
                 Route::get('/customers/{user}', [CustomerController::class, 'show'])->middleware('permission:customers.view')->name('customers.show');
+                Route::post('/customers/{user}/impersonate', [CustomerImpersonationController::class, 'start'])->middleware('permission:customers.view')->name('customers.impersonate');
                 Route::post('/customers/{user}/wallet-adjustments', CustomerWalletAdjustmentController::class)->middleware('permission:wallets.adjust')->name('customers.wallet-adjustments.store');
                 Route::get('/bank-integrations', [BankIntegrationController::class, 'index'])->middleware('permission:bank_integrations.manage')->name('bank-integrations.index');
                 Route::get('/bank-integrations/create', [BankIntegrationController::class, 'create'])->middleware('permission:bank_integrations.manage')->name('bank-integrations.create');

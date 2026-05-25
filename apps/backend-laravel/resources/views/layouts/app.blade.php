@@ -43,6 +43,15 @@
     </nav>
 </header>
 <main>
+    @if (session('impersonator_id'))
+        <div class="panel">
+            Impersonating {{ session('impersonated_user_email') }} as {{ session('impersonator_email') }}.
+            <form method="POST" action="/impersonation/stop" style="display:inline">
+                @csrf
+                <button type="submit" class="secondary">Stop Impersonation</button>
+            </form>
+        </div>
+    @endif
     @if (session('status'))<div class="panel">{{ session('status') }}</div>@endif
     @if ($errors->any())<div class="panel error"><ul>@foreach ($errors->all() as $error)<li>{{ $error }}</li>@endforeach</ul></div>@endif
     @yield('content')

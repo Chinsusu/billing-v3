@@ -3,7 +3,15 @@
 <div class="panel">
     <h1>{{ $customer->name }}</h1>
     <p>{{ $customer->email }}</p>
-    <p><a class="button secondary" href="/admin/customers">Back to Customers</a></p>
+    <p>
+        <a class="button secondary" href="/admin/customers">Back to Customers</a>
+        @can('customers.view')
+            <form method="POST" action="/admin/customers/{{ $customer->id }}/impersonate" style="display:inline">
+                @csrf
+                <button type="submit">Impersonate</button>
+            </form>
+        @endcan
+    </p>
 </div>
 
 <div class="panel">
