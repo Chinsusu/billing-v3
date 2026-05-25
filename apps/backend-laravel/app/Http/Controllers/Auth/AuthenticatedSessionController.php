@@ -3,6 +3,8 @@
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
+use App\Models\User;
+use App\Services\Audit\AuditLogger;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -16,12 +18,30 @@ class AuthenticatedSessionController extends Controller
         return view('auth.login');
     }
 
-    public function store(Request $request): RedirectResponse
+    public function store(Request $request, AuditLogger $auditLogger): RedirectResponse
     {
         $credentials = $request->validate([
             'email' => ['required', 'email'],
             'password' => ['required', 'string'],
         ]);
+
+        $user = User::where('email', $credentials['email'])->first();
+        if ($user?->disabled_at !== null) {
+            $auditLogger->record(
+                null,
+                'user_login_blocked_disabled',
+                $user,
+                [],
+                [],
+                ['disabled_reason' => $user->disabled_reason],
+                $request,
+                $user->email,
+            );
+
+            throw ValidationException::withMessages([
+                'email' => 'This account is disabled.',
+            ]);
+        }
 
         if (! Auth::attempt($credentials, $request->boolean('remember'))) {
             throw ValidationException::withMessages([
@@ -30,6 +50,24 @@ class AuthenticatedSessionController extends Controller
         }
 
         $request->session()->regenerate();
+        $user = $request->user();
+        $loginAt = now();
+        $user->forceFill([
+            'last_login_at' => $loginAt,
+            'last_login_ip' => $request->ip(),
+            'last_login_user_agent' => $request->userAgent(),
+        ])->save();
+
+        $auditLogger->record(
+            $user,
+            'user_login_succeeded',
+            $user,
+            [],
+            ['last_login_at' => $loginAt],
+            ['ip_address' => $request->ip(), 'user_agent' => $request->userAgent()],
+            $request,
+            $user->email,
+        );
 
         return redirect()->intended('/dashboard');
     }

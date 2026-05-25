@@ -396,6 +396,26 @@ Permissions:
 
 `super_admin` receives all S32 permissions. Existing `ops_admin`, `support`, and `finance` roles do not receive them by default. User and role changes write `admin_audit_logs` actions `user_created`, `user_roles_updated`, `role_created`, and `role_permissions_updated`. Self-updates are blocked when they would remove effective `admin.access`, `users.manage`, or `roles.manage`.
 
+## Sprint 33 Operator Account Security
+
+Routes:
+
+- `GET /password/setup/{token}`
+- `POST /password/setup`
+- `GET /password/forced-reset`
+- `POST /password/forced-reset`
+- `POST /admin/users/{user}/security/send-reset-link`
+- `POST /admin/users/{user}/security/force-password-reset`
+- `POST /admin/users/{user}/security/clear-force-password-reset`
+- `POST /admin/users/{user}/security/disable`
+- `POST /admin/users/{user}/security/enable`
+
+Admins with `users.view` and `users.manage` can create one-time password setup links, require password change at next login, disable accounts with a reason, and re-enable disabled accounts from the user detail screen. Setup links use `password_reset_tokens`; the plaintext token is only shown once in the admin flash message and is not written to audit logs.
+
+Disabled users cannot log in, and active sessions for newly disabled users are logged out before reaching authenticated pages. Users marked for forced password reset can only reach logout and `/password/forced-reset` until they set a new password. Successful logins update `last_login_at`, IP, and user agent on the user record.
+
+Safety rules block self-disable and block disabling the last enabled `super_admin`. Security actions write `admin_audit_logs` actions `user_password_setup_link_created`, `user_force_password_reset_required`, `user_force_password_reset_cleared`, `user_disabled`, `user_enabled`, `user_password_reset_completed`, `user_forced_password_reset_completed`, `user_login_succeeded`, and `user_login_blocked_disabled`.
+
 ## Sprint 8 Shared Postgres Runtime
 
 The dev Compose runtime runs Laravel and the worker against the same Postgres database:
