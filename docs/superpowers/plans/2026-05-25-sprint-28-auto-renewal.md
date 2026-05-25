@@ -17,10 +17,10 @@
 - Modify: `apps/backend-laravel/tests/Feature/SchedulerConfigurationTest.php`
 - Modify: `apps/backend-laravel/tests/Feature/AdminOpsHealthTest.php`
 
-- [ ] Write tests for customer enable/disable, ownership protection, successful scheduled renewal, insufficient-balance retry behavior, cancellation skip behavior, scheduler registration, and ops health visibility.
-- [ ] Run `APP_ENV=testing php artisan test tests/Feature/ServiceAutoRenewalTest.php tests/Feature/SchedulerConfigurationTest.php tests/Feature/AdminOpsHealthTest.php`.
-- [ ] Verify the tests fail because the auto-renew column, attempt table, route, command, and scheduler task do not exist.
-- [ ] Commit the RED tests.
+- [x] Write tests for customer enable/disable, ownership protection, successful scheduled renewal, insufficient-balance retry behavior, cancellation skip behavior, scheduler registration, and ops health visibility.
+- [x] Run `APP_ENV=testing php artisan test tests/Feature/ServiceAutoRenewalTest.php tests/Feature/SchedulerConfigurationTest.php tests/Feature/AdminOpsHealthTest.php`.
+- [x] Verify the tests fail because the auto-renew column, attempt table, route, command, and scheduler task do not exist.
+- [x] Commit the RED tests.
 
 ### Task 2: Schema and Model
 
@@ -31,12 +31,12 @@
 - Modify: `apps/backend-laravel/app/Models/Service.php`
 - Modify: `apps/backend-laravel/database/factories/ServiceFactory.php`
 
-- [ ] Add `services.auto_renew_enabled` with a false default.
-- [ ] Add `service_auto_renewal_attempts` with service/user relations, target expiry, status, attempt count, retry time, renewed expiry, price snapshot, last error, and unique idempotency key.
-- [ ] Add model casts and `Service::autoRenewalAttempts()`.
-- [ ] Add factory default `auto_renew_enabled => false`.
-- [ ] Run the auto-renew tests and verify failures move from missing schema/model to missing route/processor behavior.
-- [ ] Commit schema and model changes.
+- [x] Add `services.auto_renew_enabled` with a false default.
+- [x] Add `service_auto_renewal_attempts` with service/user relations, target expiry, status, attempt count, retry time, renewed expiry, price snapshot, last error, and unique idempotency key.
+- [x] Add model casts and `Service::autoRenewalAttempts()`.
+- [x] Add factory default `auto_renew_enabled => false`.
+- [x] Run the auto-renew tests and verify failures move from missing schema/model to missing route/processor behavior.
+- [x] Commit schema and model changes.
 
 ### Task 3: Customer Toggle and Service Visibility
 
@@ -48,13 +48,13 @@
 - Modify: `apps/backend-laravel/resources/views/services/show.blade.php`
 - Modify: `apps/backend-laravel/resources/views/admin/services/show.blade.php`
 
-- [ ] Add `POST /services/{service}/auto-renew` for the owner to set `enabled`.
-- [ ] Reject other users with 404 and inactive services with a validation error.
-- [ ] Load latest auto-renewal attempts on customer and admin service detail pages.
-- [ ] Render customer toggle, state, and latest attempt summary.
-- [ ] Render admin read-only state and attempt history.
-- [ ] Run `APP_ENV=testing php artisan test tests/Feature/ServiceAutoRenewalTest.php` and verify UI/toggle tests pass or expose processor-only failures.
-- [ ] Commit customer toggle and visibility changes.
+- [x] Add `POST /services/{service}/auto-renew` for the owner to set `enabled`.
+- [x] Reject other users with 404 and inactive services with a validation error.
+- [x] Load latest auto-renewal attempts on customer and admin service detail pages.
+- [x] Render customer toggle, state, and latest attempt summary.
+- [x] Render admin read-only state and attempt history.
+- [x] Run `APP_ENV=testing php artisan test tests/Feature/ServiceAutoRenewalTest.php` and verify UI/toggle tests pass or expose processor-only failures.
+- [x] Commit customer toggle and visibility changes.
 
 ### Task 4: Processor, Command, Scheduler, and Notifications
 
@@ -67,15 +67,15 @@
 - Modify: `apps/backend-laravel/app/Services/Ops/OpsHealthSnapshot.php`
 - Modify: `apps/backend-laravel/app/Services/Notifications/NotificationTemplateCatalog.php`
 
-- [ ] Implement candidate selection for active opted-in services expiring within one day and without open cancellation.
-- [ ] Reuse or create one attempt row per service/expiry idempotency key.
-- [ ] Call `ServiceRenewalService::renew()` and mark success with renewed expiry, amount, and currency.
-- [ ] On failure, store the exception message, set `next_attempt_at = now() + 1 hour`, and enqueue `service_auto_renew_failed` once per attempt count.
-- [ ] Add `services:auto-renew --limit=50`.
-- [ ] Register `services_auto_renew` in the task registry, Laravel schedule, and ops health freshness checks.
-- [ ] Add the notification template catalog entry.
-- [ ] Run targeted auto-renew, scheduler, ops health, and notification preference tests.
-- [ ] Commit processor, scheduler, and notification changes.
+- [x] Implement candidate selection for active opted-in services expiring within one day and without open cancellation.
+- [x] Reuse or create one attempt row per service/expiry idempotency key.
+- [x] Call `ServiceRenewalService::renew()` and mark success with renewed expiry, amount, and currency.
+- [x] On failure, store the exception message, set `next_attempt_at = now() + 1 hour`, and enqueue `service_auto_renew_failed` once per attempt count.
+- [x] Add `services:auto-renew --limit=50`.
+- [x] Register `services_auto_renew` in the task registry, Laravel schedule, and ops health freshness checks.
+- [x] Add the notification template catalog entry.
+- [x] Run targeted auto-renew, scheduler, ops health, and notification preference tests.
+- [x] Commit processor, scheduler, and notification changes.
 
 ### Task 5: Docs, Verification, PR, and Deploy
 
@@ -83,8 +83,8 @@
 - Modify: `README.md`
 - Modify: `docs/superpowers/plans/2026-05-25-sprint-28-auto-renewal.md`
 
-- [ ] Document S28 auto-renew behavior, command, schedule, UI path, and retry semantics.
-- [ ] Mark completed plan checklist items.
+- [x] Document S28 auto-renew behavior, command, schedule, UI path, and retry semantics.
+- [x] Mark completed plan checklist items.
 - [ ] Run `./vendor/bin/pint --test`.
 - [ ] Run `APP_ENV=testing php artisan test`.
 - [ ] Run Go format/vet/test and Compose config/build backend checks used by CI.

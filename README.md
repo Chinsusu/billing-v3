@@ -183,6 +183,7 @@ Routes and commands:
 - `php artisan scheduled-tasks:run bank_sync_payments`
 - `php artisan scheduled-tasks:run provider_actions_work`
 - `php artisan scheduled-tasks:run services_expire`
+- `php artisan scheduled-tasks:run services_auto_renew`
 - `php artisan scheduled-tasks:run provider_actions_recover_stuck`
 - `php artisan schedule:work`
 
@@ -322,6 +323,18 @@ Routes:
 - `GET /admin/audit-logs/{adminAuditLog}`
 
 Admin audit logs capture sensitive config, money, and operations changes: bank integrations, provisioning provider accounts, products, notification templates, ops alert rules, wallet adjustments, service refund credits, provider queue actions, and provider action retries. Raw secret fields are redacted before storage; last-four helper fields remain visible for operational checks. Only users with `audit_logs.view` can inspect audit rows.
+
+## Sprint 28 Auto-Renewal Foundation
+
+Routes and commands:
+
+- `POST /services/{service}/auto-renew`
+- `php artisan services:auto-renew --limit=50`
+- `php artisan scheduled-tasks:run services_auto_renew`
+
+Customers can enable or disable auto-renew per active service from the service detail page. The scheduled auto-renew command renews opted-in active services expiring within 24 hours by reusing the wallet-funded `ServiceRenewalService`, so provider-backed renewals still call the provider before any wallet debit.
+
+Each target expiry creates one `service_auto_renewal_attempts` row. Successful attempts store the renewed expiry and price snapshot. Failed attempts store the error, set `next_attempt_at` one hour later, and enqueue `service_auto_renew_failed` once per attempt count. Open cancellation requests prevent auto-renewal. Admin service runbooks show auto-renew state and attempt history, and ops health tracks the scheduled task.
 
 ## Sprint 8 Shared Postgres Runtime
 
