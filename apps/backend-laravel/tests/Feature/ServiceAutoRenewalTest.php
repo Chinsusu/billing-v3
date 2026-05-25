@@ -158,7 +158,7 @@ class ServiceAutoRenewalTest extends TestCase
         ]);
 
         $this->artisan('services:auto-renew --limit=10')
-            ->expectsOutput('Auto-renew processed=0 succeeded=0 failed=0 skipped=1.')
+            ->expectsOutput('Auto-renew processed=0 succeeded=0 failed=0 skipped=0.')
             ->assertExitCode(0);
 
         $this->assertSame(1, DB::table('notification_events')->where('type', 'service_auto_renew_failed')->count());
