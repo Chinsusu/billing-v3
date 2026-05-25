@@ -28,6 +28,11 @@ Schedule::command('scheduled-tasks:run services_expire')
     ->withoutOverlapping()
     ->name('services_expire');
 
+Schedule::command('scheduled-tasks:run services_auto_renew')
+    ->everyFifteenMinutes()
+    ->withoutOverlapping()
+    ->name('services_auto_renew');
+
 Schedule::command('scheduled-tasks:run service_cancellations_process_scheduled')
     ->everyFiveMinutes()
     ->withoutOverlapping()

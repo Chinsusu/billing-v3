@@ -10,8 +10,14 @@
         <div><strong>External ID</strong><br>{{ $service->external_id ?? '-' }}</div>
         <div><strong>Provisioned</strong><br>{{ $service->provisioned_at?->format('Y-m-d H:i') ?? '-' }}</div>
         <div><strong>Expires</strong><br>{{ $service->expires_at?->format('Y-m-d H:i') ?? '-' }}</div>
+        <div><strong>Auto-renew</strong><br>{{ $service->auto_renew_enabled ? 'Enabled' : 'Disabled' }}</div>
     </div>
     @if ($service->status === 'active')
+        <form method="POST" action="/services/{{ $service->id }}/auto-renew" style="margin-top:16px">
+            @csrf
+            <input type="hidden" name="enabled" value="{{ $service->auto_renew_enabled ? '0' : '1' }}">
+            <button class="button secondary" type="submit">{{ $service->auto_renew_enabled ? 'Disable Auto-renew' : 'Enable Auto-renew' }}</button>
+        </form>
         <form method="POST" action="/services/{{ $service->id }}/renew" style="margin-top:16px">
             @csrf
             <button type="submit">Renew</button>
@@ -27,6 +33,24 @@
             <label>Reason<textarea name="reason" rows="3"></textarea></label>
             <button class="button danger" type="submit">Request Cancellation</button>
         </form>
+    @endif
+</div>
+
+<div class="panel">
+    <h2>Auto-Renewal</h2>
+    @php($latestAutoRenewalAttempt = $service->autoRenewalAttempts->first())
+    @if ($latestAutoRenewalAttempt)
+        <div class="grid">
+            <div><strong>Status</strong><br>{{ $latestAutoRenewalAttempt->status }}</div>
+            <div><strong>Attempts</strong><br>{{ $latestAutoRenewalAttempt->attempts }}</div>
+            <div><strong>Target Expiry</strong><br>{{ $latestAutoRenewalAttempt->expires_at?->format('Y-m-d H:i') ?? '-' }}</div>
+            <div><strong>Next Retry</strong><br>{{ $latestAutoRenewalAttempt->next_attempt_at?->format('Y-m-d H:i') ?? '-' }}</div>
+        </div>
+        @if ($latestAutoRenewalAttempt->last_error)
+            <p class="error">{{ $latestAutoRenewalAttempt->last_error }}</p>
+        @endif
+    @else
+        <p class="muted">No auto-renewal attempts yet.</p>
     @endif
 </div>
 

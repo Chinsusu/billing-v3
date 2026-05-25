@@ -15,6 +15,7 @@ class OpsHealthSnapshot
         'bank_sync_payments' => 3,
         'provider_actions_work' => 3,
         'services_expire' => 15,
+        'services_auto_renew' => 30,
         'service_cancellations_process_scheduled' => 15,
         'provider_actions_recover_stuck' => 15,
         'notifications_send' => 3,

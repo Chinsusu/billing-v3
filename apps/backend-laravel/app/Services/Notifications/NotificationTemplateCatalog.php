@@ -42,6 +42,14 @@ class NotificationTemplateCatalog
                 'body_template' => 'Your service {{service_id}} was renewed until {{new_expires_at}}.',
                 'variables' => ['service_id', 'old_expires_at', 'new_expires_at', 'amount', 'currency'],
             ],
+            'service_auto_renew_failed' => [
+                'type' => 'service_auto_renew_failed',
+                'channel' => 'email',
+                'name' => 'Service auto-renew failed',
+                'subject_template' => 'Service auto-renew failed',
+                'body_template' => 'Auto-renew failed for service {{service_id}}. Next retry: {{next_attempt_at}}.',
+                'variables' => ['service_id', 'product_name', 'expires_at', 'next_attempt_at', 'error'],
+            ],
             'service_cancellation_requested' => [
                 'type' => 'service_cancellation_requested',
                 'channel' => 'email',
