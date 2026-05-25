@@ -6,6 +6,7 @@ use App\Http\Controllers\Admin\BankIntegrationController;
 use App\Http\Controllers\Admin\BankIntegrationTestController;
 use App\Http\Controllers\Admin\CustomerController;
 use App\Http\Controllers\Admin\CustomerImpersonationController;
+use App\Http\Controllers\Admin\CustomerResellerController;
 use App\Http\Controllers\Admin\CustomerWalletAdjustmentController;
 use App\Http\Controllers\Admin\InvoiceController as AdminInvoiceController;
 use App\Http\Controllers\Admin\NotificationEventController;
@@ -20,6 +21,7 @@ use App\Http\Controllers\Admin\OrderController as AdminOrderController;
 use App\Http\Controllers\Admin\PaymentEventController;
 use App\Http\Controllers\Admin\PaymentEventReconciliationController;
 use App\Http\Controllers\Admin\ProductController;
+use App\Http\Controllers\Admin\ResellerPriceOverrideController;
 use App\Http\Controllers\Admin\ProviderActionJobController;
 use App\Http\Controllers\Admin\ProviderActionJobRetryController;
 use App\Http\Controllers\Admin\ProvisioningJobController;
@@ -58,6 +60,7 @@ use App\Http\Controllers\OrderController;
 use App\Http\Controllers\ProductCatalogController;
 use App\Http\Controllers\ProductOrderController;
 use App\Http\Controllers\ProviderCallbackController;
+use App\Http\Controllers\ResellerCustomerController;
 use App\Http\Controllers\ServiceAutoRenewalController;
 use App\Http\Controllers\ServiceCancellationController;
 use App\Http\Controllers\ServiceController;
@@ -128,6 +131,7 @@ Route::middleware('auth')->group(function (): void {
             Route::post('/support/tickets', [SupportTicketController::class, 'store'])->name('support-tickets.store');
             Route::get('/support/tickets/{ticket}', [SupportTicketController::class, 'show'])->name('support-tickets.show');
             Route::post('/support/tickets/{ticket}/notes', [SupportTicketController::class, 'note'])->name('support-tickets.notes.store');
+            Route::get('/reseller/customers', ResellerCustomerController::class)->name('reseller.customers.index');
 
             Route::middleware('permission:admin.access')->prefix('admin')->name('admin.')->group(function (): void {
                 Route::get('/', AdminDashboardController::class)->name('dashboard');
@@ -167,7 +171,10 @@ Route::middleware('auth')->group(function (): void {
                 Route::get('/customers', [CustomerController::class, 'index'])->middleware('permission:customers.view')->name('customers.index');
                 Route::get('/customers/{user}', [CustomerController::class, 'show'])->middleware('permission:customers.view')->name('customers.show');
                 Route::post('/customers/{user}/impersonate', [CustomerImpersonationController::class, 'start'])->middleware('permission:customers.view')->name('customers.impersonate');
+                Route::post('/customers/{user}/reseller', [CustomerResellerController::class, 'store'])->middleware('permission:customers.view')->name('customers.reseller.store');
                 Route::post('/customers/{user}/wallet-adjustments', CustomerWalletAdjustmentController::class)->middleware('permission:wallets.adjust')->name('customers.wallet-adjustments.store');
+                Route::get('/reseller-price-overrides', [ResellerPriceOverrideController::class, 'index'])->middleware('permission:products.update')->name('reseller-price-overrides.index');
+                Route::post('/reseller-price-overrides', [ResellerPriceOverrideController::class, 'store'])->middleware('permission:products.update')->name('reseller-price-overrides.store');
                 Route::get('/support-tickets', [AdminSupportTicketController::class, 'index'])->middleware('permission:support_tickets.view')->name('support-tickets.index');
                 Route::get('/support-tickets/{ticket}', [AdminSupportTicketController::class, 'show'])->middleware('permission:support_tickets.view')->name('support-tickets.show');
                 Route::put('/support-tickets/{ticket}', [AdminSupportTicketController::class, 'update'])->middleware('permission:support_tickets.manage')->name('support-tickets.update');

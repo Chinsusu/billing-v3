@@ -6,6 +6,7 @@ use Database\Factories\UserFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\Hidden;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
@@ -68,6 +69,21 @@ class User extends Authenticatable
     public function supportTickets(): HasMany
     {
         return $this->hasMany(SupportTicket::class);
+    }
+
+    public function reseller(): BelongsTo
+    {
+        return $this->belongsTo(self::class, 'reseller_id');
+    }
+
+    public function resellerCustomers(): HasMany
+    {
+        return $this->hasMany(self::class, 'reseller_id');
+    }
+
+    public function resellerPriceOverrides(): HasMany
+    {
+        return $this->hasMany(ResellerPriceOverride::class, 'reseller_id');
     }
 
     public function apiKeys(): HasMany
