@@ -60,9 +60,9 @@
 - [x] Add bulk panel, row checkboxes, and row retry/reset controls on `/admin/renewals`.
 - [x] Add admin auto-renew toggle form on service runbook.
 - [x] Document routes, guardrails, and audit behavior.
-- [ ] Mark completed plan checklist items.
-- [ ] Run targeted UI tests.
-- [ ] Commit UI/docs changes.
+- [x] Mark completed plan checklist items.
+- [x] Run targeted UI tests.
+- [x] Commit UI/docs changes.
 
 ### Task 5: Verification, PR, Merge, Deploy
 
