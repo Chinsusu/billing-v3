@@ -372,6 +372,30 @@ Permissions:
 
 `super_admin` and `ops_admin` receive both permissions from `RolesAndPermissionsSeeder`. `services.view` still controls admin service runbook visibility, but it no longer authorizes renewal mutations or renewal reporting by itself. Renewal mutation controls are hidden unless the operator has `renewals.manage`.
 
+## Sprint 32 Operator/User Role Management UI
+
+Routes:
+
+- `GET /admin/users`
+- `GET /admin/users/create`
+- `POST /admin/users`
+- `GET /admin/users/{user}`
+- `GET /admin/users/{user}/edit`
+- `PUT /admin/users/{user}`
+- `GET /admin/roles`
+- `GET /admin/roles/create`
+- `POST /admin/roles`
+- `GET /admin/roles/{role}/edit`
+- `PUT /admin/roles/{role}`
+
+Permissions:
+
+- `users.view`: view user and role management screens.
+- `users.manage`: create users and update user role/direct permission assignments.
+- `roles.manage`: create roles and update role permission assignments.
+
+`super_admin` receives all S32 permissions. Existing `ops_admin`, `support`, and `finance` roles do not receive them by default. User and role changes write `admin_audit_logs` actions `user_created`, `user_roles_updated`, `role_created`, and `role_permissions_updated`. Self-updates are blocked when they would remove effective `admin.access`, `users.manage`, or `roles.manage`.
+
 ## Sprint 8 Shared Postgres Runtime
 
 The dev Compose runtime runs Laravel and the worker against the same Postgres database:
