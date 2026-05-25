@@ -124,13 +124,13 @@ Route::middleware('auth')->group(function (): void {
         Route::post('/provisioning-provider-accounts/{provisioningProviderAccount}/test', ProvisioningProviderAccountTestController::class)->middleware('permission:provisioning_provider_accounts.manage')->name('provisioning-provider-accounts.test');
         Route::get('/orders', [AdminOrderController::class, 'index'])->middleware('permission:orders.view')->name('orders.index');
         Route::get('/orders/{order}', [AdminOrderController::class, 'show'])->middleware('permission:orders.view')->name('orders.show');
-        Route::get('/renewals', ServiceRenewalReportController::class)->middleware('permission:services.view')->name('renewals.index');
-        Route::post('/renewals/bulk', ServiceAutoRenewalBulkActionController::class)->middleware('permission:services.view')->name('renewals.bulk');
-        Route::post('/renewals/{serviceAutoRenewalAttempt}/retry', ServiceAutoRenewalAttemptRetryController::class)->middleware('permission:services.view')->name('renewals.retry');
-        Route::post('/renewals/{serviceAutoRenewalAttempt}/reset', ServiceAutoRenewalAttemptResetController::class)->middleware('permission:services.view')->name('renewals.reset');
+        Route::get('/renewals', ServiceRenewalReportController::class)->middleware('permission:renewals.view')->name('renewals.index');
+        Route::post('/renewals/bulk', ServiceAutoRenewalBulkActionController::class)->middleware('permission:renewals.manage')->name('renewals.bulk');
+        Route::post('/renewals/{serviceAutoRenewalAttempt}/retry', ServiceAutoRenewalAttemptRetryController::class)->middleware('permission:renewals.manage')->name('renewals.retry');
+        Route::post('/renewals/{serviceAutoRenewalAttempt}/reset', ServiceAutoRenewalAttemptResetController::class)->middleware('permission:renewals.manage')->name('renewals.reset');
         Route::get('/services', [AdminServiceController::class, 'index'])->middleware('permission:services.view')->name('services.index');
         Route::get('/services/{service}', [AdminServiceController::class, 'show'])->middleware('permission:services.view')->name('services.show');
-        Route::post('/services/{service}/auto-renew', ServiceAutoRenewalAdminToggleController::class)->middleware('permission:services.view')->name('services.auto-renew');
+        Route::post('/services/{service}/auto-renew', ServiceAutoRenewalAdminToggleController::class)->middleware('permission:renewals.manage')->name('services.auto-renew');
         Route::post('/services/{service}/refund-credit', ServiceRefundCreditController::class)->middleware('permission:wallets.adjust')->name('services.refund-credit');
         Route::post('/services/{service}/sync-provider', ServiceProviderSyncController::class)->middleware('permission:services.view')->name('services.sync-provider');
         Route::post('/services/{service}/cancel-provider', ServiceProviderCancelController::class)->middleware('permission:services.view')->name('services.cancel-provider');

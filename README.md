@@ -363,6 +363,15 @@ Admins can operate failed auto-renewal attempts from `/admin/renewals`: retry no
 
 All renewal ops actions require a reason and write `admin_audit_logs`. Retry and reset actions are blocked when the service is not active, auto-renew is disabled, the product policy disallows auto-renew, the attempt targets an old expiry, the service is outside the policy window, or an open cancellation exists.
 
+## Sprint 31 Renewal RBAC and Operator Safety
+
+Permissions:
+
+- `renewals.view`: view `/admin/renewals` reporting.
+- `renewals.manage`: retry/reset renewal attempts, run bulk renewal actions, and toggle service auto-renew from the admin runbook.
+
+`super_admin` and `ops_admin` receive both permissions from `RolesAndPermissionsSeeder`. `services.view` still controls admin service runbook visibility, but it no longer authorizes renewal mutations or renewal reporting by itself. Renewal mutation controls are hidden unless the operator has `renewals.manage`.
+
 ## Sprint 8 Shared Postgres Runtime
 
 The dev Compose runtime runs Laravel and the worker against the same Postgres database:

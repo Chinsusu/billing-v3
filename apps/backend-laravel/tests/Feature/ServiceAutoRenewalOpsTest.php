@@ -14,11 +14,22 @@ use App\Models\Wallet;
 use Database\Seeders\RolesAndPermissionsSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Carbon;
+use Spatie\Permission\Models\Permission;
 use Tests\TestCase;
 
 class ServiceAutoRenewalOpsTest extends TestCase
 {
     use RefreshDatabase;
+
+    public function test_ops_admin_receives_renewal_view_and_manage_permissions(): void
+    {
+        $this->seed(RolesAndPermissionsSeeder::class);
+        $opsAdmin = User::factory()->create(['email' => 'ops-renewal-admin@example.test']);
+        $opsAdmin->assignRole('ops_admin');
+
+        $this->assertTrue($opsAdmin->can('renewals.view'));
+        $this->assertTrue($opsAdmin->can('renewals.manage'));
+    }
 
     public function test_admin_can_retry_failed_attempt_now_and_renew_service(): void
     {
@@ -350,6 +361,79 @@ class ServiceAutoRenewalOpsTest extends TestCase
             ->assertSee('Disable Auto-renew');
     }
 
+    public function test_renewal_view_only_admin_can_view_report_without_mutation_controls(): void
+    {
+        $admin = $this->adminWithDirectPermissions('renewal-view-only@example.test', ['admin.access', 'renewals.view']);
+        $customer = $this->customerUser('ops-view-only@example.test');
+        $service = $this->serviceFor($customer, [
+            'status' => 'active',
+            'auto_renew_enabled' => true,
+        ], [
+            'auto_renew_max_attempts' => 1,
+        ]);
+        $this->attemptFor($service, [
+            'status' => 'failed',
+            'attempts' => 1,
+            'next_attempt_at' => null,
+        ]);
+
+        $this->actingAs($admin)
+            ->get('/admin/renewals')
+            ->assertOk()
+            ->assertSee('Renewal Reporting')
+            ->assertDontSee('Bulk Renewal Actions')
+            ->assertDontSee('Retry Now')
+            ->assertDontSee('Reset Attempts');
+    }
+
+    public function test_renewal_view_without_manage_cannot_mutate_renewals(): void
+    {
+        $admin = $this->adminWithDirectPermissions('renewal-no-manage@example.test', ['admin.access', 'services.view', 'renewals.view']);
+        $customer = $this->customerUser('ops-no-manage@example.test');
+        $service = $this->serviceFor($customer, [
+            'status' => 'active',
+            'auto_renew_enabled' => true,
+        ]);
+        $attempt = $this->attemptFor($service, ['status' => 'failed', 'attempts' => 1]);
+
+        $this->actingAs($admin)->post("/admin/renewals/{$attempt->id}/retry", ['reason' => 'No manage permission.'])->assertForbidden();
+        $this->actingAs($admin)->post("/admin/renewals/{$attempt->id}/reset", ['reason' => 'No manage permission.'])->assertForbidden();
+        $this->actingAs($admin)->post('/admin/renewals/bulk', ['action' => 'retry', 'attempt_ids' => [$attempt->id], 'reason' => 'No manage permission.'])->assertForbidden();
+        $this->actingAs($admin)->post("/admin/services/{$service->id}/auto-renew", ['enabled' => '0', 'reason' => 'No manage permission.'])->assertForbidden();
+    }
+
+    public function test_services_view_without_renewal_view_cannot_access_renewal_report(): void
+    {
+        $admin = $this->adminWithDirectPermissions('services-view-only@example.test', ['admin.access', 'services.view']);
+
+        $this->actingAs($admin)->get('/admin/renewals')->assertForbidden();
+        $this->actingAs($admin)
+            ->get('/admin')
+            ->assertOk()
+            ->assertDontSee('href="/admin/renewals"', false);
+        $this->actingAs($admin)
+            ->get('/admin/services')
+            ->assertOk()
+            ->assertDontSee('href="/admin/renewals"', false);
+    }
+
+    public function test_services_view_without_renewal_manage_can_view_runbook_without_auto_renew_control(): void
+    {
+        $admin = $this->adminWithDirectPermissions('runbook-no-renewal-manage@example.test', ['admin.access', 'services.view']);
+        $customer = $this->customerUser('ops-runbook-readonly@example.test');
+        $service = $this->serviceFor($customer, [
+            'status' => 'active',
+            'auto_renew_enabled' => true,
+        ]);
+
+        $this->actingAs($admin)
+            ->get("/admin/services/{$service->id}")
+            ->assertOk()
+            ->assertSee('Service Runbook')
+            ->assertDontSee('Admin Auto-renew Control')
+            ->assertDontSee('Disable Auto-renew');
+    }
+
     public function test_customer_cannot_access_admin_renewal_ops_routes(): void
     {
         $customer = $this->customerUser('ops-auth@example.test');
@@ -444,6 +528,22 @@ class ServiceAutoRenewalOpsTest extends TestCase
         $this->seed(RolesAndPermissionsSeeder::class);
         $user = User::factory()->create(['email' => $email]);
         $user->assignRole('customer');
+
+        return $user;
+    }
+
+    /**
+     * @param  list<string>  $permissions
+     */
+    private function adminWithDirectPermissions(string $email, array $permissions): User
+    {
+        $this->seed(RolesAndPermissionsSeeder::class);
+        foreach ($permissions as $permission) {
+            Permission::findOrCreate($permission);
+        }
+
+        $user = User::factory()->create(['email' => $email]);
+        $user->givePermissionTo($permissions);
 
         return $user;
     }

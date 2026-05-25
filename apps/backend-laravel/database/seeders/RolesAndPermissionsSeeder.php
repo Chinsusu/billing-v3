@@ -27,6 +27,8 @@ class RolesAndPermissionsSeeder extends Seeder
             'provisioning_provider_accounts.manage',
             'orders.view',
             'services.view',
+            'renewals.view',
+            'renewals.manage',
             'provisioning_jobs.view',
             'wallets.adjust',
             'notifications.manage',
@@ -40,7 +42,7 @@ class RolesAndPermissionsSeeder extends Seeder
         $superAdmin = Role::findOrCreate('super_admin');
         $superAdmin->syncPermissions($permissions);
 
-        Role::findOrCreate('ops_admin')->syncPermissions(['admin.access', 'products.view', 'products.create', 'products.update', 'invoices.view', 'invoices.create', 'payment_events.view', 'provisioning_provider_accounts.manage', 'orders.view', 'services.view', 'provisioning_jobs.view', 'notifications.manage']);
+        Role::findOrCreate('ops_admin')->syncPermissions(['admin.access', 'products.view', 'products.create', 'products.update', 'invoices.view', 'invoices.create', 'payment_events.view', 'provisioning_provider_accounts.manage', 'orders.view', 'services.view', 'renewals.view', 'renewals.manage', 'provisioning_jobs.view', 'notifications.manage']);
         Role::findOrCreate('support')->syncPermissions(['admin.access', 'products.view', 'customers.view']);
         Role::findOrCreate('finance')->syncPermissions(['admin.access', 'invoices.view', 'invoices.create', 'payment_events.view', 'bank_integrations.manage', 'customers.view', 'wallets.adjust', 'orders.view']);
         Role::findOrCreate('customer');
