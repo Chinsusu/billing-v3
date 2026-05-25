@@ -43,10 +43,30 @@
 </div>
 
 <div class="panel">
+    <h2>Bulk Renewal Actions</h2>
+    <form id="renewal-bulk-form" method="POST" action="/admin/renewals/bulk">
+        @csrf
+        <div class="grid">
+            <label>Action
+                <select name="action" required>
+                    <option value="retry">Retry Now</option>
+                    <option value="disable">Disable Auto-renew</option>
+                </select>
+            </label>
+            <label>Reason
+                <textarea name="reason" rows="2" required placeholder="Required audit reason"></textarea>
+            </label>
+        </div>
+        <p><button type="submit">Apply Bulk Action</button></p>
+    </form>
+</div>
+
+<div class="panel">
     <h2>Recent Attempts</h2>
     <table>
         <thead>
             <tr>
+                <th>Select</th>
                 <th>Service</th>
                 <th>Customer</th>
                 <th>Status</th>
@@ -55,11 +75,15 @@
                 <th>Next Retry</th>
                 <th>Policy</th>
                 <th>Error</th>
+                <th>Actions</th>
             </tr>
         </thead>
         <tbody>
             @forelse ($attempts as $attempt)
                 <tr>
+                    <td>
+                        <input form="renewal-bulk-form" type="checkbox" name="attempt_ids[]" value="{{ $attempt->id }}">
+                    </td>
                     <td>
                         @if ($attempt->service)
                             <a href="/admin/services/{{ $attempt->service_id }}">{{ $attempt->service->product_name }}</a>
@@ -74,9 +98,32 @@
                     <td>{{ $attempt->next_attempt_at?->toDateTimeString() ?? '-' }}</td>
                     <td>{{ $attempt->renewal_policy['allowed'] ? 'Allowed' : 'Disabled' }}<br>{{ $attempt->renewal_policy['window_hours'] }}h window, {{ $attempt->renewal_policy['retry_delay_minutes'] }}m retry</td>
                     <td>{{ $attempt->last_error ?? '-' }}</td>
+                    <td>
+                        @if ($attempt->status === 'failed')
+                            <form method="POST" action="/admin/renewals/{{ $attempt->id }}/retry">
+                                @csrf
+                                <label>Reason
+                                    <input name="reason" required placeholder="Audit reason">
+                                </label>
+                                <button class="button secondary" type="submit">Retry Now</button>
+                            </form>
+
+                            @if ($attempt->is_exhausted)
+                                <form method="POST" action="/admin/renewals/{{ $attempt->id }}/reset">
+                                    @csrf
+                                    <label>Reason
+                                        <input name="reason" required placeholder="Audit reason">
+                                    </label>
+                                    <button class="button secondary" type="submit">Reset Attempts</button>
+                                </form>
+                            @endif
+                        @else
+                            <span class="muted">-</span>
+                        @endif
+                    </td>
                 </tr>
             @empty
-                <tr><td colspan="8" class="muted">No auto-renewal attempts yet.</td></tr>
+                <tr><td colspan="10" class="muted">No auto-renewal attempts yet.</td></tr>
             @endforelse
         </tbody>
     </table>

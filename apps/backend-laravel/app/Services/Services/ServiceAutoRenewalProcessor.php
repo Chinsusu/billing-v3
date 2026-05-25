@@ -94,6 +94,11 @@ class ServiceAutoRenewalProcessor
             ->cursor();
     }
 
+    public function processService(Service $service): string
+    {
+        return $this->processOne($service);
+    }
+
     private function processOne(Service $service): string
     {
         $service->loadMissing(['user', 'product', 'orderItem']);

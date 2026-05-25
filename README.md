@@ -350,6 +350,19 @@ Products now define auto-renew policy fields: `auto_renew_allowed`, `auto_renew_
 
 Failed auto-renew attempts use the product retry delay while attempts remain. When an attempt reaches the product max attempts, `next_attempt_at` is cleared and the attempt is treated as exhausted until the service expiry target changes. Admins can inspect renewal summary metrics, filters, recent attempts, exhausted rows, and service links from `/admin/renewals`. Customer dashboards and service lists show enabled, due soon, failed, latest status, and next retry renewal state.
 
+## Sprint 30 Renewal Ops Controls
+
+Routes:
+
+- `POST /admin/renewals/bulk`
+- `POST /admin/renewals/{serviceAutoRenewalAttempt}/retry`
+- `POST /admin/renewals/{serviceAutoRenewalAttempt}/reset`
+- `POST /admin/services/{service}/auto-renew`
+
+Admins can operate failed auto-renewal attempts from `/admin/renewals`: retry now, reset an exhausted attempt back to a due retry, or bulk retry/disable selected services. The service runbook also exposes an audited admin auto-renew toggle.
+
+All renewal ops actions require a reason and write `admin_audit_logs`. Retry and reset actions are blocked when the service is not active, auto-renew is disabled, the product policy disallows auto-renew, the attempt targets an old expiry, the service is outside the policy window, or an open cancellation exists.
+
 ## Sprint 8 Shared Postgres Runtime
 
 The dev Compose runtime runs Laravel and the worker against the same Postgres database:
