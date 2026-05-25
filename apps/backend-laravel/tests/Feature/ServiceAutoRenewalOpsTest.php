@@ -109,8 +109,23 @@ class ServiceAutoRenewalOpsTest extends TestCase
             'expires_at' => $now->copy()->addHours(4),
         ], ['code' => 'ops-inactive']);
         $inactiveAttempt = $this->attemptFor($inactive, ['status' => 'failed', 'attempts' => 1]);
+        $disabled = $this->serviceFor($customer, [
+            'status' => 'active',
+            'auto_renew_enabled' => false,
+            'expires_at' => $now->copy()->addHours(4),
+        ], ['code' => 'ops-disabled']);
+        $disabledAttempt = $this->attemptFor($disabled, ['status' => 'failed', 'attempts' => 1]);
+        $outsideWindow = $this->serviceFor($customer, [
+            'status' => 'active',
+            'auto_renew_enabled' => true,
+            'expires_at' => $now->copy()->addHours(48),
+        ], [
+            'code' => 'ops-outside-window',
+            'auto_renew_window_hours' => 1,
+        ]);
+        $outsideWindowAttempt = $this->attemptFor($outsideWindow, ['status' => 'failed', 'attempts' => 1]);
 
-        foreach ([$oldAttempt, $policyAttempt, $cancelAttempt, $inactiveAttempt] as $attempt) {
+        foreach ([$oldAttempt, $policyAttempt, $cancelAttempt, $inactiveAttempt, $disabledAttempt, $outsideWindowAttempt] as $attempt) {
             $this->actingAs($admin)
                 ->from('/admin/renewals')
                 ->post("/admin/renewals/{$attempt->id}/retry", [
@@ -266,6 +281,40 @@ class ServiceAutoRenewalOpsTest extends TestCase
             'auditable_type' => User::class,
             'auditable_id' => $admin->id,
         ]);
+    }
+
+    public function test_bulk_disable_counts_duplicate_service_attempts_once(): void
+    {
+        $admin = $this->adminUser();
+        $customer = $this->customerUser('ops-bulk-duplicate@example.test');
+        $service = $this->serviceFor($customer, [
+            'status' => 'active',
+            'auto_renew_enabled' => true,
+            'expires_at' => now()->addHours(2),
+        ]);
+        $firstAttempt = $this->attemptFor($service, ['status' => 'failed', 'attempts' => 1]);
+        $secondAttempt = $this->attemptFor($service, [
+            'status' => 'failed',
+            'attempts' => 2,
+            'expires_at' => $service->expires_at->copy()->subDay(),
+            'idempotency_key' => "service-auto-renew:{$service->id}:duplicate",
+        ]);
+
+        $this->actingAs($admin)
+            ->from('/admin/renewals')
+            ->post('/admin/renewals/bulk', [
+                'action' => 'disable',
+                'attempt_ids' => [$firstAttempt->id, $secondAttempt->id],
+                'reason' => 'Disable once for duplicate attempt rows.',
+            ])
+            ->assertRedirect('/admin/renewals')
+            ->assertSessionHas('status', 'Bulk disable applied=1 skipped=1.');
+
+        $this->assertFalse($service->refresh()->auto_renew_enabled);
+        $audit = AdminAuditLog::where('action', 'service_auto_renew_bulk_disable')->firstOrFail();
+        $this->assertSame(2, $audit->metadata['selected']);
+        $this->assertSame(1, $audit->metadata['applied']);
+        $this->assertSame(1, $audit->metadata['skipped']);
     }
 
     public function test_admin_renewal_report_and_runbook_show_ops_controls(): void
