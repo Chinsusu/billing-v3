@@ -80,7 +80,7 @@
 
 - [x] Update README with S27 routes and audit behavior.
 - [x] Mark plan checklist items complete.
-- [ ] Run `./vendor/bin/pint --test`.
-- [ ] Run `APP_ENV=testing php artisan test`.
-- [ ] Run Go format/vet/test and compose config/build backend.
+- [x] Run `./vendor/bin/pint --test`.
+- [x] Run `APP_ENV=testing php artisan test`.
+- [x] Run Go format/vet/test and compose config/build backend.
 - [ ] Push branch, open PR to `develop`, wait for CI, merge, deploy to `/opt/billing`, run migrations/seeds, and smoke `/admin/audit-logs`.
