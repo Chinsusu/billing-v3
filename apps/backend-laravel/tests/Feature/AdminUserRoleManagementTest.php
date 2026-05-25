@@ -4,9 +4,13 @@ namespace Tests\Feature;
 
 use App\Models\AdminAuditLog;
 use App\Models\User;
+use App\Services\Audit\AuditLogger;
 use Database\Seeders\RolesAndPermissionsSeeder;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
+use RuntimeException;
 use Spatie\Permission\Models\Permission;
 use Spatie\Permission\Models\Role;
 use Tests\TestCase;
@@ -65,6 +69,40 @@ class AdminUserRoleManagementTest extends TestCase
         $this->actingAs($adminWithUserView)->get('/admin/roles')->assertOk();
         $this->actingAs($adminWithUserView)->post('/admin/users', [])->assertForbidden();
         $this->actingAs($adminWithUserView)->post('/admin/roles', [])->assertForbidden();
+    }
+
+    public function test_management_permissions_without_user_view_cannot_access_management_screens_or_mutations(): void
+    {
+        $this->seed(RolesAndPermissionsSeeder::class);
+        $target = $this->userWithRole('support', 's32-route-target@example.test');
+        $userManagerWithoutView = $this->adminWithDirectPermissions('s32-user-manager-no-view@example.test', ['admin.access', 'users.manage']);
+        $roleManagerWithoutView = $this->adminWithDirectPermissions('s32-role-manager-no-view@example.test', ['admin.access', 'roles.manage']);
+        $superAdminRole = Role::findByName('super_admin');
+
+        $this->actingAs($userManagerWithoutView)->get('/admin/users/create')->assertForbidden();
+        $this->actingAs($userManagerWithoutView)->get("/admin/users/{$target->id}/edit")->assertForbidden();
+        $this->actingAs($userManagerWithoutView)->post('/admin/users', [
+            'name' => 'Blocked User',
+            'email' => 'blocked-user@example.test',
+            'password' => 'blocked-password',
+            'password_confirmation' => 'blocked-password',
+            'roles' => ['support'],
+            'permissions' => [],
+        ])->assertForbidden();
+        $this->actingAs($userManagerWithoutView)->put("/admin/users/{$target->id}", [
+            'roles' => ['finance'],
+            'permissions' => [],
+        ])->assertForbidden();
+
+        $this->actingAs($roleManagerWithoutView)->get('/admin/roles/create')->assertForbidden();
+        $this->actingAs($roleManagerWithoutView)->get("/admin/roles/{$superAdminRole->id}/edit")->assertForbidden();
+        $this->actingAs($roleManagerWithoutView)->post('/admin/roles', [
+            'name' => 'blocked_role',
+            'permissions' => ['admin.access'],
+        ])->assertForbidden();
+        $this->actingAs($roleManagerWithoutView)->put("/admin/roles/{$superAdminRole->id}", [
+            'permissions' => ['admin.access'],
+        ])->assertForbidden();
     }
 
     public function test_admin_can_create_user_with_roles_and_direct_permissions(): void
@@ -200,6 +238,32 @@ class AdminUserRoleManagementTest extends TestCase
         $this->assertSame(0, AdminAuditLog::where('action', 'user_roles_updated')->count());
     }
 
+    public function test_user_authorization_update_rolls_back_when_audit_fails(): void
+    {
+        $admin = $this->superAdmin('s32-user-audit-failure-admin@example.test');
+        $operator = $this->userWithRole('customer', 'rollback-target@example.test');
+        $operator->givePermissionTo('products.view');
+        $this->bindFailingAuditLogger();
+        $this->withoutExceptionHandling();
+
+        try {
+            $this->actingAs($admin)->put("/admin/users/{$operator->id}", [
+                'roles' => ['finance'],
+                'permissions' => ['renewals.view'],
+            ]);
+            $this->fail('Expected audit failure.');
+        } catch (RuntimeException $exception) {
+            $this->assertSame('audit failed', $exception->getMessage());
+        }
+
+        $operator = User::findOrFail($operator->id);
+        $this->assertTrue($operator->hasRole('customer'));
+        $this->assertFalse($operator->hasRole('finance'));
+        $this->assertTrue($operator->hasDirectPermission('products.view'));
+        $this->assertFalse($operator->hasDirectPermission('renewals.view'));
+        $this->assertSame(0, AdminAuditLog::where('action', 'user_roles_updated')->count());
+    }
+
     public function test_self_assigned_role_update_cannot_remove_critical_management_access(): void
     {
         $admin = $this->superAdmin('s32-self-role-admin@example.test');
@@ -216,6 +280,30 @@ class AdminUserRoleManagementTest extends TestCase
         $role = Role::findByName('super_admin');
         $this->assertTrue($role->hasPermissionTo('users.manage'));
         $this->assertTrue($role->hasPermissionTo('roles.manage'));
+        $this->assertSame(0, AdminAuditLog::where('action', 'role_permissions_updated')->count());
+    }
+
+    public function test_role_permission_update_rolls_back_when_audit_fails(): void
+    {
+        $admin = $this->superAdmin('s32-role-audit-failure-admin@example.test');
+        $role = Role::create(['name' => 'rollback_role', 'guard_name' => 'web']);
+        $role->syncPermissions(['admin.access', 'renewals.view']);
+        $this->bindFailingAuditLogger();
+        $this->withoutExceptionHandling();
+
+        try {
+            $this->actingAs($admin)->put("/admin/roles/{$role->id}", [
+                'permissions' => ['admin.access', 'renewals.manage'],
+            ]);
+            $this->fail('Expected audit failure.');
+        } catch (RuntimeException $exception) {
+            $this->assertSame('audit failed', $exception->getMessage());
+        }
+
+        $role = Role::findByName('rollback_role');
+        $this->assertTrue($role->hasPermissionTo('admin.access'));
+        $this->assertTrue($role->hasPermissionTo('renewals.view'));
+        $this->assertFalse($role->hasPermissionTo('renewals.manage'));
         $this->assertSame(0, AdminAuditLog::where('action', 'role_permissions_updated')->count());
     }
 
@@ -247,6 +335,30 @@ class AdminUserRoleManagementTest extends TestCase
         $user->givePermissionTo($permissions);
 
         return $user;
+    }
+
+    private function bindFailingAuditLogger(): void
+    {
+        $this->app->instance(AuditLogger::class, new class extends AuditLogger
+        {
+            /**
+             * @param  array<string, mixed>  $before
+             * @param  array<string, mixed>  $after
+             * @param  array<string, mixed>  $metadata
+             */
+            public function record(
+                ?User $actor,
+                string $action,
+                Model $auditable,
+                array $before = [],
+                array $after = [],
+                array $metadata = [],
+                ?Request $request = null,
+                ?string $label = null,
+            ): AdminAuditLog {
+                throw new RuntimeException('audit failed');
+            }
+        });
     }
 
     /**
