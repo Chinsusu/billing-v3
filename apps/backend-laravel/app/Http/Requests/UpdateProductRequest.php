@@ -16,6 +16,10 @@ class UpdateProductRequest extends FormRequest
             'lifecycle_count' => $this->input('lifecycle_count', $this->input('duration_days', 30)),
             'provider_lifecycle_date_format' => $this->input('provider_lifecycle_date_format', 'iso8601'),
             'provider_lifecycle_timezone' => $this->input('provider_lifecycle_timezone', 'UTC'),
+            'auto_renew_allowed' => $this->has('auto_renew_allowed') ? $this->boolean('auto_renew_allowed') : true,
+            'auto_renew_window_hours' => $this->input('auto_renew_window_hours', 24),
+            'auto_renew_retry_delay_minutes' => $this->input('auto_renew_retry_delay_minutes', 60),
+            'auto_renew_max_attempts' => $this->input('auto_renew_max_attempts', 3),
         ]);
     }
 
@@ -37,6 +41,10 @@ class UpdateProductRequest extends FormRequest
             'price_amount' => ['required', 'integer', 'min:1'],
             'currency' => ['required', 'string', 'size:3'],
             'duration_days' => ['required', 'integer', 'min:1', 'max:3650'],
+            'auto_renew_allowed' => ['required', 'boolean'],
+            'auto_renew_window_hours' => ['required', 'integer', 'min:1', 'max:24'],
+            'auto_renew_retry_delay_minutes' => ['required', 'integer', 'min:5', 'max:10080'],
+            'auto_renew_max_attempts' => ['required', 'integer', 'min:1', 'max:20'],
             'description' => ['nullable', 'string', 'max:2000'],
             'provider_account_id' => ['nullable', 'uuid', 'exists:provisioning_provider_accounts,id'],
             'provider_plan_code' => ['nullable', 'string', 'max:120'],

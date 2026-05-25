@@ -16,16 +16,17 @@ class ServiceAutoRenewalProcessor
 {
     private const CUSTOMER_ERROR_MESSAGE = 'Auto-renew failed. We will retry automatically.';
 
-    private const DUE_WINDOW_HOURS = 24;
-
-    private const RETRY_DELAY_MINUTES = 60;
-
     private const STALE_PROCESSING_MINUTES = 15;
+
+    private readonly ServiceAutoRenewalPolicy $policy;
 
     public function __construct(
         private readonly ServiceRenewalService $renewals,
         private readonly NotificationOutbox $notifications,
-    ) {}
+        ?ServiceAutoRenewalPolicy $policy = null,
+    ) {
+        $this->policy = $policy ?? app(ServiceAutoRenewalPolicy::class);
+    }
 
     /**
      * @return array{processed: int, succeeded: int, failed: int, skipped: int}
@@ -57,7 +58,13 @@ class ServiceAutoRenewalProcessor
             ->where('status', 'active')
             ->where('auto_renew_enabled', true)
             ->whereNotNull('expires_at')
-            ->where('expires_at', '<=', now()->addHours(self::DUE_WINDOW_HOURS))
+            ->where('expires_at', '<=', now()->addHours(ServiceAutoRenewalPolicy::MAX_WINDOW_HOURS))
+            ->where(function ($query): void {
+                $query->whereNull('product_id')
+                    ->orWhereHas('product', function ($query): void {
+                        $query->where('auto_renew_allowed', true);
+                    });
+            })
             ->whereDoesntHave('cancellations', function ($query): void {
                 $query->whereIn('status', ['requested', 'scheduled', 'queued']);
             })
@@ -67,8 +74,10 @@ class ServiceAutoRenewalProcessor
                         $query->where('status', 'succeeded')
                             ->orWhere(function ($query) use ($now): void {
                                 $query->where('status', 'failed')
-                                    ->whereNotNull('next_attempt_at')
-                                    ->where('next_attempt_at', '>', $now);
+                                    ->where(function ($query) use ($now): void {
+                                        $query->whereNull('next_attempt_at')
+                                            ->orWhere('next_attempt_at', '>', $now);
+                                    });
                             })
                             ->orWhere(function ($query) use ($processingCutoff): void {
                                 $query->where('status', 'processing')
@@ -90,6 +99,11 @@ class ServiceAutoRenewalProcessor
             return 'skipped';
         }
 
+        $policy = $this->policy->forService($service);
+        if (! $this->policy->isDue($service, now(), $policy)) {
+            return 'skipped';
+        }
+
         $targetExpiresAt = $service->expires_at->copy();
         $attempt = $this->attemptFor($service, $targetExpiresAt);
 
@@ -102,6 +116,10 @@ class ServiceAutoRenewalProcessor
         }
 
         if ($attempt->status === 'failed' && $attempt->next_attempt_at?->isFuture()) {
+            return 'skipped';
+        }
+
+        if ($this->policy->isExhausted($attempt, $policy)) {
             return 'skipped';
         }
 
@@ -127,7 +145,7 @@ class ServiceAutoRenewalProcessor
 
             return 'skipped';
         } catch (Throwable $exception) {
-            $this->markFailed($attempt, $service, $targetExpiresAt, $exception);
+            $this->markFailed($attempt, $service, $targetExpiresAt, $exception, $policy);
 
             return 'failed';
         }
@@ -169,6 +187,10 @@ class ServiceAutoRenewalProcessor
             return false;
         }
 
+        if (! $this->policy->isDue($service, now())) {
+            return false;
+        }
+
         return ! $service->cancellations()
             ->whereIn('status', ['requested', 'scheduled', 'queued'])
             ->exists();
@@ -183,14 +205,18 @@ class ServiceAutoRenewalProcessor
         ])->save();
     }
 
-    private function markFailed(ServiceAutoRenewalAttempt $attempt, Service $service, Carbon $targetExpiresAt, Throwable $exception): void
+    /**
+     * @param  array{allowed: bool, window_hours: int, retry_delay_minutes: int, max_attempts: int}  $policy
+     */
+    private function markFailed(ServiceAutoRenewalAttempt $attempt, Service $service, Carbon $targetExpiresAt, Throwable $exception, array $policy): void
     {
         $message = $this->exceptionMessage($exception);
-        $nextAttemptAt = now()->addMinutes(self::RETRY_DELAY_MINUTES);
+        $nextAttemptCount = $attempt->attempts + 1;
+        $nextAttemptAt = $this->policy->nextAttemptAt($nextAttemptCount, $policy);
 
         $attempt->forceFill([
             'status' => 'failed',
-            'attempts' => $attempt->attempts + 1,
+            'attempts' => $nextAttemptCount,
             'next_attempt_at' => $nextAttemptAt,
             'last_error' => $message,
         ])->save();
@@ -212,7 +238,7 @@ class ServiceAutoRenewalProcessor
                 'service_id' => $service->id,
                 'product_name' => $service->product_name,
                 'expires_at' => $targetExpiresAt->toISOString(),
-                'next_attempt_at' => $nextAttemptAt->toISOString(),
+                'next_attempt_at' => $nextAttemptAt?->toISOString(),
                 'error' => $message,
             ],
         );

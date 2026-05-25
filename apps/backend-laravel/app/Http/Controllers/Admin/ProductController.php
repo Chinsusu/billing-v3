@@ -13,7 +13,7 @@ use Illuminate\View\View;
 
 class ProductController extends Controller
 {
-    private const AUDIT_FIELDS = ['code', 'name', 'type', 'status', 'price_amount', 'currency', 'duration_days', 'description', 'provider_account_id', 'provider_plan_code', 'provider_region', 'provider_provision_path', 'provider_options', 'lifecycle_source', 'lifecycle_unit', 'lifecycle_count', 'provider_lifecycle_path', 'provider_lifecycle_ordered_at_path', 'provider_lifecycle_expires_at_path', 'provider_lifecycle_date_format', 'provider_lifecycle_timezone', 'provider_renew_path', 'provider_suspend_path', 'provider_cancel_path', 'provider_sync_path'];
+    private const AUDIT_FIELDS = ['code', 'name', 'type', 'status', 'price_amount', 'currency', 'duration_days', 'auto_renew_allowed', 'auto_renew_window_hours', 'auto_renew_retry_delay_minutes', 'auto_renew_max_attempts', 'description', 'provider_account_id', 'provider_plan_code', 'provider_region', 'provider_provision_path', 'provider_options', 'lifecycle_source', 'lifecycle_unit', 'lifecycle_count', 'provider_lifecycle_path', 'provider_lifecycle_ordered_at_path', 'provider_lifecycle_expires_at_path', 'provider_lifecycle_date_format', 'provider_lifecycle_timezone', 'provider_renew_path', 'provider_suspend_path', 'provider_cancel_path', 'provider_sync_path'];
 
     public function index(): View
     {

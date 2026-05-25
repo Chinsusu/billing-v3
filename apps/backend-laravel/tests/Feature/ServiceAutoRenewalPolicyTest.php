@@ -231,7 +231,7 @@ class ServiceAutoRenewalPolicyTest extends TestCase
             ->assertSee('failed')
             ->assertSee('2 / 2')
             ->assertSee('Exhausted')
-            ->assertDontSee('Report Other Product');
+            ->assertDontSee($other->id);
 
         $this->actingAs($customer)->get('/admin/renewals')->assertForbidden();
     }

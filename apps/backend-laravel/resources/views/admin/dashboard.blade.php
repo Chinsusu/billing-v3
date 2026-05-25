@@ -9,6 +9,8 @@
         <div class="panel"><strong>{{ $paymentEventCount }}</strong><br>Payment events</div>
         <div class="panel"><strong>{{ $orderCount }}</strong><br>Orders</div>
         <div class="panel"><strong>{{ $serviceCount }}</strong><br>Services</div>
+        <div class="panel"><strong>{{ $autoRenewEnabledServiceCount }}</strong><br>Auto-renew enabled</div>
+        <div class="panel"><strong>{{ $failedAutoRenewAttemptCount }}</strong><br>Renewal failures</div>
         <div class="panel"><strong>{{ $pendingProvisioningJobCount }}</strong><br>Pending jobs</div>
     </div>
     <p>
@@ -20,6 +22,7 @@
         <a class="button secondary" href="/admin/provisioning-provider-accounts">Provider Accounts</a>
         <a class="button secondary" href="/admin/orders">Orders</a>
         <a class="button secondary" href="/admin/services">Services</a>
+        <a class="button secondary" href="/admin/renewals">Renewal Reporting</a>
         <a class="button secondary" href="/admin/provisioning-jobs">Provisioning Jobs</a>
         @can('notifications.manage')
             <a class="button secondary" href="/admin/notification-events">Notification Events</a>
