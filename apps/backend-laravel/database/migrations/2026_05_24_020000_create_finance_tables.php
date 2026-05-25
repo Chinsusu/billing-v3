@@ -76,7 +76,7 @@ return new class extends Migration
 
         Schema::create('ledger_entries', function (Blueprint $table): void {
             $table->uuid('id')->primary();
-            $table->foreignUuid('wallet_id')->constrained()->cascadeOnDelete();
+            $table->foreignUuid('wallet_id')->nullable()->constrained()->nullOnDelete();
             $table->foreignId('user_id')->constrained()->cascadeOnDelete();
             $table->string('direction', 10);
             $table->unsignedBigInteger('amount');
