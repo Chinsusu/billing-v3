@@ -93,11 +93,13 @@ class AuditLogger
         foreach ($payload as $key => $value) {
             if ($this->isSensitiveKey((string) $key)) {
                 $sanitized[$key] = $value === null || $value === '' ? null : '[redacted]';
+
                 continue;
             }
 
             if (is_array($value)) {
                 $sanitized[$key] = $this->sanitize($value);
+
                 continue;
             }
 
