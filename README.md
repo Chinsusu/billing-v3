@@ -302,6 +302,27 @@ Routes:
 
 Admins can drill from ops alert event rows into event details with rule, delivery, actor, and context metadata. Ops health now links each scheduled task to its run history and latest run detail, while scheduled task run pages expose stored command output/error snippets for incident triage.
 
+## Sprint 26 Notification Templates and Preferences
+
+Routes:
+
+- `GET /admin/notification-templates`
+- `GET /admin/notification-templates/{notificationTemplate}/edit`
+- `PUT /admin/notification-templates/{notificationTemplate}`
+- `GET /notification-preferences`
+- `POST /notification-preferences`
+
+Admins can edit seeded email templates for customer notification types. Customer notification preferences can disable supported customer-facing notification types without suppressing operator alerts. The notification outbox renders enabled templates with `{{variable}}` placeholders and stores rendered subject/body on each event.
+
+## Sprint 27 Admin Audit Log
+
+Routes:
+
+- `GET /admin/audit-logs`
+- `GET /admin/audit-logs/{adminAuditLog}`
+
+Admin audit logs capture sensitive config, money, and operations changes: bank integrations, provisioning provider accounts, products, notification templates, ops alert rules, wallet adjustments, service refund credits, provider queue actions, and provider action retries. Raw secret fields are redacted before storage; last-four helper fields remain visible for operational checks. Only users with `audit_logs.view` can inspect audit rows.
+
 ## Sprint 8 Shared Postgres Runtime
 
 The dev Compose runtime runs Laravel and the worker against the same Postgres database:
