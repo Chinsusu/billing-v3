@@ -53,6 +53,18 @@ class AdminAuthorizationSafety
         return $this->hasCriticalPermissions($this->normalizeNames($effectivePermissionNames));
     }
 
+    public function canDisableUser(User $target): bool
+    {
+        if (! $target->hasRole('super_admin')) {
+            return true;
+        }
+
+        return User::role('super_admin')
+            ->whereNull('disabled_at')
+            ->where('id', '!=', $target->id)
+            ->exists();
+    }
+
     /**
      * @param  list<string>  $roleNames
      * @param  list<string>  $directPermissionNames

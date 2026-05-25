@@ -29,12 +29,14 @@
 
 <div class="panel">
     <table>
-        <thead><tr><th>Name</th><th>Email</th><th>Roles</th><th>Direct Permissions</th><th>Action</th></tr></thead>
+        <thead><tr><th>Name</th><th>Email</th><th>Status</th><th>Last Login</th><th>Roles</th><th>Direct Permissions</th><th>Action</th></tr></thead>
         <tbody>
             @forelse ($users as $user)
                 <tr>
                     <td>{{ $user->name }}</td>
                     <td>{{ $user->email }}</td>
+                    <td>{{ $user->disabled_at ? 'Disabled' : 'Enabled' }}</td>
+                    <td>{{ $user->last_login_at?->format('Y-m-d H:i') ?? '-' }}</td>
                     <td>{{ $user->roles->pluck('name')->sort()->join(', ') ?: '-' }}</td>
                     <td>{{ $user->permissions->pluck('name')->sort()->join(', ') ?: '-' }}</td>
                     <td>
@@ -45,7 +47,7 @@
                     </td>
                 </tr>
             @empty
-                <tr><td colspan="5" class="muted">No users found.</td></tr>
+                <tr><td colspan="7" class="muted">No users found.</td></tr>
             @endforelse
         </tbody>
     </table>

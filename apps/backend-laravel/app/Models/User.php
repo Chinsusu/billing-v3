@@ -22,6 +22,11 @@ class User extends Authenticatable
     {
         return [
             'email_verified_at' => 'datetime',
+            'disabled_at' => 'datetime',
+            'force_password_reset_at' => 'datetime',
+            'invited_at' => 'datetime',
+            'last_password_reset_at' => 'datetime',
+            'last_login_at' => 'datetime',
             'password' => 'hashed',
         ];
     }

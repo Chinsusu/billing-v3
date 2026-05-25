@@ -37,7 +37,10 @@ use App\Http\Controllers\Admin\ServiceProviderSyncController;
 use App\Http\Controllers\Admin\ServiceRefundCreditController;
 use App\Http\Controllers\Admin\ServiceRenewalReportController;
 use App\Http\Controllers\Admin\UserController as AdminUserController;
+use App\Http\Controllers\Admin\UserSecurityController;
 use App\Http\Controllers\Auth\AuthenticatedSessionController;
+use App\Http\Controllers\Auth\ForcedPasswordResetController;
+use App\Http\Controllers\Auth\PasswordSetupController;
 use App\Http\Controllers\Auth\RegisteredUserController;
 use App\Http\Controllers\BankWebhookSandboxController;
 use App\Http\Controllers\DashboardController;
@@ -72,28 +75,37 @@ Route::middleware('guest')->group(function (): void {
     Route::post('/login', [AuthenticatedSessionController::class, 'store']);
 });
 
+Route::get('/password/setup/{token}', [PasswordSetupController::class, 'show'])->name('password.setup.edit');
+Route::post('/password/setup', [PasswordSetupController::class, 'store'])->name('password.setup.update');
+
 Route::middleware('auth')->group(function (): void {
     Route::post('/logout', [AuthenticatedSessionController::class, 'destroy'])->name('logout');
-    Route::get('/dashboard', DashboardController::class)->name('dashboard');
-    Route::get('/wallet', WalletController::class)->name('wallet.show');
-    Route::get('/wallet/top-ups', [WalletTopUpController::class, 'index'])->name('wallet.top-ups.index');
-    Route::post('/wallet/top-ups', [WalletTopUpController::class, 'store'])->name('wallet.top-ups.store');
-    Route::get('/wallet/top-ups/{paymentIntent}', [WalletTopUpController::class, 'show'])->name('wallet.top-ups.show');
-    Route::get('/invoices', [InvoiceController::class, 'index'])->name('invoices.index');
-    Route::get('/invoices/{invoice}', [InvoiceController::class, 'show'])->name('invoices.show');
-    Route::post('/invoices/{invoice}/pay', [InvoiceController::class, 'pay'])->name('invoices.pay');
-    Route::post('/products/{product}/order', [ProductOrderController::class, 'store'])->name('products.order');
-    Route::get('/orders', [OrderController::class, 'index'])->name('orders.index');
-    Route::get('/orders/{order}', [OrderController::class, 'show'])->name('orders.show');
-    Route::get('/services', [ServiceController::class, 'index'])->name('services.index');
-    Route::get('/services/{service}', [ServiceController::class, 'show'])->name('services.show');
-    Route::post('/services/{service}/auto-renew', ServiceAutoRenewalController::class)->name('services.auto-renew');
-    Route::post('/services/{service}/renew', ServiceRenewalController::class)->name('services.renew');
-    Route::post('/services/{service}/cancel', ServiceCancellationController::class)->name('services.cancel');
-    Route::get('/notification-preferences', [NotificationPreferenceController::class, 'edit'])->name('notification-preferences.edit');
-    Route::post('/notification-preferences', [NotificationPreferenceController::class, 'update'])->name('notification-preferences.update');
 
-    Route::middleware('permission:admin.access')->prefix('admin')->name('admin.')->group(function (): void {
+    Route::middleware('account.enabled')->group(function (): void {
+        Route::get('/password/forced-reset', [ForcedPasswordResetController::class, 'edit'])->name('password.forced-reset.edit');
+        Route::post('/password/forced-reset', [ForcedPasswordResetController::class, 'update'])->name('password.forced-reset.update');
+
+        Route::middleware('password.reset.not_forced')->group(function (): void {
+            Route::get('/dashboard', DashboardController::class)->name('dashboard');
+            Route::get('/wallet', WalletController::class)->name('wallet.show');
+            Route::get('/wallet/top-ups', [WalletTopUpController::class, 'index'])->name('wallet.top-ups.index');
+            Route::post('/wallet/top-ups', [WalletTopUpController::class, 'store'])->name('wallet.top-ups.store');
+            Route::get('/wallet/top-ups/{paymentIntent}', [WalletTopUpController::class, 'show'])->name('wallet.top-ups.show');
+            Route::get('/invoices', [InvoiceController::class, 'index'])->name('invoices.index');
+            Route::get('/invoices/{invoice}', [InvoiceController::class, 'show'])->name('invoices.show');
+            Route::post('/invoices/{invoice}/pay', [InvoiceController::class, 'pay'])->name('invoices.pay');
+            Route::post('/products/{product}/order', [ProductOrderController::class, 'store'])->name('products.order');
+            Route::get('/orders', [OrderController::class, 'index'])->name('orders.index');
+            Route::get('/orders/{order}', [OrderController::class, 'show'])->name('orders.show');
+            Route::get('/services', [ServiceController::class, 'index'])->name('services.index');
+            Route::get('/services/{service}', [ServiceController::class, 'show'])->name('services.show');
+            Route::post('/services/{service}/auto-renew', ServiceAutoRenewalController::class)->name('services.auto-renew');
+            Route::post('/services/{service}/renew', ServiceRenewalController::class)->name('services.renew');
+            Route::post('/services/{service}/cancel', ServiceCancellationController::class)->name('services.cancel');
+            Route::get('/notification-preferences', [NotificationPreferenceController::class, 'edit'])->name('notification-preferences.edit');
+            Route::post('/notification-preferences', [NotificationPreferenceController::class, 'update'])->name('notification-preferences.update');
+
+            Route::middleware('permission:admin.access')->prefix('admin')->name('admin.')->group(function (): void {
         Route::get('/', AdminDashboardController::class)->name('dashboard');
         Route::get('/audit-logs', [AdminAuditLogController::class, 'index'])->middleware('permission:audit_logs.view')->name('audit-logs.index');
         Route::get('/audit-logs/{adminAuditLog}', [AdminAuditLogController::class, 'show'])->middleware('permission:audit_logs.view')->name('audit-logs.show');
@@ -103,6 +115,11 @@ Route::middleware('auth')->group(function (): void {
         Route::get('/users/{user}', [AdminUserController::class, 'show'])->middleware('permission:users.view')->name('users.show');
         Route::get('/users/{user}/edit', [AdminUserController::class, 'edit'])->middleware(['permission:users.view', 'permission:users.manage'])->name('users.edit');
         Route::put('/users/{user}', [AdminUserController::class, 'update'])->middleware(['permission:users.view', 'permission:users.manage'])->name('users.update');
+        Route::post('/users/{user}/security/send-reset-link', [UserSecurityController::class, 'sendResetLink'])->middleware(['permission:users.view', 'permission:users.manage'])->name('users.security.send-reset-link');
+        Route::post('/users/{user}/security/force-password-reset', [UserSecurityController::class, 'forcePasswordReset'])->middleware(['permission:users.view', 'permission:users.manage'])->name('users.security.force-password-reset');
+        Route::post('/users/{user}/security/clear-force-password-reset', [UserSecurityController::class, 'clearForcePasswordReset'])->middleware(['permission:users.view', 'permission:users.manage'])->name('users.security.clear-force-password-reset');
+        Route::post('/users/{user}/security/disable', [UserSecurityController::class, 'disable'])->middleware(['permission:users.view', 'permission:users.manage'])->name('users.security.disable');
+        Route::post('/users/{user}/security/enable', [UserSecurityController::class, 'enable'])->middleware(['permission:users.view', 'permission:users.manage'])->name('users.security.enable');
         Route::get('/roles', [RoleController::class, 'index'])->middleware('permission:users.view')->name('roles.index');
         Route::get('/roles/create', [RoleController::class, 'create'])->middleware(['permission:users.view', 'permission:roles.manage'])->name('roles.create');
         Route::post('/roles', [RoleController::class, 'store'])->middleware(['permission:users.view', 'permission:roles.manage'])->name('roles.store');
@@ -168,5 +185,7 @@ Route::middleware('auth')->group(function (): void {
         Route::get('/provisioning-jobs', [ProvisioningJobController::class, 'index'])->middleware('permission:provisioning_jobs.view')->name('provisioning-jobs.index');
         Route::get('/provisioning-jobs/{provisioningJob}', [ProvisioningJobController::class, 'show'])->middleware('permission:provisioning_jobs.view')->name('provisioning-jobs.show');
         Route::post('/provisioning-jobs/{provisioningJob}/retry', ProvisioningJobRetryController::class)->middleware('permission:provisioning_jobs.view')->name('provisioning-jobs.retry');
+            });
+        });
     });
 });

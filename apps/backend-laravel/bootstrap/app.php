@@ -11,6 +11,8 @@ use App\Console\Commands\SendNotificationsCommand;
 use App\Console\Commands\SmokeProvisioningRuntimeCommand;
 use App\Console\Commands\SyncPrivateBankPaymentsCommand;
 use App\Console\Commands\WorkProviderActionJobsCommand;
+use App\Http\Middleware\EnsureAccountIsEnabled;
+use App\Http\Middleware\EnsurePasswordResetIsNotForced;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
@@ -42,6 +44,8 @@ return Application::configure(basePath: dirname(__DIR__))
             'role' => RoleMiddleware::class,
             'permission' => PermissionMiddleware::class,
             'role_or_permission' => RoleOrPermissionMiddleware::class,
+            'account.enabled' => EnsureAccountIsEnabled::class,
+            'password.reset.not_forced' => EnsurePasswordResetIsNotForced::class,
         ]);
         $middleware->validateCsrfTokens(except: [
             'webhooks/bank/sandbox',
