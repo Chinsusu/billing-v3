@@ -268,6 +268,36 @@ class ServiceAutoRenewalOpsTest extends TestCase
         ]);
     }
 
+    public function test_admin_renewal_report_and_runbook_show_ops_controls(): void
+    {
+        $admin = $this->adminUser();
+        $customer = $this->customerUser('ops-ui@example.test');
+        $service = $this->serviceFor($customer, [
+            'status' => 'active',
+            'auto_renew_enabled' => true,
+        ], [
+            'auto_renew_max_attempts' => 1,
+        ]);
+        $this->attemptFor($service, [
+            'status' => 'failed',
+            'attempts' => 1,
+            'next_attempt_at' => null,
+        ]);
+
+        $this->actingAs($admin)
+            ->get('/admin/renewals')
+            ->assertOk()
+            ->assertSee('Bulk Renewal Actions')
+            ->assertSee('Retry Now')
+            ->assertSee('Reset Attempts');
+
+        $this->actingAs($admin)
+            ->get("/admin/services/{$service->id}")
+            ->assertOk()
+            ->assertSee('Admin Auto-renew Control')
+            ->assertSee('Disable Auto-renew');
+    }
+
     public function test_customer_cannot_access_admin_renewal_ops_routes(): void
     {
         $customer = $this->customerUser('ops-auth@example.test');
