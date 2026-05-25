@@ -1,6 +1,6 @@
 # Sprint 32 Operator/User Role Management UI Implementation Plan
 
-> **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
+> **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [x]`) syntax for tracking.
 
 **Goal:** Build admin UI and audited workflows for user role assignment, direct permissions, and role permission management.
 
@@ -18,14 +18,14 @@
 - Modify: `apps/backend-laravel/routes/web.php`
 - Modify: `apps/backend-laravel/resources/views/admin/dashboard.blade.php`
 
-- [ ] Add tests proving `super_admin` receives `users.view`, `users.manage`, and `roles.manage`; `ops_admin` does not.
-- [ ] Add tests proving `/admin/users` and `/admin/roles` are forbidden without `users.view`.
-- [ ] Add tests proving the dashboard shows "Users & Roles" only with `users.view`.
-- [ ] Run `php artisan test tests/Feature/AdminUserRoleManagementTest.php --filter=permission` and verify RED before implementation.
-- [ ] Add permissions to `RolesAndPermissionsSeeder`, grant them through the super admin all-permission list only.
-- [ ] Register admin user and role routes with correct middleware.
-- [ ] Add dashboard link gated by `@can('users.view')`.
-- [ ] Re-run targeted tests and commit.
+- [x] Add tests proving `super_admin` receives `users.view`, `users.manage`, and `roles.manage`; `ops_admin` does not.
+- [x] Add tests proving `/admin/users` and `/admin/roles` are forbidden without `users.view`.
+- [x] Add tests proving the dashboard shows "Users & Roles" only with `users.view`.
+- [x] Run `php artisan test tests/Feature/AdminUserRoleManagementTest.php --filter=permission` and verify RED before implementation.
+- [x] Add permissions to `RolesAndPermissionsSeeder`, grant them through the super admin all-permission list only.
+- [x] Register admin user and role routes with correct middleware.
+- [x] Add dashboard link gated by `@can('users.view')`.
+- [x] Re-run targeted tests and commit.
 
 ### Task 2: Admin User Management
 
@@ -37,16 +37,16 @@
 - Create: `apps/backend-laravel/resources/views/admin/users/edit.blade.php`
 - Modify: `apps/backend-laravel/tests/Feature/AdminUserRoleManagementTest.php`
 
-- [ ] Add tests for listing users with role filter and authorization detail.
-- [ ] Add tests for creating a user with roles and direct permissions.
-- [ ] Add tests for updating a user's roles and direct permissions.
-- [ ] Add tests for `user_created` and `user_roles_updated` audit rows with role and permission names.
-- [ ] Verify these tests fail because the controller and views do not exist.
-- [ ] Implement `UserController` index, show, create, store, edit, and update.
-- [ ] Validate role and permission names against existing Spatie records.
-- [ ] Record audit logs without storing the submitted password.
-- [ ] Build simple Blade screens using existing `.panel`, `.grid`, table, checkbox, and button styles.
-- [ ] Re-run targeted tests and commit.
+- [x] Add tests for listing users with role filter and authorization detail.
+- [x] Add tests for creating a user with roles and direct permissions.
+- [x] Add tests for updating a user's roles and direct permissions.
+- [x] Add tests for `user_created` and `user_roles_updated` audit rows with role and permission names.
+- [x] Verify these tests fail because the controller and views do not exist.
+- [x] Implement `UserController` index, show, create, store, edit, and update.
+- [x] Validate role and permission names against existing Spatie records.
+- [x] Record audit logs without storing the submitted password.
+- [x] Build simple Blade screens using existing `.panel`, `.grid`, table, checkbox, and button styles.
+- [x] Re-run targeted tests and commit.
 
 ### Task 3: Admin Role Management
 
@@ -57,15 +57,15 @@
 - Create: `apps/backend-laravel/resources/views/admin/roles/edit.blade.php`
 - Modify: `apps/backend-laravel/tests/Feature/AdminUserRoleManagementTest.php`
 
-- [ ] Add tests for role list visibility.
-- [ ] Add tests for creating a custom role with permissions.
-- [ ] Add tests for updating role permissions.
-- [ ] Add tests for `role_created` and `role_permissions_updated` audit rows.
-- [ ] Verify these tests fail before implementation.
-- [ ] Implement `RoleController` index, create, store, edit, and update.
-- [ ] Validate role names with `^[a-z0-9_.-]+$`, unique in Spatie roles, guard name `web`.
-- [ ] Build Blade screens matching existing admin table/form patterns.
-- [ ] Re-run targeted tests and commit.
+- [x] Add tests for role list visibility.
+- [x] Add tests for creating a custom role with permissions.
+- [x] Add tests for updating role permissions.
+- [x] Add tests for `role_created` and `role_permissions_updated` audit rows.
+- [x] Verify these tests fail before implementation.
+- [x] Implement `RoleController` index, create, store, edit, and update.
+- [x] Validate role names with `^[a-z0-9_.-]+$`, unique in Spatie roles, guard name `web`.
+- [x] Build Blade screens matching existing admin table/form patterns.
+- [x] Re-run targeted tests and commit.
 
 ### Task 4: Self-Lockout Guard
 
@@ -75,13 +75,13 @@
 - Modify: `apps/backend-laravel/app/Http/Controllers/Admin/RoleController.php`
 - Modify: `apps/backend-laravel/tests/Feature/AdminUserRoleManagementTest.php`
 
-- [ ] Add tests proving an admin cannot update themselves into losing `admin.access`, `users.manage`, or `roles.manage`.
-- [ ] Add tests proving an admin cannot update a role assigned to themselves if the effective result loses one of those critical permissions.
-- [ ] Verify these tests fail before implementation.
-- [ ] Implement `AdminAuthorizationSafety` helper that evaluates effective permission names from role permission sets plus direct permission names.
-- [ ] Use the helper in user and role update paths before syncing changes.
-- [ ] Return validation errors to the form instead of partially applying changes.
-- [ ] Re-run targeted tests and commit.
+- [x] Add tests proving an admin cannot update themselves into losing `admin.access`, `users.manage`, or `roles.manage`.
+- [x] Add tests proving an admin cannot update a role assigned to themselves if the effective result loses one of those critical permissions.
+- [x] Verify these tests fail before implementation.
+- [x] Implement `AdminAuthorizationSafety` helper that evaluates effective permission names from role permission sets plus direct permission names.
+- [x] Use the helper in user and role update paths before syncing changes.
+- [x] Return validation errors to the form instead of partially applying changes.
+- [x] Re-run targeted tests and commit.
 
 ### Task 5: Documentation and Verification
 
@@ -89,10 +89,10 @@
 - Modify: `README.md`
 - Modify: `docs/superpowers/plans/2026-05-25-sprint-32-operator-user-role-management-ui.md`
 
-- [ ] Document S32 routes, permissions, safety behavior, and audit actions in `README.md`.
-- [ ] Mark plan checklist complete.
-- [ ] Run targeted Laravel tests for `AdminUserRoleManagementTest` and `AdminAuditLogTest`.
-- [ ] Run full Laravel Pint and PHPUnit on the server test environment.
-- [ ] Run Go worker verification and compose config/build checks.
-- [ ] Run secret scan and `git diff --check`.
-- [ ] Push PR, wait for CI, merge to `develop`, deploy to `/opt/billing`, seed permissions, and smoke `/admin/users` and `/admin/roles`.
+- [x] Document S32 routes, permissions, safety behavior, and audit actions in `README.md`.
+- [x] Mark plan checklist complete.
+- [x] Run targeted Laravel tests for `AdminUserRoleManagementTest` and `AdminAuditLogTest`.
+- [x] Run full Laravel Pint and PHPUnit on the server test environment.
+- [x] Run Go worker verification and compose config/build checks.
+- [x] Run secret scan and `git diff --check`.
+- [x] Push PR, wait for CI, merge to `develop`, deploy to `/opt/billing`, seed permissions, and smoke `/admin/users` and `/admin/roles`.
