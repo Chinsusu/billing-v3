@@ -46,7 +46,7 @@ class AdminAuthorizationSafety
 
             $effectivePermissionNames = array_merge(
                 $effectivePermissionNames,
-                Role::findByName($roleName)->permissions()->pluck('name')->all(),
+                Role::findByName($roleName, 'web')->permissions()->pluck('name')->all(),
             );
         }
 
@@ -65,7 +65,7 @@ class AdminAuthorizationSafety
         foreach ($roleNames as $roleName) {
             $permissionNames = array_merge(
                 $permissionNames,
-                Role::findByName($roleName)->permissions()->pluck('name')->all(),
+                Role::findByName($roleName, 'web')->permissions()->pluck('name')->all(),
             );
         }
 

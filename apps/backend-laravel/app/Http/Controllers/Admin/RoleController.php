@@ -7,6 +7,7 @@ use App\Services\Audit\AuditLogger;
 use App\Support\AdminAuthorizationSafety;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\Rule;
 use Illuminate\View\View;
 use Spatie\Permission\Models\Permission;
@@ -17,39 +18,41 @@ class RoleController extends Controller
     public function index(): View
     {
         return view('admin.roles.index', [
-            'roles' => Role::with(['permissions'])->withCount('users')->orderBy('name')->get(),
+            'roles' => Role::where('guard_name', 'web')->with(['permissions'])->withCount('users')->orderBy('name')->get(),
         ]);
     }
 
     public function create(): View
     {
         return view('admin.roles.create', [
-            'permissions' => Permission::orderBy('name')->get(),
+            'permissions' => Permission::where('guard_name', 'web')->orderBy('name')->get(),
         ]);
     }
 
     public function store(Request $request, AuditLogger $auditLogger): RedirectResponse
     {
         $validated = $request->validate([
-            'name' => ['required', 'string', 'max:255', 'regex:/^[a-z0-9_.-]+$/', Rule::unique('roles', 'name')],
+            'name' => ['required', 'string', 'max:255', 'regex:/^[a-z0-9_.-]+$/', Rule::unique('roles', 'name')->where('guard_name', 'web')],
             'permissions' => ['nullable', 'array'],
-            'permissions.*' => ['string', 'exists:permissions,name'],
+            'permissions.*' => ['string', Rule::exists('permissions', 'name')->where('guard_name', 'web')],
         ]);
         $permissionNames = $this->normalizedPermissionNames($validated['permissions'] ?? []);
 
-        $role = Role::create(['name' => $validated['name'], 'guard_name' => 'web']);
-        $role->syncPermissions($permissionNames);
+        DB::transaction(function () use ($auditLogger, $permissionNames, $request, $validated): void {
+            $role = Role::create(['name' => $validated['name'], 'guard_name' => 'web']);
+            $role->syncPermissions($permissionNames);
 
-        $auditLogger->record(
-            $request->user(),
-            'role_created',
-            $role,
-            [],
-            ['name' => $role->name, 'permissions' => $this->permissionNames($role)],
-            [],
-            $request,
-            $role->name,
-        );
+            $auditLogger->record(
+                $request->user(),
+                'role_created',
+                $role,
+                [],
+                ['name' => $role->name, 'permissions' => $this->permissionNames($role)],
+                [],
+                $request,
+                $role->name,
+            );
+        });
 
         return redirect('/admin/roles')->with('status', 'Role created.');
     }
@@ -58,7 +61,7 @@ class RoleController extends Controller
     {
         return view('admin.roles.edit', [
             'role' => $role->load('permissions'),
-            'permissions' => Permission::orderBy('name')->get(),
+            'permissions' => Permission::where('guard_name', 'web')->orderBy('name')->get(),
             'assignedPermissions' => $this->permissionNames($role),
         ]);
     }
@@ -71,7 +74,7 @@ class RoleController extends Controller
     ): RedirectResponse {
         $validated = $request->validate([
             'permissions' => ['nullable', 'array'],
-            'permissions.*' => ['string', 'exists:permissions,name'],
+            'permissions.*' => ['string', Rule::exists('permissions', 'name')->where('guard_name', 'web')],
         ]);
         $permissionNames = $this->normalizedPermissionNames($validated['permissions'] ?? []);
         $before = ['permissions' => $this->permissionNames($role)];
@@ -82,13 +85,15 @@ class RoleController extends Controller
                 ->withInput();
         }
 
-        $role->syncPermissions($permissionNames);
-        $after = ['permissions' => $this->permissionNames($role->refresh())];
+        DB::transaction(function () use ($auditLogger, $before, $permissionNames, $request, $role): void {
+            $role->syncPermissions($permissionNames);
+            $after = ['permissions' => $this->permissionNames($role->refresh())];
 
-        [$beforeChanges, $afterChanges] = $auditLogger->diff($before, $after);
-        if ($beforeChanges !== [] || $afterChanges !== []) {
-            $auditLogger->record($request->user(), 'role_permissions_updated', $role, $beforeChanges, $afterChanges, [], $request, $role->name);
-        }
+            [$beforeChanges, $afterChanges] = $auditLogger->diff($before, $after);
+            if ($beforeChanges !== [] || $afterChanges !== []) {
+                $auditLogger->record($request->user(), 'role_permissions_updated', $role, $beforeChanges, $afterChanges, [], $request, $role->name);
+            }
+        });
 
         return redirect('/admin/roles')->with('status', 'Role permissions updated.');
     }

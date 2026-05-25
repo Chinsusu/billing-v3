@@ -9,7 +9,9 @@ use App\Support\AdminAuthorizationSafety;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Validation\Rule;
 use Illuminate\View\View;
 use Spatie\Permission\Models\Permission;
 use Spatie\Permission\Models\Role;
@@ -66,30 +68,32 @@ class UserController extends Controller
         $roleNames = $this->normalizedInputNames($validated['roles']);
         $permissionNames = $this->normalizedInputNames($validated['permissions'] ?? []);
 
-        $user = User::create([
-            'name' => $validated['name'],
-            'email' => $validated['email'],
-            'password' => Hash::make($validated['password']),
-        ]);
-        $user->syncRoles($roleNames);
-        $user->syncPermissions($permissionNames);
+        DB::transaction(function () use ($auditLogger, $permissionNames, $request, $roleNames, $validated): void {
+            $user = User::create([
+                'name' => $validated['name'],
+                'email' => $validated['email'],
+                'password' => Hash::make($validated['password']),
+            ]);
+            $user->syncRoles($roleNames);
+            $user->syncPermissions($permissionNames);
 
-        $after = $this->authorizationSnapshot($user->refresh());
-        $auditLogger->record(
-            $request->user(),
-            'user_created',
-            $user,
-            [],
-            [
-                'name' => $user->name,
-                'email' => $user->email,
-                'roles' => $after['roles'],
-                'direct_permissions' => $after['direct_permissions'],
-            ],
-            [],
-            $request,
-            $user->email,
-        );
+            $after = $this->authorizationSnapshot($user->refresh());
+            $auditLogger->record(
+                $request->user(),
+                'user_created',
+                $user,
+                [],
+                [
+                    'name' => $user->name,
+                    'email' => $user->email,
+                    'roles' => $after['roles'],
+                    'direct_permissions' => $after['direct_permissions'],
+                ],
+                [],
+                $request,
+                $user->email,
+            );
+        });
 
         return redirect('/admin/users')->with('status', 'User created.');
     }
@@ -120,14 +124,16 @@ class UserController extends Controller
                 ->withInput();
         }
 
-        $user->syncRoles($roleNames);
-        $user->syncPermissions($permissionNames);
-        $after = $this->authorizationSnapshot($user->refresh());
+        DB::transaction(function () use ($auditLogger, $before, $permissionNames, $request, $roleNames, $user): void {
+            $user->syncRoles($roleNames);
+            $user->syncPermissions($permissionNames);
+            $after = $this->authorizationSnapshot($user->refresh());
 
-        [$beforeChanges, $afterChanges] = $auditLogger->diff($before, $after);
-        if ($beforeChanges !== [] || $afterChanges !== []) {
-            $auditLogger->record($request->user(), 'user_roles_updated', $user, $beforeChanges, $afterChanges, [], $request, $user->email);
-        }
+            [$beforeChanges, $afterChanges] = $auditLogger->diff($before, $after);
+            if ($beforeChanges !== [] || $afterChanges !== []) {
+                $auditLogger->record($request->user(), 'user_roles_updated', $user, $beforeChanges, $afterChanges, [], $request, $user->email);
+            }
+        });
 
         return redirect("/admin/users/{$user->id}")->with('status', 'User authorization updated.');
     }
@@ -138,8 +144,8 @@ class UserController extends Controller
     private function assignmentCatalog(): array
     {
         return [
-            'roles' => Role::orderBy('name')->get(),
-            'permissions' => Permission::orderBy('name')->get(),
+            'roles' => Role::where('guard_name', 'web')->orderBy('name')->get(),
+            'permissions' => Permission::where('guard_name', 'web')->orderBy('name')->get(),
         ];
     }
 
@@ -153,9 +159,9 @@ class UserController extends Controller
             'email' => [$creating ? 'required' : 'sometimes', 'email', 'max:255', 'unique:users,email'],
             'password' => [$creating ? 'required' : 'sometimes', 'string', 'min:8', 'confirmed'],
             'roles' => ['required', 'array', 'min:1'],
-            'roles.*' => ['string', 'exists:roles,name'],
+            'roles.*' => ['string', Rule::exists('roles', 'name')->where('guard_name', 'web')],
             'permissions' => ['nullable', 'array'],
-            'permissions.*' => ['string', 'exists:permissions,name'],
+            'permissions.*' => ['string', Rule::exists('permissions', 'name')->where('guard_name', 'web')],
         ]);
     }
 
