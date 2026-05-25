@@ -16,9 +16,9 @@
 - Create: `apps/backend-laravel/tests/Feature/ServiceAutoRenewalPolicyTest.php`
 - Modify: `apps/backend-laravel/tests/Feature/ServiceAutoRenewalTest.php` only if existing behavior assertions need policy defaults.
 
-- [ ] Write tests for product policy persistence, customer toggle guardrails, due-window enforcement, retry delay/max attempts, admin report filtering, and customer reporting surfaces.
-- [ ] Run targeted tests and verify they fail because schema, policy service, report route, and UI fields do not exist.
-- [ ] Commit the RED tests.
+- [x] Write tests for product policy persistence, customer toggle guardrails, due-window enforcement, retry delay/max attempts, admin report filtering, and customer reporting surfaces.
+- [x] Run targeted tests and verify they fail because schema, policy service, report route, and UI fields do not exist.
+- [x] Commit the RED tests.
 
 ### Task 2: Schema and Product Controls
 
@@ -31,10 +31,10 @@
 - Modify: `apps/backend-laravel/app/Http/Controllers/Admin/ProductController.php`
 - Modify: `apps/backend-laravel/resources/views/admin/products/_form.blade.php`
 
-- [ ] Add product policy columns with safe defaults.
-- [ ] Add casts, factory defaults, validation, form controls, and audit field coverage.
-- [ ] Run product-focused tests.
-- [ ] Commit schema and product control changes.
+- [x] Add product policy columns with safe defaults.
+- [x] Add casts, factory defaults, validation, form controls, and audit field coverage.
+- [x] Run product-focused tests.
+- [x] Commit schema and product control changes.
 
 ### Task 3: Policy Enforcement
 
@@ -43,13 +43,13 @@
 - Modify: `apps/backend-laravel/app/Services/Services/ServiceAutoRenewalProcessor.php`
 - Modify: `apps/backend-laravel/app/Http/Controllers/ServiceAutoRenewalController.php`
 
-- [ ] Centralize default and per-product policy normalization.
-- [ ] Refuse customer enable when product policy disallows auto-renewal while preserving disable behavior.
-- [ ] Enforce policy due window before attempt creation.
-- [ ] Apply policy retry delay and max attempts on failure and retry skips.
-- [ ] Re-check policy inside the renewal precondition before wallet/provider side effects.
-- [ ] Run S28 and S29 auto-renew tests.
-- [ ] Commit policy enforcement changes.
+- [x] Centralize default and per-product policy normalization.
+- [x] Refuse customer enable when product policy disallows auto-renewal while preserving disable behavior.
+- [x] Enforce policy due window before attempt creation.
+- [x] Apply policy retry delay and max attempts on failure and retry skips.
+- [x] Re-check policy inside the renewal precondition before wallet/provider side effects.
+- [x] Run S28 and S29 auto-renew tests.
+- [x] Commit policy enforcement changes.
 
 ### Task 4: Admin and Customer Reporting
 
@@ -66,11 +66,11 @@
 - Modify: `apps/backend-laravel/resources/views/admin/dashboard.blade.php`
 - Modify: `apps/backend-laravel/resources/views/admin/services/index.blade.php`
 
-- [ ] Add admin renewal report route, controller, filters, summary metrics, and links.
-- [ ] Add customer dashboard and service list renewal metrics.
-- [ ] Add customer and admin service detail policy hints.
-- [ ] Run report and UI feature tests.
-- [ ] Commit reporting changes.
+- [x] Add admin renewal report route, controller, filters, summary metrics, and links.
+- [x] Add customer dashboard and service list renewal metrics.
+- [x] Add customer and admin service detail policy hints.
+- [x] Run report and UI feature tests.
+- [x] Commit reporting changes.
 
 ### Task 5: Docs, Verification, PR, and Deploy
 
@@ -78,8 +78,8 @@
 - Modify: `README.md`
 - Modify: `docs/superpowers/plans/2026-05-25-sprint-29-renewal-policy-reporting.md`
 
-- [ ] Document policy fields, command behavior, and report paths.
-- [ ] Mark completed plan checklist items.
+- [x] Document policy fields, command behavior, and report paths.
+- [x] Mark completed plan checklist items.
 - [ ] Run `./vendor/bin/pint --test`.
 - [ ] Run `APP_ENV=testing php artisan test`.
 - [ ] Run Go format/vet/test and Compose config/build backend checks used by CI.

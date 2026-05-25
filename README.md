@@ -336,6 +336,20 @@ Customers can enable or disable auto-renew per active service from the service d
 
 Each target expiry creates one `service_auto_renewal_attempts` row. Successful attempts store the renewed expiry and price snapshot. Failed attempts store the error, set `next_attempt_at` one hour later, and enqueue `service_auto_renew_failed` once per attempt count. Open cancellation requests prevent auto-renewal. Admin service runbooks show auto-renew state and attempt history, and ops health tracks the scheduled task.
 
+## Sprint 29 Renewal Policy Controls and Reporting
+
+Routes and commands:
+
+- `GET /admin/renewals`
+- `GET /admin/products/create`, `PUT /admin/products/{product}`
+- `GET /dashboard`
+- `GET /services`
+- `php artisan services:auto-renew --limit=50`
+
+Products now define auto-renew policy fields: `auto_renew_allowed`, `auto_renew_window_hours`, `auto_renew_retry_delay_minutes`, and `auto_renew_max_attempts`. Customers can only enable auto-renew when the product permits it, but can always disable an already-enabled service. The scheduler still uses wallet-funded service renewal, but it now checks each product policy before creating an attempt and again inside the renewal precondition before wallet or provider side effects.
+
+Failed auto-renew attempts use the product retry delay while attempts remain. When an attempt reaches the product max attempts, `next_attempt_at` is cleared and the attempt is treated as exhausted until the service expiry target changes. Admins can inspect renewal summary metrics, filters, recent attempts, exhausted rows, and service links from `/admin/renewals`. Customer dashboards and service lists show enabled, due soon, failed, latest status, and next retry renewal state.
+
 ## Sprint 8 Shared Postgres Runtime
 
 The dev Compose runtime runs Laravel and the worker against the same Postgres database:
