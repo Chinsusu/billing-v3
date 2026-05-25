@@ -45,7 +45,7 @@
 
 <div class="panel">
     <h2>Auto-Renewal</h2>
-    @php($latestAutoRenewalAttempt = $service->autoRenewalAttempts->first())
+    @php($latestAutoRenewalAttempt = $service->latestAutoRenewalAttemptForCurrentExpiry())
     @if ($latestAutoRenewalAttempt)
         <div class="grid">
             <div><strong>Status</strong><br>{{ $latestAutoRenewalAttempt->status }}</div>

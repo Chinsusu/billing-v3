@@ -49,7 +49,7 @@
         <table>
             <tbody>
                 @forelse ($recentServices as $service)
-                    @php($latestAutoRenewalAttempt = $service->autoRenewalAttempts->first())
+                    @php($latestAutoRenewalAttempt = $service->latestAutoRenewalAttemptForCurrentExpiry())
                     <tr>
                         <td><a href="/services/{{ $service->id }}">{{ $service->product_name }}</a></td>
                         <td>{{ $service->status }}</td>

@@ -33,7 +33,10 @@ class DashboardController extends Controller
             'dueForAutoRenewCount' => $autoRenewServices->filter(fn (Service $service): bool => $renewalPolicy->isDue($service))->count(),
             'failedAutoRenewCount' => ServiceAutoRenewalAttempt::where('user_id', $user->id)
                 ->where('status', 'failed')
-                ->whereHas('service', fn ($query) => $query->where('status', 'active'))
+                ->whereHas('service', function ($query): void {
+                    $query->where('status', 'active')
+                        ->whereColumn('service_auto_renewal_attempts.expires_at', 'services.expires_at');
+                })
                 ->count(),
             'recentInvoices' => Invoice::where('user_id', $user->id)->latest()->limit(5)->get(),
             'recentOrders' => Order::where('user_id', $user->id)->latest()->limit(5)->get(),

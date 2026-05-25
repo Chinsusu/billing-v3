@@ -6,7 +6,7 @@
         <thead><tr><th>Product</th><th>Type</th><th>Status</th><th>Expires</th><th>Auto-renew</th><th>Latest renewal</th><th></th></tr></thead>
         <tbody>
             @forelse ($services as $service)
-                @php($latestAutoRenewalAttempt = $service->autoRenewalAttempts->first())
+                @php($latestAutoRenewalAttempt = $service->latestAutoRenewalAttemptForCurrentExpiry())
                 <tr>
                     <td>{{ $service->product_name }}</td>
                     <td>{{ $service->product_type }}</td>

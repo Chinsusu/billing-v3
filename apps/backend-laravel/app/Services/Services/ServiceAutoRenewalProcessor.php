@@ -36,19 +36,23 @@ class ServiceAutoRenewalProcessor
         $counts = ['processed' => 0, 'succeeded' => 0, 'failed' => 0, 'skipped' => 0];
         $limit = max(1, $limit);
 
-        $this->dueServices($limit)->each(function (Service $service) use (&$counts): void {
+        foreach ($this->dueServices() as $service) {
+            if ($counts['processed'] >= $limit) {
+                break;
+            }
+
             $result = $this->processOne($service);
             $counts[$result]++;
 
             if ($result === 'succeeded' || $result === 'failed') {
                 $counts['processed']++;
             }
-        });
+        }
 
         return $counts;
     }
 
-    private function dueServices(int $limit)
+    private function dueServices()
     {
         $now = now();
         $processingCutoff = $now->copy()->subMinutes(self::STALE_PROCESSING_MINUTES);
@@ -87,8 +91,7 @@ class ServiceAutoRenewalProcessor
             })
             ->orderBy('expires_at')
             ->orderBy('id')
-            ->limit($limit)
-            ->get();
+            ->cursor();
     }
 
     private function processOne(Service $service): string

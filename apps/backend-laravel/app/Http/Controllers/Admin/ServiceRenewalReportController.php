@@ -17,9 +17,11 @@ class ServiceRenewalReportController extends Controller
         $status = (string) $request->query('status', '');
         $productId = (string) $request->query('product_id', '');
         $customer = trim((string) $request->query('customer', ''));
+        $recentSince = now()->subDays(7);
 
         $attemptsQuery = ServiceAutoRenewalAttempt::query()
-            ->with(['service.product', 'service.user', 'user']);
+            ->with(['service.product', 'service.user', 'user'])
+            ->where('updated_at', '>=', $recentSince);
 
         if (in_array($status, ['processing', 'succeeded', 'failed', 'skipped'], true)) {
             $attemptsQuery->where('status', $status);
@@ -42,7 +44,7 @@ class ServiceRenewalReportController extends Controller
         }
 
         $attempts = $attemptsQuery
-            ->latest()
+            ->latest('updated_at')
             ->paginate(50)
             ->withQueryString();
 
@@ -80,7 +82,10 @@ class ServiceRenewalReportController extends Controller
                 ->count(),
             'exhaustedAttemptCount' => ServiceAutoRenewalAttempt::where('status', 'failed')
                 ->whereNull('next_attempt_at')
-                ->whereHas('service', fn ($query) => $query->where('status', 'active'))
+                ->whereHas('service', function ($query): void {
+                    $query->where('status', 'active')
+                        ->whereColumn('service_auto_renewal_attempts.expires_at', 'services.expires_at');
+                })
                 ->count(),
         ]);
     }
