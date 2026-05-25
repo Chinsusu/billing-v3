@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\User;
 use App\Services\Audit\AuditLogger;
 use App\Support\AdminAuthorizationSafety;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
@@ -132,7 +133,7 @@ class UserController extends Controller
     }
 
     /**
-     * @return array{roles: \Illuminate\Database\Eloquent\Collection<int, Role>, permissions: \Illuminate\Database\Eloquent\Collection<int, Permission>}
+     * @return array{roles: Collection<int, Role>, permissions: Collection<int, Permission>}
      */
     private function assignmentCatalog(): array
     {
