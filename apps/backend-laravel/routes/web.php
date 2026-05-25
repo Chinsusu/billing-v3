@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Admin\AdminDashboardController;
+use App\Http\Controllers\Admin\AdminAuditLogController;
 use App\Http\Controllers\Admin\BankIntegrationController;
 use App\Http\Controllers\Admin\BankIntegrationTestController;
 use App\Http\Controllers\Admin\CustomerController;
@@ -85,6 +86,8 @@ Route::middleware('auth')->group(function (): void {
 
     Route::middleware('permission:admin.access')->prefix('admin')->name('admin.')->group(function (): void {
         Route::get('/', AdminDashboardController::class)->name('dashboard');
+        Route::get('/audit-logs', [AdminAuditLogController::class, 'index'])->middleware('permission:audit_logs.view')->name('audit-logs.index');
+        Route::get('/audit-logs/{adminAuditLog}', [AdminAuditLogController::class, 'show'])->middleware('permission:audit_logs.view')->name('audit-logs.show');
         Route::get('/products', [ProductController::class, 'index'])->middleware('permission:products.view')->name('products.index');
         Route::get('/products/create', [ProductController::class, 'create'])->middleware('permission:products.create')->name('products.create');
         Route::post('/products', [ProductController::class, 'store'])->middleware('permission:products.create')->name('products.store');

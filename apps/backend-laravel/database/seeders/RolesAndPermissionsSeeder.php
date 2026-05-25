@@ -30,6 +30,7 @@ class RolesAndPermissionsSeeder extends Seeder
             'provisioning_jobs.view',
             'wallets.adjust',
             'notifications.manage',
+            'audit_logs.view',
         ];
 
         foreach ($permissions as $permission) {

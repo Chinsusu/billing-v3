@@ -4,12 +4,15 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\OpsAlertRule;
+use App\Services\Audit\AuditLogger;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
 
 class OpsAlertRuleController extends Controller
 {
+    private const AUDIT_FIELDS = ['name', 'type', 'enabled', 'severity', 'cooldown_minutes', 'webhook_url', 'webhook_secret'];
+
     public function index(): View
     {
         return view('admin.ops-alert-rules.index', [
@@ -17,16 +20,21 @@ class OpsAlertRuleController extends Controller
         ]);
     }
 
-    public function store(Request $request): RedirectResponse
+    public function store(Request $request, AuditLogger $audit): RedirectResponse
     {
-        OpsAlertRule::create($this->attributes($request));
+        $rule = OpsAlertRule::create($this->attributes($request));
+        $audit->record($request->user(), 'created', $rule, [], $audit->snapshot($rule, self::AUDIT_FIELDS), [], $request);
 
         return redirect('/admin/ops-alert-rules')->with('status', 'Ops alert rule created.');
     }
 
-    public function update(Request $request, OpsAlertRule $opsAlertRule): RedirectResponse
+    public function update(Request $request, OpsAlertRule $opsAlertRule, AuditLogger $audit): RedirectResponse
     {
+        $before = $audit->snapshot($opsAlertRule, self::AUDIT_FIELDS);
         $opsAlertRule->update($this->attributes($request, $opsAlertRule));
+        $opsAlertRule->refresh();
+        [$beforeChanges, $afterChanges] = $audit->diff($before, $audit->snapshot($opsAlertRule, self::AUDIT_FIELDS));
+        $audit->record($request->user(), 'updated', $opsAlertRule, $beforeChanges, $afterChanges, [], $request);
 
         return redirect('/admin/ops-alert-rules')->with('status', 'Ops alert rule updated.');
     }
