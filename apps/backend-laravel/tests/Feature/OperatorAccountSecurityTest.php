@@ -9,6 +9,7 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Schema;
+use Spatie\Permission\Models\Permission;
 use Tests\TestCase;
 
 class OperatorAccountSecurityTest extends TestCase
@@ -331,7 +332,7 @@ class OperatorAccountSecurityTest extends TestCase
     private function adminWithDirectPermissions(string $email, array $permissions): User
     {
         foreach ($permissions as $permission) {
-            \Spatie\Permission\Models\Permission::findOrCreate($permission);
+            Permission::findOrCreate($permission);
         }
 
         $user = User::factory()->create(['email' => $email]);
