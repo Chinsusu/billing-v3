@@ -12,6 +12,7 @@ use App\Console\Commands\SmokeProvisioningRuntimeCommand;
 use App\Console\Commands\SyncPrivateBankPaymentsCommand;
 use App\Console\Commands\WorkProviderActionJobsCommand;
 use App\Http\Middleware\EnsureAccountIsEnabled;
+use App\Http\Middleware\EnsureMfaIsVerified;
 use App\Http\Middleware\EnsurePasswordResetIsNotForced;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
@@ -45,6 +46,7 @@ return Application::configure(basePath: dirname(__DIR__))
             'permission' => PermissionMiddleware::class,
             'role_or_permission' => RoleOrPermissionMiddleware::class,
             'account.enabled' => EnsureAccountIsEnabled::class,
+            'mfa.verified' => EnsureMfaIsVerified::class,
             'password.reset.not_forced' => EnsurePasswordResetIsNotForced::class,
         ]);
         $middleware->validateCsrfTokens(except: [

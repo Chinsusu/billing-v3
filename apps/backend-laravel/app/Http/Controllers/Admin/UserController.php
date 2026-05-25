@@ -54,6 +54,10 @@ class UserController extends Controller
             'roles' => $this->roleNames($user),
             'directPermissions' => $this->directPermissionNames($user),
             'effectivePermissions' => $this->effectivePermissionNames($user),
+            'sessions' => DB::table('sessions')
+                ->where('user_id', $user->id)
+                ->orderByDesc('last_activity')
+                ->get(),
         ]);
     }
 

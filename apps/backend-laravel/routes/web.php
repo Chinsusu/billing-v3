@@ -37,7 +37,9 @@ use App\Http\Controllers\Admin\ServiceProviderSyncController;
 use App\Http\Controllers\Admin\ServiceRefundCreditController;
 use App\Http\Controllers\Admin\ServiceRenewalReportController;
 use App\Http\Controllers\Admin\UserController as AdminUserController;
+use App\Http\Controllers\Admin\UserMfaController;
 use App\Http\Controllers\Admin\UserSecurityController;
+use App\Http\Controllers\Admin\UserSessionController;
 use App\Http\Controllers\Auth\AuthenticatedSessionController;
 use App\Http\Controllers\Auth\ForcedPasswordResetController;
 use App\Http\Controllers\Auth\PasswordSetupController;
@@ -46,6 +48,7 @@ use App\Http\Controllers\BankWebhookSandboxController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\Internal\ProvisioningJobExecutionController;
 use App\Http\Controllers\InvoiceController;
+use App\Http\Controllers\MfaController;
 use App\Http\Controllers\NotificationPreferenceController;
 use App\Http\Controllers\OrderController;
 use App\Http\Controllers\ProductCatalogController;
@@ -84,8 +87,14 @@ Route::middleware('auth')->group(function (): void {
     Route::middleware('account.enabled')->group(function (): void {
         Route::get('/password/forced-reset', [ForcedPasswordResetController::class, 'edit'])->name('password.forced-reset.edit');
         Route::post('/password/forced-reset', [ForcedPasswordResetController::class, 'update'])->name('password.forced-reset.update');
+        Route::get('/mfa/setup', [MfaController::class, 'setup'])->name('mfa.setup');
+        Route::post('/mfa/enable', [MfaController::class, 'enable'])->name('mfa.enable');
+        Route::get('/mfa/challenge', [MfaController::class, 'challenge'])->name('mfa.challenge');
+        Route::post('/mfa/challenge', [MfaController::class, 'verify'])->name('mfa.verify');
+        Route::post('/mfa/recovery', [MfaController::class, 'recovery'])->name('mfa.recovery');
 
         Route::middleware('password.reset.not_forced')->group(function (): void {
+            Route::middleware('mfa.verified')->group(function (): void {
             Route::get('/dashboard', DashboardController::class)->name('dashboard');
             Route::get('/wallet', WalletController::class)->name('wallet.show');
             Route::get('/wallet/top-ups', [WalletTopUpController::class, 'index'])->name('wallet.top-ups.index');
@@ -120,6 +129,9 @@ Route::middleware('auth')->group(function (): void {
                 Route::post('/users/{user}/security/clear-force-password-reset', [UserSecurityController::class, 'clearForcePasswordReset'])->middleware(['permission:users.view', 'permission:users.manage'])->name('users.security.clear-force-password-reset');
                 Route::post('/users/{user}/security/disable', [UserSecurityController::class, 'disable'])->middleware(['permission:users.view', 'permission:users.manage'])->name('users.security.disable');
                 Route::post('/users/{user}/security/enable', [UserSecurityController::class, 'enable'])->middleware(['permission:users.view', 'permission:users.manage'])->name('users.security.enable');
+                Route::post('/users/{user}/mfa/require', [UserMfaController::class, 'require'])->middleware(['permission:users.view', 'permission:users.manage'])->name('users.mfa.require');
+                Route::post('/users/{user}/mfa/reset', [UserMfaController::class, 'reset'])->middleware(['permission:users.view', 'permission:users.manage'])->name('users.mfa.reset');
+                Route::post('/users/{user}/sessions/{sessionId}/revoke', [UserSessionController::class, 'revoke'])->middleware(['permission:users.view', 'permission:users.manage'])->name('users.sessions.revoke');
                 Route::get('/roles', [RoleController::class, 'index'])->middleware('permission:users.view')->name('roles.index');
                 Route::get('/roles/create', [RoleController::class, 'create'])->middleware(['permission:users.view', 'permission:roles.manage'])->name('roles.create');
                 Route::post('/roles', [RoleController::class, 'store'])->middleware(['permission:users.view', 'permission:roles.manage'])->name('roles.store');
@@ -185,6 +197,7 @@ Route::middleware('auth')->group(function (): void {
                 Route::get('/provisioning-jobs', [ProvisioningJobController::class, 'index'])->middleware('permission:provisioning_jobs.view')->name('provisioning-jobs.index');
                 Route::get('/provisioning-jobs/{provisioningJob}', [ProvisioningJobController::class, 'show'])->middleware('permission:provisioning_jobs.view')->name('provisioning-jobs.show');
                 Route::post('/provisioning-jobs/{provisioningJob}/retry', ProvisioningJobRetryController::class)->middleware('permission:provisioning_jobs.view')->name('provisioning-jobs.retry');
+            });
             });
         });
     });

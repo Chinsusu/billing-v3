@@ -27,6 +27,10 @@ class User extends Authenticatable
             'invited_at' => 'datetime',
             'last_password_reset_at' => 'datetime',
             'last_login_at' => 'datetime',
+            'mfa_secret' => 'encrypted',
+            'mfa_enabled_at' => 'datetime',
+            'mfa_required_at' => 'datetime',
+            'mfa_recovery_codes' => 'encrypted:array',
             'password' => 'hashed',
         ];
     }
