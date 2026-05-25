@@ -28,6 +28,7 @@ class ServiceController extends Controller
                 'providerActionJobs' => fn ($query) => $query->latest(),
                 'provisioningExecutionLogs' => fn ($query) => $query->latest(),
                 'cancellations' => fn ($query) => $query->latest(),
+                'autoRenewalAttempts' => fn ($query) => $query->latest(),
             ]),
         ]);
     }

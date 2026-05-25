@@ -41,6 +41,7 @@ use App\Http\Controllers\OrderController;
 use App\Http\Controllers\ProductCatalogController;
 use App\Http\Controllers\ProductOrderController;
 use App\Http\Controllers\ProviderCallbackController;
+use App\Http\Controllers\ServiceAutoRenewalController;
 use App\Http\Controllers\ServiceCancellationController;
 use App\Http\Controllers\ServiceController;
 use App\Http\Controllers\ServiceRenewalController;
@@ -79,6 +80,7 @@ Route::middleware('auth')->group(function (): void {
     Route::get('/orders/{order}', [OrderController::class, 'show'])->name('orders.show');
     Route::get('/services', [ServiceController::class, 'index'])->name('services.index');
     Route::get('/services/{service}', [ServiceController::class, 'show'])->name('services.show');
+    Route::post('/services/{service}/auto-renew', ServiceAutoRenewalController::class)->name('services.auto-renew');
     Route::post('/services/{service}/renew', ServiceRenewalController::class)->name('services.renew');
     Route::post('/services/{service}/cancel', ServiceCancellationController::class)->name('services.cancel');
     Route::get('/notification-preferences', [NotificationPreferenceController::class, 'edit'])->name('notification-preferences.edit');

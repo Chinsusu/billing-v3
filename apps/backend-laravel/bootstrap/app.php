@@ -1,5 +1,6 @@
 <?php
 
+use App\Console\Commands\AutoRenewServicesCommand;
 use App\Console\Commands\EvaluateOpsAlertsCommand;
 use App\Console\Commands\ExpirePaymentIntentsCommand;
 use App\Console\Commands\ExpireServicesCommand;
@@ -24,6 +25,7 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withCommands([
+        AutoRenewServicesCommand::class,
         ExpirePaymentIntentsCommand::class,
         ExpireServicesCommand::class,
         EvaluateOpsAlertsCommand::class,

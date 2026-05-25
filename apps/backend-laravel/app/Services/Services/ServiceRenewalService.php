@@ -3,12 +3,14 @@
 namespace App\Services\Services;
 
 use App\Exceptions\InsufficientWalletBalance;
+use App\Exceptions\ServiceAutoRenewalSkipped;
 use App\Models\Service;
 use App\Models\User;
 use App\Models\Wallet;
 use App\Services\Finance\WalletService;
 use App\Services\Notifications\NotificationOutbox;
 use App\Services\Provisioning\ProviderServiceActionService;
+use Closure;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
@@ -23,10 +25,10 @@ class ServiceRenewalService
         private readonly NotificationOutbox $notifications,
     ) {}
 
-    public function renew(Service $service, User $user): Service
+    public function renew(Service $service, User $user, ?Closure $precondition = null): Service
     {
         $providerError = null;
-        $renewedService = DB::transaction(function () use ($service, $user, &$providerError): Service {
+        $renewedService = DB::transaction(function () use ($service, $user, $precondition, &$providerError): Service {
             $lockedService = Service::with(['orderItem', 'product'])
                 ->whereKey($service->id)
                 ->lockForUpdate()
@@ -46,6 +48,10 @@ class ServiceRenewalService
                 throw ValidationException::withMessages([
                     'service' => 'Service expiry is missing.',
                 ]);
+            }
+
+            if ($precondition !== null && $precondition($lockedService) === false) {
+                throw new ServiceAutoRenewalSkipped('Auto-renewal candidate is no longer eligible.');
             }
 
             $policy = $this->lifecyclePolicy->forService($lockedService);

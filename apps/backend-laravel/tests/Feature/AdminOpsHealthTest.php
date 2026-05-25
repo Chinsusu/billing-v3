@@ -71,6 +71,7 @@ class AdminOpsHealthTest extends TestCase
         $response->assertOk()
             ->assertSee('Ops Health')
             ->assertSee('provider_actions_work')
+            ->assertSee('services_auto_renew')
             ->assertSee('success')
             ->assertSee('Provisioning Queue')
             ->assertSee('failed: 1')

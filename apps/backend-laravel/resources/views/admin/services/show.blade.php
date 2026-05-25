@@ -13,6 +13,7 @@
         <div><strong>Order</strong><br>{{ $service->order?->order_number ?? '-' }}</div>
         <div><strong>Provisioned</strong><br>{{ $service->provisioned_at?->toDateTimeString() ?? '-' }}</div>
         <div><strong>Expires</strong><br>{{ $service->expires_at?->toDateTimeString() ?? '-' }}</div>
+        <div><strong>Auto-renew</strong><br>{{ $service->auto_renew_enabled ? 'Enabled' : 'Disabled' }}</div>
     </div>
     <p>
         <form method="POST" action="/admin/services/{{ $service->id }}/sync-provider" style="display:inline">
@@ -24,6 +25,28 @@
             <button class="button secondary" type="submit">Cancel Provider</button>
         </form>
     </p>
+</div>
+
+<div class="panel">
+    <h2>Auto-Renewal Attempts</h2>
+    <table>
+        <thead><tr><th>Status</th><th>Attempts</th><th>Target Expiry</th><th>Renewed Expiry</th><th>Next Retry</th><th>Amount</th><th>Error</th></tr></thead>
+        <tbody>
+            @forelse ($service->autoRenewalAttempts as $attempt)
+                <tr>
+                    <td>{{ $attempt->status }}</td>
+                    <td>{{ $attempt->attempts }}</td>
+                    <td>{{ $attempt->expires_at?->toDateTimeString() ?? '-' }}</td>
+                    <td>{{ $attempt->renewed_expires_at?->toDateTimeString() ?? '-' }}</td>
+                    <td>{{ $attempt->next_attempt_at?->toDateTimeString() ?? '-' }}</td>
+                    <td>{{ $attempt->amount ? $attempt->amount.' '.$attempt->currency : '-' }}</td>
+                    <td>{{ $attempt->last_error ?? '-' }}</td>
+                </tr>
+            @empty
+                <tr><td colspan="7" class="muted">No auto-renewal attempts yet.</td></tr>
+            @endforelse
+        </tbody>
+    </table>
 </div>
 
 @can('wallets.adjust')

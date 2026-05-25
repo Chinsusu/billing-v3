@@ -10,7 +10,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
-#[Fillable(['user_id', 'order_id', 'order_item_id', 'product_id', 'product_code', 'product_name', 'product_type', 'status', 'external_id', 'config', 'meta', 'provisioned_at', 'expires_at'])]
+#[Fillable(['user_id', 'order_id', 'order_item_id', 'product_id', 'product_code', 'product_name', 'product_type', 'status', 'external_id', 'config', 'meta', 'provisioned_at', 'expires_at', 'auto_renew_enabled'])]
 class Service extends Model
 {
     /** @use HasFactory<ServiceFactory> */
@@ -23,6 +23,7 @@ class Service extends Model
             'meta' => 'array',
             'provisioned_at' => 'datetime',
             'expires_at' => 'datetime',
+            'auto_renew_enabled' => 'boolean',
         ];
     }
 
@@ -69,5 +70,10 @@ class Service extends Model
     public function cancellations(): HasMany
     {
         return $this->hasMany(ServiceCancellation::class);
+    }
+
+    public function autoRenewalAttempts(): HasMany
+    {
+        return $this->hasMany(ServiceAutoRenewalAttempt::class);
     }
 }

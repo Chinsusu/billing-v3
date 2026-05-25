@@ -14,6 +14,7 @@ class ScheduledTaskRegistry
             'payment_intents_expire' => 'payment-intents:expire',
             'provider_actions_work' => 'provider-actions:work --limit=50',
             'services_expire' => 'services:expire',
+            'services_auto_renew' => 'services:auto-renew --limit=50',
             'service_cancellations_process_scheduled' => 'service-cancellations:process-scheduled --limit=50',
             'provider_actions_recover_stuck' => 'provider-actions:recover-stuck',
             'ops_alerts_evaluate' => 'ops-alerts:evaluate',
