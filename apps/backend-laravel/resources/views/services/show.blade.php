@@ -46,8 +46,8 @@
             <div><strong>Target Expiry</strong><br>{{ $latestAutoRenewalAttempt->expires_at?->format('Y-m-d H:i') ?? '-' }}</div>
             <div><strong>Next Retry</strong><br>{{ $latestAutoRenewalAttempt->next_attempt_at?->format('Y-m-d H:i') ?? '-' }}</div>
         </div>
-        @if ($latestAutoRenewalAttempt->last_error)
-            <p class="error">{{ $latestAutoRenewalAttempt->last_error }}</p>
+        @if ($latestAutoRenewalAttempt->status === 'failed')
+            <p class="error">Auto-renew failed. We will retry automatically.</p>
         @endif
     @else
         <p class="muted">No auto-renewal attempts yet.</p>

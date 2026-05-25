@@ -2,6 +2,8 @@
 
 namespace App\Services\Services;
 
+use App\Exceptions\InsufficientWalletBalance;
+use App\Exceptions\ServiceAutoRenewalSkipped;
 use App\Models\Service;
 use App\Models\ServiceAutoRenewalAttempt;
 use App\Services\Notifications\NotificationOutbox;
@@ -12,6 +14,8 @@ use Throwable;
 
 class ServiceAutoRenewalProcessor
 {
+    private const CUSTOMER_ERROR_MESSAGE = 'Auto-renew failed. We will retry automatically.';
+
     private const DUE_WINDOW_HOURS = 24;
 
     private const RETRY_DELAY_MINUTES = 60;
@@ -45,6 +49,9 @@ class ServiceAutoRenewalProcessor
 
     private function dueServices(int $limit)
     {
+        $now = now();
+        $processingCutoff = $now->copy()->subMinutes(self::STALE_PROCESSING_MINUTES);
+
         return Service::query()
             ->with(['user', 'product', 'orderItem'])
             ->where('status', 'active')
@@ -53,6 +60,21 @@ class ServiceAutoRenewalProcessor
             ->where('expires_at', '<=', now()->addHours(self::DUE_WINDOW_HOURS))
             ->whereDoesntHave('cancellations', function ($query): void {
                 $query->whereIn('status', ['requested', 'scheduled', 'queued']);
+            })
+            ->whereDoesntHave('autoRenewalAttempts', function ($query) use ($now, $processingCutoff): void {
+                $query->whereColumn('service_auto_renewal_attempts.expires_at', 'services.expires_at')
+                    ->where(function ($query) use ($now, $processingCutoff): void {
+                        $query->where('status', 'succeeded')
+                            ->orWhere(function ($query) use ($now): void {
+                                $query->where('status', 'failed')
+                                    ->whereNotNull('next_attempt_at')
+                                    ->where('next_attempt_at', '>', $now);
+                            })
+                            ->orWhere(function ($query) use ($processingCutoff): void {
+                                $query->where('status', 'processing')
+                                    ->where('updated_at', '>', $processingCutoff);
+                            });
+                    });
             })
             ->orderBy('expires_at')
             ->orderBy('id')
@@ -88,7 +110,6 @@ class ServiceAutoRenewalProcessor
 
         $attempt->forceFill([
             'status' => 'processing',
-            'attempts' => $attempt->attempts + 1,
             'amount' => $amount > 0 ? $amount : null,
             'currency' => $currency !== '' ? $currency : null,
             'next_attempt_at' => null,
@@ -96,7 +117,15 @@ class ServiceAutoRenewalProcessor
         ])->save();
 
         try {
-            $renewed = $this->renewals->renew($service, $service->user);
+            $renewed = $this->renewals->renew(
+                $service,
+                $service->user,
+                fn (Service $lockedService): bool => $this->isStillEligible($lockedService, $targetExpiresAt),
+            );
+        } catch (ServiceAutoRenewalSkipped) {
+            $this->markSkipped($attempt);
+
+            return 'skipped';
         } catch (Throwable $exception) {
             $this->markFailed($attempt, $service, $targetExpiresAt, $exception);
 
@@ -105,6 +134,7 @@ class ServiceAutoRenewalProcessor
 
         $attempt->forceFill([
             'status' => 'succeeded',
+            'attempts' => $attempt->attempts + 1,
             'renewed_expires_at' => $renewed->expires_at,
             'next_attempt_at' => null,
             'last_error' => null,
@@ -129,6 +159,30 @@ class ServiceAutoRenewalProcessor
         );
     }
 
+    private function isStillEligible(Service $service, Carbon $targetExpiresAt): bool
+    {
+        if (! $service->auto_renew_enabled || $service->status !== 'active' || $service->expires_at === null) {
+            return false;
+        }
+
+        if (! $service->expires_at->isSameSecond($targetExpiresAt)) {
+            return false;
+        }
+
+        return ! $service->cancellations()
+            ->whereIn('status', ['requested', 'scheduled', 'queued'])
+            ->exists();
+    }
+
+    private function markSkipped(ServiceAutoRenewalAttempt $attempt): void
+    {
+        $attempt->forceFill([
+            'status' => 'skipped',
+            'next_attempt_at' => null,
+            'last_error' => null,
+        ])->save();
+    }
+
     private function markFailed(ServiceAutoRenewalAttempt $attempt, Service $service, Carbon $targetExpiresAt, Throwable $exception): void
     {
         $message = $this->exceptionMessage($exception);
@@ -136,6 +190,7 @@ class ServiceAutoRenewalProcessor
 
         $attempt->forceFill([
             'status' => 'failed',
+            'attempts' => $attempt->attempts + 1,
             'next_attempt_at' => $nextAttemptAt,
             'last_error' => $message,
         ])->save();
@@ -165,14 +220,21 @@ class ServiceAutoRenewalProcessor
 
     private function exceptionMessage(Throwable $exception): string
     {
+        if ($exception instanceof InsufficientWalletBalance) {
+            return $exception->getMessage();
+        }
+
         if ($exception instanceof ValidationException) {
-            $first = collect($exception->errors())->flatten()->first();
+            $first = collect($exception->errors())
+                ->only(['service', 'wallet'])
+                ->flatten()
+                ->first();
 
             if (is_string($first) && $first !== '') {
                 return Str::limit($first, 1000, '');
             }
         }
 
-        return Str::limit($exception->getMessage(), 1000, '');
+        return self::CUSTOMER_ERROR_MESSAGE;
     }
 }
