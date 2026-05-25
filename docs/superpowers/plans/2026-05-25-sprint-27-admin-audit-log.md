@@ -83,4 +83,4 @@
 - [x] Run `./vendor/bin/pint --test`.
 - [x] Run `APP_ENV=testing php artisan test`.
 - [x] Run Go format/vet/test and compose config/build backend.
-- [ ] Push branch, open PR to `develop`, wait for CI, merge, deploy to `/opt/billing`, run migrations/seeds, and smoke `/admin/audit-logs`.
+- [x] Push branch, open PR to `develop`, wait for CI, merge, deploy to `/opt/billing`, run migrations/seeds, and smoke `/admin/audit-logs`.
