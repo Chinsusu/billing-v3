@@ -190,6 +190,14 @@
         body.app-shell--admin .ops-dashboard-grid {
             grid-template-columns: repeat(6, minmax(0, 1fr));
         }
+
+        body.app-shell--admin .admin-kpi-grid--single-row {
+            grid-template-columns: repeat(5, minmax(0, 1fr));
+        }
+
+        body.app-shell--admin .admin-kpi-grid--single-row .admin-kpi-card--wide {
+            grid-column: span 1;
+        }
     }
 
     @media (min-width: 1800px) {

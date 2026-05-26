@@ -19,9 +19,10 @@
     </x-slot:actions>
 </x-page-header>
 
-<div class="ops-dashboard-grid admin-kpi-grid">
+<div class="ops-dashboard-grid admin-kpi-grid admin-kpi-grid--single-row">
     <x-stat-card
-        class="admin-kpi-card admin-kpi-card--wide"
+        class="admin-kpi-card"
+        data-kpi-card="revenue-mtd"
         label="Revenue MTD"
         :value="$money($monthlyRevenueAmount)"
         :meta="'Today '.$money($todayRevenueAmount).' / paid orders + invoices'"
@@ -29,12 +30,14 @@
         :href="auth()->user()->can('invoices.view') ? '/admin/reports/billing' : null"
     />
     <x-stat-card
+        data-kpi-card="active-services"
         label="Active services"
         :value="$activeServiceCount"
         :meta="$activeServiceCount.' active / '.$pendingProvisioningServiceCount.' pending'"
         :href="auth()->user()->can('services.view') ? '/admin/services?status=active' : null"
     />
     <x-stat-card
+        data-kpi-card="pending-provisioning"
         label="Pending provisioning"
         :value="$pendingProvisioningServiceCount"
         :meta="$pendingProvisioningServiceCount.' services waiting / '.$pendingProvisioningJobCount.' queued'"
@@ -42,6 +45,7 @@
         :href="auth()->user()->can('provisioning_jobs.view') ? '/admin/provisioning-jobs?status=pending' : null"
     />
     <x-stat-card
+        data-kpi-card="queue-risk"
         label="Queue risk"
         :value="$queueRiskCount"
         :meta="$failedProvisioningJobCount.' failed / '.$stuckProvisioningJobCount.' stuck'"
@@ -49,25 +53,11 @@
         :href="auth()->user()->can('provisioning_jobs.view') ? '/admin/provisioning-jobs' : null"
     />
     <x-stat-card
-        class="admin-kpi-card admin-kpi-card--wide"
-        label="Open invoice amount"
-        :value="$money($openInvoiceAmount)"
-        :meta="$openInvoiceCount.' open invoices'"
-        tone="warning"
-        :href="auth()->user()->can('invoices.view') ? '/admin/invoices?status=open' : null"
-    />
-    <x-stat-card
+        data-kpi-card="open-support-tickets"
         label="Open support tickets"
         :value="$openSupportTicketCount"
         :meta="$urgentSupportTicketCount.' urgent'"
         :href="auth()->user()->can('support_tickets.view') ? '/admin/support-tickets' : null"
-    />
-    <x-stat-card
-        label="Payment exceptions"
-        :value="$paymentExceptionCount"
-        :meta="$paymentExceptionCount.' need review'"
-        :tone="$paymentExceptionCount > 0 ? 'danger' : 'success'"
-        :href="auth()->user()->can('payment_events.view') ? '/admin/payment-events' : null"
     />
 </div>
 
