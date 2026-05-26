@@ -1,44 +1,58 @@
 @extends('layouts.admin', ['title' => 'Admin Dashboard'])
 @section('content')
+<x-page-header
+    title="Admin Dashboard"
+    subtitle="Operational overview for billing, provisioning, renewals, and customer support."
+>
+    <x-slot:actions>
+        <a class="button" href="/admin/ops-health">Open Ops Health</a>
+        <a class="button secondary" href="/admin/customers">Customer Base</a>
+    </x-slot:actions>
+</x-page-header>
+
+<div class="ops-dashboard-grid">
+    <x-stat-card label="Open invoices" :value="$openInvoiceCount" href="/admin/invoices" />
+    <x-stat-card label="Pending jobs" :value="$pendingProvisioningJobCount" tone="warning" href="/admin/provisioning-jobs" />
+    @can('renewals.view')
+        <x-stat-card label="Renewal failures" :value="$failedAutoRenewAttemptCount" tone="danger" href="/admin/renewals" />
+    @else
+        <x-stat-card label="Renewal failures" :value="$failedAutoRenewAttemptCount" tone="danger" />
+    @endcan
+    <x-stat-card label="Payment events" :value="$paymentEventCount" href="/admin/payment-events" />
+    <x-stat-card label="Orders" :value="$orderCount" href="/admin/orders" />
+    <x-stat-card label="Services" :value="$serviceCount" href="/admin/services" />
+</div>
+
 <div class="panel">
-    <h1>Admin Dashboard</h1>
-    <div class="grid">
-        <div class="panel"><strong>{{ $productCount }}</strong><br>Products</div>
-        <div class="panel"><strong>{{ $activeProductCount }}</strong><br>Active products</div>
-        <div class="panel"><strong>{{ $openInvoiceCount }}</strong><br>Open invoices</div>
-        <div class="panel"><strong>{{ $paymentEventCount }}</strong><br>Payment events</div>
-        <div class="panel"><strong>{{ $orderCount }}</strong><br>Orders</div>
-        <div class="panel"><strong>{{ $serviceCount }}</strong><br>Services</div>
-        <div class="panel"><strong>{{ $autoRenewEnabledServiceCount }}</strong><br>Auto-renew enabled</div>
-        <div class="panel"><strong>{{ $failedAutoRenewAttemptCount }}</strong><br>Renewal failures</div>
-        <div class="panel"><strong>{{ $pendingProvisioningJobCount }}</strong><br>Pending jobs</div>
+    <div class="page-header" style="margin-bottom: 0;">
+        <div>
+            <h2>Platform inventory</h2>
+            <p class="page-subtitle">{{ $activeProductCount }} active of {{ $productCount }} products. {{ $autoRenewEnabledServiceCount }} services have auto-renew enabled.</p>
+        </div>
+        <div class="page-header-actions">
+            <a class="button secondary" href="/admin/products">Manage Products</a>
+            <a class="button secondary" href="/admin/services">Review Services</a>
+        </div>
     </div>
-    <p>
-        <a class="button" href="/admin/products">Manage Products</a>
-        <a class="button secondary" href="/admin/invoices">Invoices</a>
-        <a class="button secondary" href="/admin/payment-events">Payment Events</a>
-        <a class="button secondary" href="/admin/customers">Customers</a>
-        <a class="button secondary" href="/admin/bank-integrations">Bank Integrations</a>
-        <a class="button secondary" href="/admin/provisioning-provider-accounts">Provider Accounts</a>
-        <a class="button secondary" href="/admin/orders">Orders</a>
-        <a class="button secondary" href="/admin/services">Services</a>
-        @can('renewals.view')
-            <a class="button secondary" href="/admin/renewals">Renewal Reporting</a>
-        @endcan
-        <a class="button secondary" href="/admin/provisioning-jobs">Provisioning Jobs</a>
+</div>
+
+<div class="panel">
+    <h2>Quick actions</h2>
+    <div class="quick-action-grid">
+        <a class="quick-action" href="/admin/bank-integrations"><strong>Bank integrations</strong><span>Configure private bank endpoints and tests.</span></a>
+        <a class="quick-action" href="/admin/provisioning-provider-accounts"><strong>Provider accounts</strong><span>Manage endpoint/API key account routing.</span></a>
+        <a class="quick-action" href="/admin/provider-action-jobs"><strong>Provider actions</strong><span>Retry sync, cancellation, and recovery jobs.</span></a>
+        <a class="quick-action" href="/admin/support-tickets"><strong>Support tickets</strong><span>Review customer support workflow.</span></a>
         @can('notifications.manage')
-            <a class="button secondary" href="/admin/notification-events">Notification Events</a>
-            <a class="button secondary" href="/admin/notification-templates">Notification Templates</a>
+            <a class="quick-action" href="/admin/notification-events"><strong>Notification Events</strong><span>Inspect delivery and retry failures.</span></a>
+            <a class="quick-action" href="/admin/notification-templates"><strong>Notification Templates</strong><span>Edit notification copy and channels.</span></a>
         @endcan
-        <a class="button secondary" href="/admin/ops-health">Ops Health</a>
-        <a class="button secondary" href="/admin/ops-alert-events">Ops Alerts</a>
-        <a class="button secondary" href="/admin/scheduled-task-runs">Scheduled Task Runs</a>
         @can('audit_logs.view')
-            <a class="button secondary" href="/admin/audit-logs">Audit Logs</a>
+            <a class="quick-action" href="/admin/audit-logs"><strong>Audit logs</strong><span>Trace operator changes and security events.</span></a>
         @endcan
         @can('users.view')
-            <a class="button secondary" href="/admin/users">Users &amp; Roles</a>
+            <a class="quick-action" href="/admin/users"><strong>Users &amp; roles</strong><span>Manage operators and permissions.</span></a>
         @endcan
-    </p>
+    </div>
 </div>
 @endsection

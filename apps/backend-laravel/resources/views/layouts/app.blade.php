@@ -120,7 +120,7 @@
         .sidebar-title {
             font-weight: 700;
             font-size: 1.25rem;
-            letter-spacing: 0.5px;
+            letter-spacing: 0;
             color: #fff;
         }
 
@@ -136,7 +136,7 @@
             font-weight: 600;
             color: #7983bb;
             margin: 18px 0 8px 10px;
-            letter-spacing: 1px;
+            letter-spacing: 0;
         }
 
         .sidebar-menu-item {
@@ -319,7 +319,7 @@
             color: var(--text-heading);
             font-weight: 600;
             margin-bottom: 16px;
-            letter-spacing: -0.5px;
+            letter-spacing: 0;
         }
 
         h1 { font-size: 1.75rem; }
@@ -357,7 +357,7 @@
             margin-top: 16px;
             margin-bottom: 6px;
             text-transform: uppercase;
-            letter-spacing: 0.5px;
+            letter-spacing: 0;
         }
 
         input, select, textarea {
@@ -453,7 +453,7 @@
             font-weight: 600;
             font-size: 0.8rem;
             text-transform: uppercase;
-            letter-spacing: 0.5px;
+            letter-spacing: 0;
             border-bottom: 2px solid var(--border-color);
             padding: 12px 16px;
             text-align: left;
@@ -524,8 +524,9 @@
             }
         }
     </style>
+    @include('layouts.partials.ui-foundation')
 </head>
-<body>
+<body class="app-shell app-shell--customer">
 <div class="app-wrapper">
     <!-- Vuexy-like Vertical Sidebar -->
     <aside class="sidebar" id="sidebar">
@@ -661,7 +662,7 @@
 
         <!-- Footer -->
         <footer class="footer">
-            <div>&copy; {{ date('Year', time()) }} 2026 Billing v3. All rights reserved.</div>
+            <div>&copy; {{ date('Y') }} Billing v3. All rights reserved.</div>
         </footer>
     </div>
 </div>

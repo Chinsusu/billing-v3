@@ -353,7 +353,8 @@ class ServiceAutoRenewalPolicyTest extends TestCase
         $this->actingAs($customer)
             ->get('/dashboard')
             ->assertOk()
-            ->assertSee('0</strong><br>Failed auto-renew', false);
+            ->assertSee('Failed auto-renew')
+            ->assertSee('stat-card__value">0</span>', false);
 
         $this->actingAs($customer)
             ->get('/services')

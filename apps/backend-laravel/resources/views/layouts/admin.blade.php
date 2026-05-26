@@ -121,7 +121,7 @@
         .sidebar-title {
             font-weight: 700;
             font-size: 1.25rem;
-            letter-spacing: 0.5px;
+            letter-spacing: 0;
             color: #fff;
         }
 
@@ -132,7 +132,7 @@
             border-radius: 4px;
             font-size: 0.65rem;
             font-weight: 600;
-            letter-spacing: 0.5px;
+            letter-spacing: 0;
             text-transform: uppercase;
         }
 
@@ -148,7 +148,7 @@
             font-weight: 600;
             color: #7983bb;
             margin: 18px 0 8px 10px;
-            letter-spacing: 1px;
+            letter-spacing: 0;
         }
 
         .sidebar-menu-item {
@@ -335,7 +335,7 @@
             color: var(--text-heading);
             font-weight: 600;
             margin-bottom: 16px;
-            letter-spacing: -0.5px;
+            letter-spacing: 0;
         }
 
         h1 { font-size: 1.75rem; }
@@ -373,7 +373,7 @@
             margin-top: 16px;
             margin-bottom: 6px;
             text-transform: uppercase;
-            letter-spacing: 0.5px;
+            letter-spacing: 0;
         }
 
         input, select, textarea {
@@ -469,7 +469,7 @@
             font-weight: 600;
             font-size: 0.8rem;
             text-transform: uppercase;
-            letter-spacing: 0.5px;
+            letter-spacing: 0;
             border-bottom: 2px solid var(--border-color);
             padding: 12px 16px;
             text-align: left;
@@ -540,8 +540,9 @@
             }
         }
     </style>
+    @include('layouts.partials.ui-foundation')
 </head>
-<body>
+<body class="app-shell app-shell--admin">
 <div class="app-wrapper">
     <!-- Vuexy-like Vertical Sidebar (Admin) -->
     <aside class="sidebar" id="sidebar">
