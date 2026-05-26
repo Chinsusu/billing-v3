@@ -153,11 +153,24 @@
             transition: all 0.15s ease-in-out;
         }
 
-        .sidebar-menu-item svg {
-            width: 20px;
+        .sidebar-menu-icon {
+            align-items: center;
+            color: currentColor;
+            display: inline-flex;
+            flex: 0 0 20px;
             height: 20px;
-            fill: currentColor;
-            opacity: 0.85;
+            justify-content: center;
+            opacity: 0.88;
+            width: 20px;
+        }
+
+        .sidebar-menu-icon svg {
+            fill: none;
+            height: 18px;
+            stroke: currentColor;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+            width: 18px;
             transition: transform 0.15s ease-in-out;
         }
 
@@ -166,7 +179,7 @@
             color: #fff;
         }
 
-        .sidebar-menu-item:hover svg {
+        .sidebar-menu-item:hover .sidebar-menu-icon svg {
             transform: translateX(2px);
         }
 
@@ -540,44 +553,44 @@
         </div>
         <div class="sidebar-menu">
             <a href="/products" class="sidebar-menu-item {{ Request::is('products') ? 'active' : '' }}">
-                <svg viewBox="0 0 24 24"><path d="M12 2.02422L1.75 6.00022L12 9.97622L22.25 6.00022L12 2.02422ZM3.75 6.00022L12 2.78122L20.25 6.00022L12 9.21922L3.75 6.00022ZM1.75 8.00022V16.0002L12 19.9762L22.25 16.0002V8.00022L20.25 8.78122V15.2192L12 18.4382L3.75 15.2192V8.78122L1.75 8.00022Z"/></svg>
+                <x-sidebar-icon name="products" />
                 <span>Products</span>
             </a>
             
             @auth
                 <div class="sidebar-section-header">Customer Area</div>
                 <a href="/dashboard" class="sidebar-menu-item {{ Request::is('dashboard') ? 'active' : '' }}">
-                    <svg viewBox="0 0 24 24"><path d="M3 13h1v7c0 1.103.897 2 2 2h12c1.103 0 2-.897 2-2v-7h1a1 1 0 0 0 .707-1.707L12.707 2.293a.999.999 0 0 0-1.414 0L2.293 11.293A1 1 0 0 0 3 13zm9-8.414 7 7V20H5v-8.414l7-7z"/></svg>
+                    <x-sidebar-icon name="dashboard" />
                     <span>Dashboard</span>
                 </a>
                 <a href="/wallet" class="sidebar-menu-item {{ Request::is('wallet*') ? 'active' : '' }}">
-                    <svg viewBox="0 0 24 24"><path d="M20 7h-4V5c0-1.103-.897-2-2-2h-4c-1.103 0-2 .897-2 2v2H4c-1.103 0-2 .897-2 2v10c0 1.103.897 2 2 2h16c1.103 0 2-.897 2-2V9c0-1.103-.897-2-2-2zM10 5h4v2h-4V5zM4 9h16v10H4V9z"/></svg>
+                    <x-sidebar-icon name="wallet" />
                     <span>Wallet</span>
                 </a>
                 <a href="/invoices" class="sidebar-menu-item {{ Request::is('invoices*') ? 'active' : '' }}">
-                    <svg viewBox="0 0 24 24"><path d="M19 3H5c-1.103 0-2 .897-2 2v14c0 1.103.897 2 2 2h14c1.103 0 2-.897 2-2V5c0-1.103-.897-2-2-2zm0 16H5V5h14v14zM7 7h10v2H7zm0 4h10v2H7zm0 4h7v2H7z"/></svg>
+                    <x-sidebar-icon name="invoices" />
                     <span>Invoices</span>
                 </a>
                 <a href="/orders" class="sidebar-menu-item {{ Request::is('orders*') ? 'active' : '' }}">
-                    <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/></svg>
+                    <x-sidebar-icon name="orders" />
                     <span>Orders</span>
                 </a>
                 <a href="/services" class="sidebar-menu-item {{ Request::is('services*') ? 'active' : '' }}">
-                    <svg viewBox="0 0 24 24"><path d="M19.14 12.94c.04-.3.06-.61.06-.94 0-.32-.02-.64-.07-.94l2.03-1.58c.18-.14.23-.41.12-.61l-1.92-3.32c-.12-.22-.37-.29-.59-.22l-2.39.96c-.5-.38-1.03-.7-1.62-.94l-.36-2.54c-.04-.24-.24-.41-.48-.41h-3.84c-.24 0-.43.17-.47.41l-.36 2.54c-.59.24-1.13.57-1.62.94l-2.39-.96c-.22-.08-.47 0-.59.22L2.74 8.87c-.12.21-.08.47.12.61l2.03 1.58c-.05.3-.09.63-.09.94s.02.64.07.94l-2.03 1.58c-.18.14-.23.41-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.24.41.48.41h3.84c.24 0 .44-.17.47-.41l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32c.12-.22.07-.47-.12-.61l-2.01-1.58zM12 15.6c-1.98 0-3.6-1.62-3.6-3.6s1.62-3.6 3.6-3.6 3.6 1.62 3.6 3.6-1.62 3.6-3.6 3.6z"/></svg>
+                    <x-sidebar-icon name="services" />
                     <span>Services</span>
                 </a>
                 <a href="/notification-preferences" class="sidebar-menu-item {{ Request::is('notification-preferences*') ? 'active' : '' }}">
-                    <svg viewBox="0 0 24 24"><path d="M19 13.586V10c0-3.217-2.185-5.927-5.145-6.742C13.562 2.52 12.846 2 12 2s-1.562.52-1.855 1.258C7.185 4.073 5 6.783 5 10v3.586l-1.707 1.707A.996.996 0 0 0 3 16v2a1 1 0 0 0 1 1h16a1 1 0 0 0 1-1v-2a.996.996 0 0 0-.293-.707L19 13.586zM19 17H5v-.586l1.707-1.707A.996.996 0 0 0 7 14v-4c0-2.757 2.243-5 5-5s5 2.243 5 5v4c0 .265.105.52.293.707L19 16.414V17zm-7 5a2.98 2.98 0 0 0 2.818-2H9.182A2.98 2.98 0 0 0 12 22z"/></svg>
+                    <x-sidebar-icon name="notifications" />
                     <span>Notifications</span>
                 </a>
                 <a href="/api-keys" class="sidebar-menu-item {{ Request::is('api-keys*') ? 'active' : '' }}">
-                    <svg viewBox="0 0 24 24"><path d="M7 14a2 2 0 1 0 0-4 2 2 0 0 0 0 4zm0-6c-2.757 0-5 2.243-5 5s2.243 5 5 5 5-2.243 5-5-2.243-5-5-5zm15 3h-8v4h2v2h4v-2h2v-4zm-2 2h-2v2h-2v-2h-2v-2h6v2z"/></svg>
+                    <x-sidebar-icon name="api-keys" />
                     <span>API Keys</span>
                 </a>
                 
                 @if (auth()->user()?->hasRole('reseller'))
                     <a href="/reseller/customers" class="sidebar-menu-item {{ Request::is('reseller*') ? 'active' : '' }}">
-                        <svg viewBox="0 0 24 24"><path d="M12 2C6.486 2 2 6.486 2 12s4.486 10 10 10 10-4.486 10-10S17.514 2 12 2zm0 18c-4.411 0-8-3.589-8-8s3.589-8 8-8 8 3.589 8 8-3.589 8-8 8zm1-13h-2v6h6v-2h-4V7z"/></svg>
+                        <x-sidebar-icon name="reseller-control" />
                         <span>Reseller Control</span>
                     </a>
                 @endif
@@ -585,7 +598,7 @@
                 @can('admin.access')
                     <div class="sidebar-section-header">Administration</div>
                     <a href="/admin" class="sidebar-menu-item">
-                        <svg viewBox="0 0 24 24"><path d="M19 3H5c-1.103 0-2 .897-2 2v14c0 1.103.897 2 2 2h14c1.103 0 2-.897 2-2V5c0-1.103-.897-2-2-2zm-1 16H6v-1h12v1zm0-3H6v-1h12v1zm0-3H6V8h12v5z"/></svg>
+                        <x-sidebar-icon name="admin-panel" />
                         <span>Go to Admin Panel</span>
                     </a>
                 @endcan

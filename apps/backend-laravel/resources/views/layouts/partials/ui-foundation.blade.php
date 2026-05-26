@@ -143,6 +143,27 @@
         text-decoration: none;
     }
 
+    body.app-shell--vuexy .sidebar-menu-icon {
+        align-items: center;
+        color: currentColor;
+        display: inline-flex;
+        flex: 0 0 20px;
+        height: 20px;
+        justify-content: center;
+        opacity: 0.9;
+        width: 20px;
+    }
+
+    body.app-shell--vuexy .sidebar-menu-icon svg {
+        fill: none;
+        height: 18px;
+        stroke: currentColor;
+        stroke-linecap: round;
+        stroke-linejoin: round;
+        stroke-width: 1.85;
+        width: 18px;
+    }
+
     body.app-shell--vuexy .sidebar-menu-item:hover,
     body.app-shell--vuexy .sidebar-menu-item:focus {
         background: var(--sidebar-hover-bg);
