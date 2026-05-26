@@ -1,4 +1,4 @@
-@extends('layouts.app', ['title' => 'Provisioning Job'])
+@extends('layouts.admin', ['title' => 'Provisioning Job'])
 @section('content')
 <div class="panel">
     <p><a href="/admin/provisioning-jobs">Back to Provisioning Jobs</a></p>

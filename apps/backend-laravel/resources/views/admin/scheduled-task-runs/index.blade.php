@@ -1,4 +1,4 @@
-@extends('layouts.app', ['title' => 'Scheduled Task Runs'])
+@extends('layouts.admin', ['title' => 'Scheduled Task Runs'])
 @section('content')
 <div class="panel">
     <h1>Scheduled Task Runs</h1>

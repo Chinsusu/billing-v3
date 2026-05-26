@@ -1,4 +1,4 @@
-@extends('layouts.app', ['title' => 'Edit Bank Integration'])
+@extends('layouts.admin', ['title' => 'Edit Bank Integration'])
 @section('content')
 <div class="panel">
     <h1>Edit Bank Integration</h1>

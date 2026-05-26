@@ -1,4 +1,4 @@
-@extends('layouts.app', ['title' => 'Provisioning Provider Accounts'])
+@extends('layouts.admin', ['title' => 'Provisioning Provider Accounts'])
 @section('content')
 <div class="panel">
     <h1>Provisioning Provider Accounts</h1>

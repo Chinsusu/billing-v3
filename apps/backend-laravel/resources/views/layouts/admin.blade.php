@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>{{ $title ?? 'Billing v3' }}</title>
+    <title>{{ $title ?? 'Billing Admin' }}</title>
     <!-- Public Sans from Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -37,12 +37,13 @@
             --shadow: 0px 4px 18px 0px rgba(75, 70, 92, 0.1);
             
             /* Spatie/Laravel variables mapped to Vuexy theme HSL style */
-            --primary: 115, 103, 240;      /* #7367F0 */
+            --primary: 234, 84, 85;         /* Red Danger for Admin #EA5455 to separate from customer! */
             --secondary: 128, 131, 144;    /* #808390 */
             --success: 40, 199, 111;       /* #28C76F */
             --info: 0, 207, 232;           /* #00CFE8 */
             --warning: 255, 159, 67;       /* #FF9F43 */
             --danger: 234, 84, 85;         /* #EA5455 */
+            --primary-rgb: 234, 84, 85;
         }
 
         [data-theme="dark"] {
@@ -124,6 +125,17 @@
             color: #fff;
         }
 
+        .sidebar-badge {
+            background: rgba(255, 255, 255, 0.15);
+            color: #fff;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 0.65rem;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+        }
+
         .sidebar-menu {
             flex-grow: 1;
             padding: 16px 14px;
@@ -143,22 +155,23 @@
             display: flex;
             align-items: center;
             gap: 12px;
-            padding: 10px 14px;
+            padding: 8px 14px;
             color: #b0acc5;
             text-decoration: none;
             border-radius: 6px;
-            margin-bottom: 4px;
-            font-size: 0.95rem;
+            margin-bottom: 3px;
+            font-size: 0.9rem;
             font-weight: 500;
             transition: all 0.15s ease-in-out;
         }
 
         .sidebar-menu-item svg {
-            width: 20px;
-            height: 20px;
+            width: 18px;
+            height: 18px;
             fill: currentColor;
             opacity: 0.85;
             transition: transform 0.15s ease-in-out;
+            flex-shrink: 0;
         }
 
         .sidebar-menu-item:hover {
@@ -173,7 +186,7 @@
         .sidebar-menu-item.active {
             background: rgb(var(--primary));
             color: #fff;
-            box-shadow: 0px 2px 6px 0px rgba(115, 103, 240, 0.3);
+            box-shadow: 0px 2px 6px 0px rgba(234, 84, 85, 0.3);
         }
 
         /* Main Container */
@@ -227,6 +240,9 @@
             font-size: 1.15rem;
             font-weight: 600;
             color: var(--text-heading);
+            display: flex;
+            align-items: center;
+            gap: 8px;
         }
 
         .navbar-right {
@@ -262,21 +278,21 @@
 
         /* User Impersonation banner */
         .impersonation-banner {
-            background: rgba(var(--warning), 0.1);
-            border: 1px solid rgb(var(--warning));
+            background: rgba(255, 159, 67, 0.1);
+            border: 1px solid rgb(255, 159, 67);
             border-radius: 6px;
             padding: 10px 16px;
             margin-bottom: 18px;
             display: flex;
             align-items: center;
             justify-content: space-between;
-            color: rgb(var(--warning));
+            color: rgb(255, 159, 67);
             font-size: 0.9rem;
             font-weight: 500;
         }
 
         .impersonation-banner button {
-            background: rgb(var(--warning));
+            background: rgb(255, 159, 67);
             color: #fff;
             border: 0;
             border-radius: 4px;
@@ -375,7 +391,7 @@
 
         input:focus, select:focus, textarea:focus {
             border-color: rgb(var(--primary));
-            box-shadow: 0px 0px 0px 3px rgba(115, 103, 240, 0.15);
+            box-shadow: 0px 0px 0px 3px rgba(var(--primary-rgb), 0.15);
         }
 
         /* Buttons */
@@ -392,13 +408,13 @@
             font-weight: 600;
             text-decoration: none;
             cursor: pointer;
-            box-shadow: 0px 2px 4px 0px rgba(115, 103, 240, 0.2);
+            box-shadow: 0px 2px 4px 0px rgba(var(--primary-rgb), 0.2);
             transition: all 0.15s ease-in-out;
         }
 
         button:hover, .button:hover {
-            background: rgba(115, 103, 240, 0.85);
-            box-shadow: 0px 4px 12px 0px rgba(115, 103, 240, 0.3);
+            background: rgba(var(--primary-rgb), 0.85);
+            box-shadow: 0px 4px 12px 0px rgba(var(--primary-rgb), 0.3);
             transform: translateY(-1px);
         }
 
@@ -434,7 +450,7 @@
         }
 
         a:hover {
-            color: rgba(115, 103, 240, 0.85);
+            color: rgba(var(--primary-rgb), 0.85);
             text-decoration: underline;
         }
 
@@ -527,64 +543,118 @@
 </head>
 <body>
 <div class="app-wrapper">
-    <!-- Vuexy-like Vertical Sidebar -->
+    <!-- Vuexy-like Vertical Sidebar (Admin) -->
     <aside class="sidebar" id="sidebar">
         <div class="sidebar-brand">
-            <div class="sidebar-logo">B</div>
-            <div class="sidebar-title">Billing v3</div>
+            <div class="sidebar-logo">A</div>
+            <div class="sidebar-title">Billing Admin</div>
+            <span class="sidebar-badge">Portal</span>
         </div>
         <div class="sidebar-menu">
-            <a href="/products" class="sidebar-menu-item {{ Request::is('products') ? 'active' : '' }}">
+            <a href="/admin" class="sidebar-menu-item {{ Request::is('admin') ? 'active' : '' }}">
+                <svg viewBox="0 0 24 24"><path d="M19 3H5c-1.103 0-2 .897-2 2v14c0 1.103.897 2 2 2h14c1.103 0 2-.897 2-2V5c0-1.103-.897-2-2-2zm-1 16H6v-1h12v1zm0-3H6v-1h12v1zm0-3H6V8h12v5z"/></svg>
+                <span>Admin Overview</span>
+            </a>
+
+            <div class="sidebar-section-header">Financials</div>
+            <a href="/admin/invoices" class="sidebar-menu-item {{ Request::is('admin/invoices*') ? 'active' : '' }}">
+                <svg viewBox="0 0 24 24"><path d="M19 3H5c-1.103 0-2 .897-2 2v14c0 1.103.897 2 2 2h14c1.103 0 2-.897 2-2V5c0-1.103-.897-2-2-2zm0 16H5V5h14v14zM7 7h10v2H7zm0 4h10v2H7zm0 4h7v2H7z"/></svg>
+                <span>Invoices</span>
+            </a>
+            <a href="/admin/payment-events" class="sidebar-menu-item {{ Request::is('admin/payment-events*') ? 'active' : '' }}">
+                <svg viewBox="0 0 24 24"><path d="M12 2C6.486 2 2 6.486 2 12s4.486 10 10 10 10-4.486 10-10S17.514 2 12 2zm0 18c-4.411 0-8-3.589-8-8s3.589-8 8-8 8 3.589 8 8-3.589 8-8 8zm1-13h-2v6h6v-2h-4V7z"/></svg>
+                <span>Payment Events</span>
+            </a>
+            @can('renewals.view')
+                <a href="/admin/renewals" class="sidebar-menu-item {{ Request::is('admin/renewals*') ? 'active' : '' }}">
+                    <svg viewBox="0 0 24 24"><path d="M19 12h-2v3h-3v2h5v-5zM7 9h3V7H5v5h2V9z"/><path d="M20 2H4c-1.103 0-2 .897-2 2v16c0 1.103.897 2 2 2h16c1.103 0 2-.897 2-2V4c0-1.103-.897-2-2-2zm0 18H4V4h16v16z"/></svg>
+                    <span>Renewals</span>
+                </a>
+            @endcan
+            @can('wallets.adjust')
+                <a href="/admin/reports/billing" class="sidebar-menu-item {{ Request::is('admin/reports*') ? 'active' : '' }}">
+                    <svg viewBox="0 0 24 24"><path d="M19 3H5c-1.103 0-2 .897-2 2v14c0 1.103.897 2 2 2h14c1.103 0 2-.897 2-2V5c0-1.103-.897-2-2-2zm-1 16H6V6h12v13z"/><path d="M8 8h3v2H8zm0 4h5v2H8zm0 3h8v2H8z"/></svg>
+                    <span>Billing Reports</span>
+                </a>
+            @endcan
+
+            <div class="sidebar-section-header">Resources</div>
+            <a href="/admin/products" class="sidebar-menu-item {{ Request::is('admin/products*') ? 'active' : '' }}">
                 <svg viewBox="0 0 24 24"><path d="M12 2.02422L1.75 6.00022L12 9.97622L22.25 6.00022L12 2.02422ZM3.75 6.00022L12 2.78122L20.25 6.00022L12 9.21922L3.75 6.00022ZM1.75 8.00022V16.0002L12 19.9762L22.25 16.0002V8.00022L20.25 8.78122V15.2192L12 18.4382L3.75 15.2192V8.78122L1.75 8.00022Z"/></svg>
                 <span>Products</span>
             </a>
-            
-            @auth
-                <div class="sidebar-section-header">Customer Area</div>
-                <a href="/dashboard" class="sidebar-menu-item {{ Request::is('dashboard') ? 'active' : '' }}">
-                    <svg viewBox="0 0 24 24"><path d="M3 13h1v7c0 1.103.897 2 2 2h12c1.103 0 2-.897 2-2v-7h1a1 1 0 0 0 .707-1.707L12.707 2.293a.999.999 0 0 0-1.414 0L2.293 11.293A1 1 0 0 0 3 13zm9-8.414 7 7V20H5v-8.414l7-7z"/></svg>
-                    <span>Dashboard</span>
-                </a>
-                <a href="/wallet" class="sidebar-menu-item {{ Request::is('wallet*') ? 'active' : '' }}">
-                    <svg viewBox="0 0 24 24"><path d="M20 7h-4V5c0-1.103-.897-2-2-2h-4c-1.103 0-2 .897-2 2v2H4c-1.103 0-2 .897-2 2v10c0 1.103.897 2 2 2h16c1.103 0 2-.897 2-2V9c0-1.103-.897-2-2-2zM10 5h4v2h-4V5zM4 9h16v10H4V9z"/></svg>
-                    <span>Wallet</span>
-                </a>
-                <a href="/invoices" class="sidebar-menu-item {{ Request::is('invoices*') ? 'active' : '' }}">
-                    <svg viewBox="0 0 24 24"><path d="M19 3H5c-1.103 0-2 .897-2 2v14c0 1.103.897 2 2 2h14c1.103 0 2-.897 2-2V5c0-1.103-.897-2-2-2zm0 16H5V5h14v14zM7 7h10v2H7zm0 4h10v2H7zm0 4h7v2H7z"/></svg>
-                    <span>Invoices</span>
-                </a>
-                <a href="/orders" class="sidebar-menu-item {{ Request::is('orders*') ? 'active' : '' }}">
-                    <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/></svg>
-                    <span>Orders</span>
-                </a>
-                <a href="/services" class="sidebar-menu-item {{ Request::is('services*') ? 'active' : '' }}">
-                    <svg viewBox="0 0 24 24"><path d="M19.14 12.94c.04-.3.06-.61.06-.94 0-.32-.02-.64-.07-.94l2.03-1.58c.18-.14.23-.41.12-.61l-1.92-3.32c-.12-.22-.37-.29-.59-.22l-2.39.96c-.5-.38-1.03-.7-1.62-.94l-.36-2.54c-.04-.24-.24-.41-.48-.41h-3.84c-.24 0-.43.17-.47.41l-.36 2.54c-.59.24-1.13.57-1.62.94l-2.39-.96c-.22-.08-.47 0-.59.22L2.74 8.87c-.12.21-.08.47.12.61l2.03 1.58c-.05.3-.09.63-.09.94s.02.64.07.94l-2.03 1.58c-.18.14-.23.41-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.24.41.48.41h3.84c.24 0 .44-.17.47-.41l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32c.12-.22.07-.47-.12-.61l-2.01-1.58zM12 15.6c-1.98 0-3.6-1.62-3.6-3.6s1.62-3.6 3.6-3.6 3.6 1.62 3.6 3.6-1.62 3.6-3.6 3.6z"/></svg>
-                    <span>Services</span>
-                </a>
-                <a href="/notification-preferences" class="sidebar-menu-item {{ Request::is('notification-preferences*') ? 'active' : '' }}">
-                    <svg viewBox="0 0 24 24"><path d="M19 13.586V10c0-3.217-2.185-5.927-5.145-6.742C13.562 2.52 12.846 2 12 2s-1.562.52-1.855 1.258C7.185 4.073 5 6.783 5 10v3.586l-1.707 1.707A.996.996 0 0 0 3 16v2a1 1 0 0 0 1 1h16a1 1 0 0 0 1-1v-2a.996.996 0 0 0-.293-.707L19 13.586zM19 17H5v-.586l1.707-1.707A.996.996 0 0 0 7 14v-4c0-2.757 2.243-5 5-5s5 2.243 5 5v4c0 .265.105.52.293.707L19 16.414V17zm-7 5a2.98 2.98 0 0 0 2.818-2H9.182A2.98 2.98 0 0 0 12 22z"/></svg>
-                    <span>Notifications</span>
-                </a>
-                <a href="/api-keys" class="sidebar-menu-item {{ Request::is('api-keys*') ? 'active' : '' }}">
-                    <svg viewBox="0 0 24 24"><path d="M7 14a2 2 0 1 0 0-4 2 2 0 0 0 0 4zm0-6c-2.757 0-5 2.243-5 5s2.243 5 5 5 5-2.243 5-5-2.243-5-5-5zm15 3h-8v4h2v2h4v-2h2v-4zm-2 2h-2v2h-2v-2h-2v-2h6v2z"/></svg>
-                    <span>API Keys</span>
-                </a>
-                
-                @if (auth()->user()?->hasRole('reseller'))
-                    <a href="/reseller/customers" class="sidebar-menu-item {{ Request::is('reseller*') ? 'active' : '' }}">
-                        <svg viewBox="0 0 24 24"><path d="M12 2C6.486 2 2 6.486 2 12s4.486 10 10 10 10-4.486 10-10S17.514 2 12 2zm0 18c-4.411 0-8-3.589-8-8s3.589-8 8-8 8 3.589 8 8-3.589 8-8 8zm1-13h-2v6h6v-2h-4V7z"/></svg>
-                        <span>Reseller Control</span>
-                    </a>
-                @endif
+            <a href="/admin/orders" class="sidebar-menu-item {{ Request::is('admin/orders*') ? 'active' : '' }}">
+                <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/></svg>
+                <span>Orders</span>
+            </a>
+            <a href="/admin/services" class="sidebar-menu-item {{ Request::is('admin/services*') ? 'active' : '' }}">
+                <svg viewBox="0 0 24 24"><path d="M19.14 12.94c.04-.3.06-.61.06-.94 0-.32-.02-.64-.07-.94l2.03-1.58c.18-.14.23-.41.12-.61l-1.92-3.32c-.12-.22-.37-.29-.59-.22l-2.39.96c-.5-.38-1.03-.7-1.62-.94l-.36-2.54c-.04-.24-.24-.41-.48-.41h-3.84c-.24 0-.43.17-.47.41l-.36 2.54c-.59.24-1.13.57-1.62.94l-2.39-.96c-.22-.08-.47 0-.59.22L2.74 8.87c-.12.21-.08.47.12.61l2.03 1.58c-.05.3-.09.63-.09.94s.02.64.07.94l-2.03 1.58c-.18.14-.23.41-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.24.41.48.41h3.84c.24 0 .44-.17.47-.41l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32c.12-.22.07-.47-.12-.61l-2.01-1.58zM12 15.6c-1.98 0-3.6-1.62-3.6-3.6s1.62-3.6 3.6-3.6 3.6 1.62 3.6 3.6-1.62 3.6-3.6 3.6z"/></svg>
+                <span>Services</span>
+            </a>
 
-                @can('admin.access')
-                    <div class="sidebar-section-header">Administration</div>
-                    <a href="/admin" class="sidebar-menu-item">
-                        <svg viewBox="0 0 24 24"><path d="M19 3H5c-1.103 0-2 .897-2 2v14c0 1.103.897 2 2 2h14c1.103 0 2-.897 2-2V5c0-1.103-.897-2-2-2zm-1 16H6v-1h12v1zm0-3H6v-1h12v1zm0-3H6V8h12v5z"/></svg>
-                        <span>Go to Admin Panel</span>
-                    </a>
-                @endcan
-            @endauth
+            <div class="sidebar-section-header">Integrations</div>
+            <a href="/admin/bank-integrations" class="sidebar-menu-item {{ Request::is('admin/bank-integrations*') ? 'active' : '' }}">
+                <svg viewBox="0 0 24 24"><path d="M21 19h-1V9a1 1 0 0 0-1-1H5a1 1 0 0 0-1 1v10H3a1 1 0 0 0-1 1v2h20v-2a1 1 0 0 0-1-1zM6 19v-9h12v9H6zm14 2H4v-1h16v1z"/></svg>
+                <span>Bank Integrations</span>
+            </a>
+            <a href="/admin/provisioning-provider-accounts" class="sidebar-menu-item {{ Request::is('admin/provisioning-provider-accounts*') ? 'active' : '' }}">
+                <svg viewBox="0 0 24 24"><path d="M12 2C6.486 2 2 6.486 2 12s4.486 10 10 10 10-4.486 10-10S17.514 2 12 2zm0 18c-4.411 0-8-3.589-8-8s3.589-8 8-8 8 3.589 8 8-3.589 8-8 8zm-1-13h2v6h-2zm0 8h2v2h-2z"/></svg>
+                <span>Provider Accounts</span>
+            </a>
+
+            <div class="sidebar-section-header">Queue &amp; Ops</div>
+            <a href="/admin/provisioning-jobs" class="sidebar-menu-item {{ Request::is('admin/provisioning-jobs*') ? 'active' : '' }}">
+                <svg viewBox="0 0 24 24"><path d="M19.14 12.94c.04-.3.06-.61.06-.94 0-.32-.02-.64-.07-.94l2.03-1.58c.18-.14.23-.41.12-.61l-1.92-3.32c-.12-.22-.37-.29-.59-.22l-2.39.96c-.5-.38-1.03-.7-1.62-.94l-.36-2.54c-.04-.24-.24-.41-.48-.41h-3.84c-.24 0-.43.17-.47.41l-.36 2.54c-.59.24-1.13.57-1.62.94l-2.39-.96c-.22-.08-.47 0-.59.22L2.74 8.87c-.12.21-.08.47.12.61l2.03 1.58c-.05.3-.09.63-.09.94s.02.64.07.94l-2.03 1.58c-.18.14-.23.41-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.24.41.48.41h3.84c.24 0 .44-.17.47-.41l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32c.12-.22.07-.47-.12-.61l-2.01-1.58zM12 15.6c-1.98 0-3.6-1.62-3.6-3.6s1.62-3.6 3.6-3.6 3.6 1.62 3.6 3.6-1.62 3.6-3.6 3.6z"/></svg>
+                <span>Provisioning Jobs</span>
+            </a>
+            <a href="/admin/provider-action-jobs" class="sidebar-menu-item {{ Request::is('admin/provider-action-jobs*') ? 'active' : '' }}">
+                <svg viewBox="0 0 24 24"><path d="M19 3H5c-1.103 0-2 .897-2 2v14c0 1.103.897 2 2 2h14c1.103 0 2-.897 2-2V5c0-1.103-.897-2-2-2zm-1 16H6V6h12v13z"/><path d="M8 8h3v2H8zm0 4h5v2H8zm0 3h8v2H8z"/></svg>
+                <span>Provider Action Jobs</span>
+            </a>
+            <a href="/admin/ops-health" class="sidebar-menu-item {{ Request::is('admin/ops-health*') ? 'active' : '' }}">
+                <svg viewBox="0 0 24 24"><path d="M12 2C6.486 2 2 6.486 2 12s4.486 10 10 10 10-4.486 10-10S17.514 2 12 2zm1 16h-2v-2h2v2zm0-4h-2V7h2v7z"/></svg>
+                <span>Ops Health</span>
+            </a>
+            <a href="/admin/ops-alert-events" class="sidebar-menu-item {{ Request::is('admin/ops-alert-events*') ? 'active' : '' }}">
+                <svg viewBox="0 0 24 24"><path d="M12 2C6.486 2 2 6.486 2 12s4.486 10 10 10 10-4.486 10-10S17.514 2 12 2zm1 16h-2v-2h2v2zm0-4h-2V7h2v7z"/></svg>
+                <span>Ops Alerts</span>
+            </a>
+            <a href="/admin/scheduled-task-runs" class="sidebar-menu-item {{ Request::is('admin/scheduled-task-runs*') ? 'active' : '' }}">
+                <svg viewBox="0 0 24 24"><path d="M12 2C6.486 2 2 6.486 2 12s4.486 10 10 10 10-4.486 10-10S17.514 2 12 2zm1 16h-2v-2h2v2zm0-4h-2V7h2v7z"/></svg>
+                <span>Task Runs</span>
+            </a>
+
+            <div class="sidebar-section-header">Security &amp; Support</div>
+            <a href="/admin/customers" class="sidebar-menu-item {{ Request::is('admin/customers*') ? 'active' : '' }}">
+                <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 17h-2v-2h2v2zm0-4h-2V7h2v8z"/></svg>
+                <span>Customer Base</span>
+            </a>
+            @can('users.view')
+                <a href="/admin/users" class="sidebar-menu-item {{ Request::is('admin/users*') ? 'active' : '' }}">
+                    <svg viewBox="0 0 24 24"><path d="M12 2C6.486 2 2 6.486 2 12s4.486 10 10 10 10-4.486 10-10S17.514 2 12 2zm0 18c-4.411 0-8-3.589-8-8s3.589-8 8-8 8 3.589 8 8-3.589 8-8 8z"/><path d="M12 6c-1.93 0-3.5 1.57-3.5 3.5S10.07 13 12 13s3.5-1.57 3.5-3.5S13.93 6 12 6zm0 5c-.827 0-1.5-.673-1.5-1.5S11.173 8 12 8s1.5.673 1.5 1.5S12.827 11 12 11zm0 3c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4zm-6 4c.22-1.35 4-2 6-2s5.78.65 6 2H6z"/></svg>
+                    <span>Users &amp; Roles</span>
+                </a>
+            @endcan
+            @can('audit_logs.view')
+                <a href="/admin/audit-logs" class="sidebar-menu-item {{ Request::is('admin/audit-logs*') ? 'active' : '' }}">
+                    <svg viewBox="0 0 24 24"><path d="M12 2C6.486 2 2 6.486 2 12s4.486 10 10 10 10-4.486 10-10S17.514 2 12 2zm0 18c-4.411 0-8-3.589-8-8s3.589-8 8-8 8 3.589 8 8-3.589 8-8 8z"/><path d="M13 7h-2v6h6v-2h-4z"/></svg>
+                    <span>Audit Logs</span>
+                </a>
+            @endcan
+            @can('notifications.manage')
+                <a href="/admin/notification-events" class="sidebar-menu-item {{ Request::is('admin/notification-events*') ? 'active' : '' }}">
+                    <svg viewBox="0 0 24 24"><path d="M19 3H5c-1.103 0-2 .897-2 2v14c0 1.103.897 2 2 2h14c1.103 0 2-.897 2-2V5c0-1.103-.897-2-2-2zm0 16H5V5h14v14zM7 7h10v2H7zm0 4h10v2H7zm0 4h7v2H7z"/></svg>
+                    <span>Notification Logs</span>
+                </a>
+                <a href="/admin/notification-templates" class="sidebar-menu-item {{ Request::is('admin/notification-templates*') ? 'active' : '' }}">
+                    <svg viewBox="0 0 24 24"><path d="M19 3H5c-1.103 0-2 .897-2 2v14c0 1.103.897 2 2 2h14c1.103 0 2-.897 2-2V5c0-1.103-.897-2-2-2zm0 16H5V5h14v14zM7 7h10v2H7zm0 4h10v2H7zm0 4h7v2H7z"/></svg>
+                    <span>Templates</span>
+                </a>
+            @endcan
+            <a href="/admin/support-tickets" class="sidebar-menu-item {{ Request::is('admin/support-tickets*') ? 'active' : '' }}">
+                <svg viewBox="0 0 24 24"><path d="M20 2H4c-1.103 0-2 .897-2 2v18l4-4h14c1.103 0 2-.897 2-2V4c0-1.103-.897-2-2-2zm0 14H5.172L4 17.172V4h16v12zm-9-3h2v2h-2zm0-8h2v6h-2z"/></svg>
+                <span>Support Tickets</span>
+            </a>
         </div>
     </aside>
 
@@ -596,10 +666,19 @@
                 <button class="navbar-toggle-btn" id="sidebar-toggle" aria-label="Toggle Sidebar">
                     <svg viewBox="0 0 24 24"><path d="M4 6h16v2H4zm0 5h16v2H4zm0 5h16v2H4z"/></svg>
                 </button>
-                <div class="navbar-page-title">{{ $title ?? 'Billing v3' }}</div>
+                <div class="navbar-page-title">
+                    <span>Admin Controls</span>
+                    <span class="sidebar-badge" style="background: rgb(var(--primary)); font-size: 0.75rem;">{{ $title ?? '' }}</span>
+                </div>
             </div>
             
             <div class="navbar-right">
+                <!-- Return to Customer Dashboard -->
+                <a href="/dashboard" class="button secondary" style="padding: 6px 12px; font-size: 0.8rem; display: inline-flex; align-items: center; gap: 6px;">
+                    <svg viewBox="0 0 24 24" style="width: 14px; height: 14px; fill: currentColor;"><path d="M12 2C6.486 2 2 6.486 2 12s4.486 10 10 10 10-4.486 10-10S17.514 2 12 2zm0 18c-4.411 0-8-3.589-8-8s3.589-8 8-8 8 3.589 8 8-3.589 8-8 8zm1-13h-2v6h6v-2h-4V7z"/></svg>
+                    <span>Exit Admin</span>
+                </a>
+
                 <!-- Theme Toggler -->
                 <button class="theme-toggle-btn" id="theme-toggle" title="Toggle Light/Dark Theme">
                     <!-- Sun Icon (visible in dark mode) -->
@@ -614,9 +693,6 @@
                         @csrf
                         <button type="submit" class="button secondary" style="padding: 6px 12px; font-size: 0.8rem;">Logout</button>
                     </form>
-                @else
-                    <a href="/login" class="button secondary" style="padding: 6px 12px; font-size: 0.8rem;">Login</a>
-                    <a href="/register" class="button" style="padding: 6px 12px; font-size: 0.8rem; margin-left: 8px;">Register</a>
                 @endauth
             </div>
         </header>
@@ -661,7 +737,7 @@
 
         <!-- Footer -->
         <footer class="footer">
-            <div>&copy; {{ date('Year', time()) }} 2026 Billing v3. All rights reserved.</div>
+            <div>&copy; 2026 Billing Admin. All rights reserved.</div>
         </footer>
     </div>
 </div>

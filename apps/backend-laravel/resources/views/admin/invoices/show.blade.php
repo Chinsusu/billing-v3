@@ -1,4 +1,4 @@
-@extends('layouts.app', ['title' => 'Admin Invoice '.$invoice->invoice_number])
+@extends('layouts.admin', ['title' => 'Admin Invoice '.$invoice->invoice_number])
 @section('content')
 <div class="panel">
     <p><a href="/admin/invoices">Back to Invoices</a></p>

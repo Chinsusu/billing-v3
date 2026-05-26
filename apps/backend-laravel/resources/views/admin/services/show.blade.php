@@ -1,4 +1,4 @@
-@extends('layouts.app', ['title' => 'Service Runbook'])
+@extends('layouts.admin', ['title' => 'Service Runbook'])
 @section('content')
 <div class="panel">
     <p><a href="/admin/services">Back to Services</a></p>

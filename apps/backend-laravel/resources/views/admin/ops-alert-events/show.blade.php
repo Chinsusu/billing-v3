@@ -1,4 +1,4 @@
-@extends('layouts.app', ['title' => 'Ops Alert Event'])
+@extends('layouts.admin', ['title' => 'Ops Alert Event'])
 @section('content')
 <div class="panel">
     <p><a href="/admin/ops-alert-events">Back to Ops Alert Events</a></p>
