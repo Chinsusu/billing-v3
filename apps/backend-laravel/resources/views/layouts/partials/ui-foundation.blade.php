@@ -455,6 +455,38 @@
         width: 34px;
     }
 
+    .stat-card--has-icon {
+        padding-right: 72px;
+    }
+
+    .stat-card--has-icon::before {
+        display: none;
+    }
+
+    .stat-card__icon {
+        align-items: center;
+        background: rgba(var(--primary-rgb), 0.12);
+        border-radius: 8px;
+        color: rgb(var(--primary));
+        display: inline-flex;
+        height: 38px;
+        justify-content: center;
+        position: absolute;
+        right: 16px;
+        top: 16px;
+        width: 38px;
+    }
+
+    .stat-card__icon svg {
+        fill: none;
+        height: 19px;
+        stroke: currentColor;
+        stroke-linecap: round;
+        stroke-linejoin: round;
+        stroke-width: 2;
+        width: 19px;
+    }
+
     .stat-card:hover {
         border-color: rgba(var(--primary-rgb), 0.24);
         box-shadow: var(--shadow-card-hover);
@@ -488,6 +520,11 @@
         background: rgba(var(--success), 0.13);
     }
 
+    .stat-card--success .stat-card__icon {
+        background: rgba(var(--success), 0.13);
+        color: rgb(var(--success));
+    }
+
     .stat-card--warning .stat-card__value {
         color: rgb(var(--warning));
     }
@@ -496,12 +533,22 @@
         background: rgba(var(--warning), 0.16);
     }
 
+    .stat-card--warning .stat-card__icon {
+        background: rgba(var(--warning), 0.16);
+        color: rgb(var(--warning));
+    }
+
     .stat-card--danger .stat-card__value {
         color: rgb(var(--danger));
     }
 
     .stat-card--danger::before {
         background: rgba(var(--danger), 0.13);
+    }
+
+    .stat-card--danger .stat-card__icon {
+        background: rgba(var(--danger), 0.13);
+        color: rgb(var(--danger));
     }
 
     .admin-dashboard-grid {

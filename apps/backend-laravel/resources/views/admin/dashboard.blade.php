@@ -27,6 +27,7 @@
         :value="$money($monthlyRevenueAmount)"
         :meta="'Today '.$money($todayRevenueAmount).' / paid orders + invoices'"
         tone="success"
+        icon="revenue"
         :href="auth()->user()->can('invoices.view') ? '/admin/reports/billing' : null"
     />
     <x-stat-card
@@ -34,6 +35,7 @@
         label="Active services"
         :value="$activeServiceCount"
         :meta="$activeServiceCount.' currently active'"
+        icon="services"
         :href="auth()->user()->can('services.view') ? '/admin/services?status=active' : null"
     />
     <x-stat-card
@@ -42,6 +44,7 @@
         :value="$pendingProvisioningServiceCount"
         :meta="$pendingProvisioningServiceCount.' waiting services / '.$pendingProvisioningJobCount.' queued jobs'"
         tone="warning"
+        icon="provisioning"
         :href="auth()->user()->can('provisioning_jobs.view') ? '/admin/provisioning-jobs?status=pending' : null"
     />
     <x-stat-card
@@ -50,6 +53,7 @@
         :value="$queueRiskCount"
         :meta="$failedProvisioningJobCount.' failed / '.$stuckProvisioningJobCount.' stuck'"
         :tone="$queueRiskCount > 0 ? 'danger' : 'success'"
+        icon="queue-risk"
         :href="auth()->user()->can('provisioning_jobs.view') ? '/admin/provisioning-jobs' : null"
     />
     <x-stat-card
@@ -57,6 +61,7 @@
         label="Open support tickets"
         :value="$openSupportTicketCount"
         :meta="$urgentSupportTicketCount.' urgent'"
+        icon="support"
         :href="auth()->user()->can('support_tickets.view') ? '/admin/support-tickets' : null"
     />
 </div>

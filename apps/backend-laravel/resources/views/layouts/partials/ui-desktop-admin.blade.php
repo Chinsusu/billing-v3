@@ -99,6 +99,11 @@
             top: 14px;
         }
 
+        body.app-shell--admin .stat-card__icon {
+            right: 14px;
+            top: 14px;
+        }
+
         body.app-shell--admin .stat-card__value {
             font-size: 1.42rem;
         }
