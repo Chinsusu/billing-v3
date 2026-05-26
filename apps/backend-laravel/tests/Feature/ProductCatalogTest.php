@@ -89,6 +89,8 @@ class ProductCatalogTest extends TestCase
             ->assertSee('data-lifecycle-unit-select', false)
             ->assertSee('data-lifecycle-duration-field', false)
             ->assertSee('data-lifecycle-count-input', false)
+            ->assertSee('--product-form-help-min-height', false)
+            ->assertSee('.product-form-field:not(:has(.field-help))::after', false)
             ->assertSeeInOrder([
                 'Product identity',
                 'Pricing & lifecycle',
