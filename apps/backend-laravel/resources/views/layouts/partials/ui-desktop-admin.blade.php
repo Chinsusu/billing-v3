@@ -37,14 +37,24 @@
         }
 
         body.app-shell--admin .navbar {
-            height: 60px;
+            height: 64px;
             padding-left: var(--admin-desktop-gutter);
             padding-right: var(--admin-desktop-gutter);
         }
 
+        body.app-shell--admin .layout-navbar-floating {
+            margin: 16px var(--admin-desktop-gutter) 0;
+            padding-left: 18px;
+            padding-right: 18px;
+        }
+
+        body.app-shell--admin .navbar-search {
+            max-width: 520px;
+        }
+
         body.app-shell--admin .content-wrapper {
             max-width: var(--admin-desktop-content-max);
-            padding: 24px var(--admin-desktop-gutter) 18px;
+            padding: 22px var(--admin-desktop-gutter) 18px;
         }
 
         body.app-shell--admin .panel {
@@ -78,6 +88,11 @@
         body.app-shell--admin .stat-card {
             min-height: 108px;
             padding: 16px;
+        }
+
+        body.app-shell--admin .stat-card::before {
+            right: 14px;
+            top: 14px;
         }
 
         body.app-shell--admin .stat-card__value {

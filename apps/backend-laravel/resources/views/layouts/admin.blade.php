@@ -37,13 +37,13 @@
             --shadow: 0px 4px 18px 0px rgba(75, 70, 92, 0.1);
             
             /* Spatie/Laravel variables mapped to Vuexy theme HSL style */
-            --primary: 234, 84, 85;         /* Red Danger for Admin #EA5455 to separate from customer! */
+            --primary: 115, 103, 240;      /* #7367F0 */
             --secondary: 128, 131, 144;    /* #808390 */
             --success: 40, 199, 111;       /* #28C76F */
             --info: 0, 207, 232;           /* #00CFE8 */
             --warning: 255, 159, 67;       /* #FF9F43 */
             --danger: 234, 84, 85;         /* #EA5455 */
-            --primary-rgb: 234, 84, 85;
+            --primary-rgb: 115, 103, 240;
         }
 
         [data-theme="dark"] {
@@ -543,14 +543,17 @@
     @include('layouts.partials.ui-foundation')
     @include('layouts.partials.ui-desktop-admin')
 </head>
-<body class="app-shell app-shell--admin">
+<body class="app-shell app-shell--admin app-shell--vuexy">
 <div class="app-wrapper">
     <!-- Vuexy-like Vertical Sidebar (Admin) -->
     <aside class="sidebar" id="sidebar">
         <div class="sidebar-brand">
-            <div class="sidebar-logo">A</div>
-            <div class="sidebar-title">Billing Admin</div>
-            <span class="sidebar-badge">Portal</span>
+            <div class="sidebar-brand-mark">B3</div>
+            <div class="sidebar-brand-copy">
+                <div class="sidebar-kicker">Control Plane</div>
+                <div class="sidebar-title">Billing v3</div>
+            </div>
+            <span class="sidebar-badge">Admin</span>
         </div>
         <div class="sidebar-menu">
             <a href="/admin" class="sidebar-menu-item {{ Request::is('admin') ? 'active' : '' }}">
@@ -663,26 +666,30 @@
     <!-- Page Content Container -->
     <div class="main-container">
         <!-- Top Navbar -->
-        <header class="navbar">
+        <header class="navbar layout-navbar-floating">
             <div class="navbar-left">
                 <button class="navbar-toggle-btn" id="sidebar-toggle" aria-label="Toggle Sidebar">
                     <svg viewBox="0 0 24 24"><path d="M4 6h16v2H4zm0 5h16v2H4zm0 5h16v2H4z"/></svg>
                 </button>
-                <div class="navbar-page-title">
-                    <span>Admin Controls</span>
-                    <span class="sidebar-badge" style="background: rgb(var(--primary)); font-size: 0.75rem;">{{ $title ?? '' }}</span>
+                <div class="navbar-title-stack">
+                    <span class="navbar-page-kicker">Admin Workspace</span>
+                    <span class="navbar-page-title">{{ $title ?? 'Admin Controls' }}</span>
                 </div>
+                <form class="navbar-search" method="GET" action="/admin/customers" role="search">
+                    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9.5 3a6.5 6.5 0 0 1 5.18 10.43l4.45 4.44-1.41 1.42-4.45-4.45A6.5 6.5 0 1 1 9.5 3zm0 2a4.5 4.5 0 1 0 0 9 4.5 4.5 0 0 0 0-9z"/></svg>
+                    <input type="search" name="search" value="{{ Request::is('admin/customers*') ? request('search') : '' }}" placeholder="Search customers" aria-label="Search customers">
+                </form>
             </div>
             
             <div class="navbar-right">
                 <!-- Return to Customer Dashboard -->
-                <a href="/dashboard" class="button secondary" style="padding: 6px 12px; font-size: 0.8rem; display: inline-flex; align-items: center; gap: 6px;">
-                    <svg viewBox="0 0 24 24" style="width: 14px; height: 14px; fill: currentColor;"><path d="M12 2C6.486 2 2 6.486 2 12s4.486 10 10 10 10-4.486 10-10S17.514 2 12 2zm0 18c-4.411 0-8-3.589-8-8s3.589-8 8-8 8 3.589 8 8-3.589 8-8 8zm1-13h-2v6h6v-2h-4V7z"/></svg>
-                    <span>Exit Admin</span>
+                <a href="/dashboard" class="button secondary button-compact button-soft">
+                    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg>
+                    <span>Client</span>
                 </a>
 
                 <!-- Theme Toggler -->
-                <button class="theme-toggle-btn" id="theme-toggle" title="Toggle Light/Dark Theme">
+                <button class="theme-toggle-btn icon-button" id="theme-toggle" title="Toggle Light/Dark Theme" aria-label="Toggle Light/Dark Theme">
                     <!-- Sun Icon (visible in dark mode) -->
                     <svg id="theme-sun-icon" viewBox="0 0 24 24" style="display: none;"><path d="M6.993 12c0 2.761 2.246 5.007 5.007 5.007s5.007-2.246 5.007-5.007S14.761 6.993 12 6.993 6.993 9.239 6.993 12zM12 8.993c1.658 0 3.007 1.349 3.007 3.007s-1.349 3.007-3.007 3.007S8.993 13.658 8.993 12s1.349-3.007 3.007-3.007zm0-6.993c-.553 0-1 .447-1 1v2c0 .553.447 1 1 1s1-.447 1-1v-2c0-.553-.447-1-1-1zm0 16c-.553 0-1 .447-1 1v2c0 .553.447 1 1 1s1-.447 1-1v-2c0-.553-.447-1-1-1zM3 11H1c-.553 0-1 .447-1 1s.447 1 1 1h2c.553 0 1-.447 1-1s-.447-1-1-1zm16 0h-2c-.553 0-1 .447-1 1s.447 1 1 1h2c.553 0 1-.447 1-1s-.447-1-1-1zM5.222 5.222c-.391-.391-1.024-.391-1.414 0s-.391 1.024 0 1.414l1.414 1.414c.391.391 1.024.391 1.414 0s.391-1.024 0-1.414L5.222 5.222zm12.164 12.164c-.391-.391-1.024-.391-1.414 0s-.391 1.024 0 1.414l1.414 1.414c.391.391 1.024.391 1.414 0s.391-1.024 0-1.414l-1.414-1.414zm0-12.164-1.414 1.414c-.391.391-.391 1.024 0 1.414s1.024.391 1.414 0l1.414-1.414c.391-.391.391-1.024 0-1.414s-1.024-.391-1.414 0zm-12.164 12.164-1.414 1.414c-.391.391-.391 1.024 0 1.414s1.024.391 1.414 0l1.414-1.414c.391-.391.391-1.024 0-1.414s-1.024-.391-1.414 0z"/></svg>
                     <!-- Moon Icon (visible in light mode) -->
@@ -690,10 +697,16 @@
                 </button>
 
                 @auth
-                    <span style="font-weight: 500; font-size: 0.9rem;">{{ auth()->user()->email }}</span>
+                    <div class="user-avatar" title="{{ auth()->user()->email }}">
+                        <span class="user-avatar__initial">{{ strtoupper(substr(auth()->user()->email, 0, 1)) }}</span>
+                        <span class="user-avatar__copy">
+                            <strong>Admin</strong>
+                            <small>{{ auth()->user()->email }}</small>
+                        </span>
+                    </div>
                     <form method="POST" action="/logout" style="display:inline">
                         @csrf
-                        <button type="submit" class="button secondary" style="padding: 6px 12px; font-size: 0.8rem;">Logout</button>
+                        <button type="submit" class="button secondary button-compact">Logout</button>
                     </form>
                 @endauth
             </div>

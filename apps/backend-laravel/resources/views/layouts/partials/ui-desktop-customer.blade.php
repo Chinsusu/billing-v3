@@ -11,9 +11,15 @@
             padding-right: var(--customer-desktop-gutter);
         }
 
+        body.app-shell--customer .layout-navbar-floating {
+            margin: 16px var(--customer-desktop-gutter) 0;
+            padding-left: 18px;
+            padding-right: 18px;
+        }
+
         body.app-shell--customer .content-wrapper {
             max-width: var(--customer-desktop-content-max);
-            padding: 32px var(--customer-desktop-gutter) 24px;
+            padding: 24px var(--customer-desktop-gutter) 24px;
         }
 
         body.app-shell--customer .page-header {

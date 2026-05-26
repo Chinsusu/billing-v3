@@ -527,13 +527,16 @@
     @include('layouts.partials.ui-foundation')
     @include('layouts.partials.ui-desktop-customer')
 </head>
-<body class="app-shell app-shell--customer">
+<body class="app-shell app-shell--customer app-shell--vuexy">
 <div class="app-wrapper">
     <!-- Vuexy-like Vertical Sidebar -->
     <aside class="sidebar" id="sidebar">
         <div class="sidebar-brand">
-            <div class="sidebar-logo">B</div>
-            <div class="sidebar-title">Billing v3</div>
+            <div class="sidebar-brand-mark">B3</div>
+            <div class="sidebar-brand-copy">
+                <div class="sidebar-kicker">Client Portal</div>
+                <div class="sidebar-title">Billing v3</div>
+            </div>
         </div>
         <div class="sidebar-menu">
             <a href="/products" class="sidebar-menu-item {{ Request::is('products') ? 'active' : '' }}">
@@ -593,17 +596,24 @@
     <!-- Page Content Container -->
     <div class="main-container">
         <!-- Top Navbar -->
-        <header class="navbar">
+        <header class="navbar layout-navbar-floating">
             <div class="navbar-left">
                 <button class="navbar-toggle-btn" id="sidebar-toggle" aria-label="Toggle Sidebar">
                     <svg viewBox="0 0 24 24"><path d="M4 6h16v2H4zm0 5h16v2H4zm0 5h16v2H4z"/></svg>
                 </button>
-                <div class="navbar-page-title">{{ $title ?? 'Billing v3' }}</div>
+                <div class="navbar-title-stack">
+                    <span class="navbar-page-kicker">Client Workspace</span>
+                    <span class="navbar-page-title">{{ $title ?? 'Billing v3' }}</span>
+                </div>
+                <form class="navbar-search" method="GET" action="/products" role="search">
+                    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9.5 3a6.5 6.5 0 0 1 5.18 10.43l4.45 4.44-1.41 1.42-4.45-4.45A6.5 6.5 0 1 1 9.5 3zm0 2a4.5 4.5 0 1 0 0 9 4.5 4.5 0 0 0 0-9z"/></svg>
+                    <input type="search" name="search" value="{{ Request::is('products*') ? request('search') : '' }}" placeholder="Search products" aria-label="Search products">
+                </form>
             </div>
             
             <div class="navbar-right">
                 <!-- Theme Toggler -->
-                <button class="theme-toggle-btn" id="theme-toggle" title="Toggle Light/Dark Theme">
+                <button class="theme-toggle-btn icon-button" id="theme-toggle" title="Toggle Light/Dark Theme" aria-label="Toggle Light/Dark Theme">
                     <!-- Sun Icon (visible in dark mode) -->
                     <svg id="theme-sun-icon" viewBox="0 0 24 24" style="display: none;"><path d="M6.993 12c0 2.761 2.246 5.007 5.007 5.007s5.007-2.246 5.007-5.007S14.761 6.993 12 6.993 6.993 9.239 6.993 12zM12 8.993c1.658 0 3.007 1.349 3.007 3.007s-1.349 3.007-3.007 3.007S8.993 13.658 8.993 12s1.349-3.007 3.007-3.007zm0-6.993c-.553 0-1 .447-1 1v2c0 .553.447 1 1 1s1-.447 1-1v-2c0-.553-.447-1-1-1zm0 16c-.553 0-1 .447-1 1v2c0 .553.447 1 1 1s1-.447 1-1v-2c0-.553-.447-1-1-1zM3 11H1c-.553 0-1 .447-1 1s.447 1 1 1h2c.553 0 1-.447 1-1s-.447-1-1-1zm16 0h-2c-.553 0-1 .447-1 1s.447 1 1 1h2c.553 0 1-.447 1-1s-.447-1-1-1zM5.222 5.222c-.391-.391-1.024-.391-1.414 0s-.391 1.024 0 1.414l1.414 1.414c.391.391 1.024.391 1.414 0s.391-1.024 0-1.414L5.222 5.222zm12.164 12.164c-.391-.391-1.024-.391-1.414 0s-.391 1.024 0 1.414l1.414 1.414c.391.391 1.024.391 1.414 0s.391-1.024 0-1.414l-1.414-1.414zm0-12.164-1.414 1.414c-.391.391-.391 1.024 0 1.414s1.024.391 1.414 0l1.414-1.414c.391-.391.391-1.024 0-1.414s-1.024-.391-1.414 0zm-12.164 12.164-1.414 1.414c-.391.391-.391 1.024 0 1.414s1.024.391 1.414 0l1.414-1.414c.391-.391.391-1.024 0-1.414s-1.024-.391-1.414 0z"/></svg>
                     <!-- Moon Icon (visible in light mode) -->
@@ -611,14 +621,23 @@
                 </button>
 
                 @auth
-                    <span style="font-weight: 500; font-size: 0.9rem;">{{ auth()->user()->email }}</span>
+                    @can('admin.access')
+                        <a href="/admin" class="button secondary button-compact button-soft">Admin</a>
+                    @endcan
+                    <div class="user-avatar" title="{{ auth()->user()->email }}">
+                        <span class="user-avatar__initial">{{ strtoupper(substr(auth()->user()->email, 0, 1)) }}</span>
+                        <span class="user-avatar__copy">
+                            <strong>Account</strong>
+                            <small>{{ auth()->user()->email }}</small>
+                        </span>
+                    </div>
                     <form method="POST" action="/logout" style="display:inline">
                         @csrf
-                        <button type="submit" class="button secondary" style="padding: 6px 12px; font-size: 0.8rem;">Logout</button>
+                        <button type="submit" class="button secondary button-compact">Logout</button>
                     </form>
                 @else
-                    <a href="/login" class="button secondary" style="padding: 6px 12px; font-size: 0.8rem;">Login</a>
-                    <a href="/register" class="button" style="padding: 6px 12px; font-size: 0.8rem; margin-left: 8px;">Register</a>
+                    <a href="/login" class="button secondary button-compact">Login</a>
+                    <a href="/register" class="button button-compact">Register</a>
                 @endauth
             </div>
         </header>

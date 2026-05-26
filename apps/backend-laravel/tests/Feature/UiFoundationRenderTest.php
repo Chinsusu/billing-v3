@@ -22,6 +22,10 @@ class UiFoundationRenderTest extends TestCase
             ->get('/dashboard')
             ->assertOk()
             ->assertSee('app-shell--customer', false)
+            ->assertSee('app-shell--vuexy', false)
+            ->assertSee('layout-navbar-floating', false)
+            ->assertSee('navbar-search', false)
+            ->assertSee('user-avatar', false)
             ->assertSee('customer-desktop-foundation', false)
             ->assertSee('--customer-desktop-content-max', false)
             ->assertSee('page-header', false)
@@ -55,6 +59,32 @@ class UiFoundationRenderTest extends TestCase
             ->assertSee('Vietnam Proxy 30 Days');
     }
 
+    public function test_product_catalog_search_filters_by_name_code_or_type(): void
+    {
+        Product::factory()->create([
+            'name' => 'Vietnam Proxy 30 Days',
+            'code' => 'proxy-vn-30d',
+            'type' => 'proxy',
+            'status' => 'active',
+        ]);
+        Product::factory()->create([
+            'name' => 'Singapore VPS Monthly',
+            'code' => 'vps-sg-monthly',
+            'type' => 'vps',
+            'status' => 'active',
+        ]);
+
+        $this->get('/products?search=proxy-vn')
+            ->assertOk()
+            ->assertSee('Vietnam Proxy 30 Days')
+            ->assertDontSee('Singapore VPS Monthly');
+
+        $this->get('/products?search=vps')
+            ->assertOk()
+            ->assertSee('Singapore VPS Monthly')
+            ->assertDontSee('Vietnam Proxy 30 Days');
+    }
+
     public function test_admin_pages_render_operations_ui_foundation(): void
     {
         $this->seed(RolesAndPermissionsSeeder::class);
@@ -67,6 +97,10 @@ class UiFoundationRenderTest extends TestCase
             ->get('/admin')
             ->assertOk()
             ->assertSee('app-shell--admin', false)
+            ->assertSee('app-shell--vuexy', false)
+            ->assertSee('layout-navbar-floating', false)
+            ->assertSee('navbar-search', false)
+            ->assertSee('user-avatar', false)
             ->assertSee('admin-desktop-foundation', false)
             ->assertSee('--admin-desktop-content-max', false)
             ->assertSee('ops-dashboard-grid', false)
