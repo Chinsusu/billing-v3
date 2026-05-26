@@ -126,4 +126,20 @@ class UiFoundationRenderTest extends TestCase
             ->assertSee('&copy; '.date('Y').' Billing v3.', false)
             ->assertDontSee('UTC', false);
     }
+
+    public function test_vuexy_shell_overrides_link_hover_and_soft_button_states(): void
+    {
+        $this->seed(RolesAndPermissionsSeeder::class);
+        $admin = User::factory()->create(['email' => 'ui-hover-admin@example.test']);
+        $admin->assignRole('super_admin');
+
+        $this->actingAs($admin)
+            ->get('/admin')
+            ->assertOk()
+            ->assertSee('body.app-shell--vuexy .sidebar-menu-item:hover', false)
+            ->assertSee('text-decoration: none;', false)
+            ->assertSee('body.app-shell--vuexy .button.secondary.button-soft', false)
+            ->assertSee('--sidebar-text', false)
+            ->assertSee('--topbar-muted', false);
+    }
 }

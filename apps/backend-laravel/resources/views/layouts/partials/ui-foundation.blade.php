@@ -34,18 +34,42 @@
     }
 
     body.app-shell--vuexy {
+        --bg-sidebar: #ffffff;
+        --sidebar-border: rgba(219, 218, 222, 0.78);
+        --sidebar-muted: #a8aaae;
+        --sidebar-text: #6f6b7d;
+        --sidebar-title: #444050;
+        --sidebar-hover-bg: rgba(var(--primary-rgb), 0.08);
+        --sidebar-hover-text: rgb(var(--primary));
+        --topbar-chip-bg: #ffffff;
+        --topbar-muted: #6f6b7d;
         background:
             radial-gradient(circle at top right, rgba(var(--primary-rgb), 0.08), transparent 28rem),
             var(--bg-body);
         color: var(--text-color);
     }
 
+    [data-theme="dark"] body.app-shell--vuexy {
+        --bg-sidebar: #2f3349;
+        --sidebar-border: rgba(219, 218, 222, 0.08);
+        --sidebar-muted: #7983bb;
+        --sidebar-text: #b0acc5;
+        --sidebar-title: #ffffff;
+        --sidebar-hover-bg: rgba(255, 255, 255, 0.06);
+        --sidebar-hover-text: #ffffff;
+        --topbar-chip-bg: #2f3349;
+        --topbar-muted: #b6bee3;
+    }
+
     body.app-shell--vuexy .sidebar {
-        border-right: 1px solid rgba(219, 218, 222, 0.08);
+        background: var(--bg-sidebar);
+        border-right: 1px solid var(--sidebar-border);
+        color: var(--sidebar-text);
         box-shadow: 0 0.125rem 0.375rem rgba(15, 10, 30, 0.16);
     }
 
     body.app-shell--vuexy .sidebar-brand {
+        border-bottom: 1px solid var(--sidebar-border);
         gap: 12px;
         min-height: 76px;
         padding: 18px;
@@ -74,7 +98,7 @@
     }
 
     .sidebar-kicker {
-        color: #7983bb;
+        color: var(--sidebar-muted);
         font-size: 0.68rem;
         font-weight: 700;
         line-height: 1;
@@ -82,12 +106,19 @@
     }
 
     body.app-shell--vuexy .sidebar-title {
+        color: var(--sidebar-title);
         font-size: 1.08rem;
         line-height: 1.2;
     }
 
     body.app-shell--vuexy .sidebar-badge {
+        background: rgba(var(--primary-rgb), 0.12);
+        color: rgb(var(--primary));
         margin-left: auto;
+    }
+
+    body.app-shell--vuexy .sidebar-section-header {
+        color: var(--sidebar-muted);
     }
 
     body.app-shell--vuexy .sidebar-menu {
@@ -96,13 +127,24 @@
 
     body.app-shell--vuexy .sidebar-menu-item {
         border-radius: 6px;
+        color: var(--sidebar-text);
         min-height: 38px;
         position: relative;
+        text-decoration: none;
+    }
+
+    body.app-shell--vuexy .sidebar-menu-item:hover,
+    body.app-shell--vuexy .sidebar-menu-item:focus {
+        background: var(--sidebar-hover-bg);
+        color: var(--sidebar-hover-text);
+        text-decoration: none;
     }
 
     body.app-shell--vuexy .sidebar-menu-item.active {
         background: linear-gradient(118deg, rgb(var(--primary)), rgba(var(--primary-rgb), 0.82));
         box-shadow: 0 0.125rem 0.375rem rgba(var(--primary-rgb), 0.35);
+        color: #ffffff;
+        text-decoration: none;
     }
 
     body.app-shell--vuexy .layout-navbar-floating {
@@ -224,22 +266,28 @@
     }
 
     .button-soft,
-    button.button-soft {
+    button.button-soft,
+    body.app-shell--vuexy .button.secondary.button-soft,
+    body.app-shell--vuexy button.secondary.button-soft {
         background: rgba(var(--primary-rgb), 0.1);
+        border: 1px solid rgba(var(--primary-rgb), 0.12);
         box-shadow: none;
         color: rgb(var(--primary));
     }
 
     .button-soft:hover,
-    button.button-soft:hover {
+    button.button-soft:hover,
+    body.app-shell--vuexy .button.secondary.button-soft:hover,
+    body.app-shell--vuexy button.secondary.button-soft:hover {
         background: rgba(var(--primary-rgb), 0.16);
+        border-color: rgba(var(--primary-rgb), 0.18);
         box-shadow: none;
         color: rgb(var(--primary));
     }
 
     .user-avatar {
         align-items: center;
-        background: var(--surface-soft);
+        background: var(--topbar-chip-bg);
         border: 1px solid var(--border-subtle);
         border-radius: 8px;
         display: inline-flex;
@@ -276,7 +324,7 @@
     }
 
     .user-avatar__copy small {
-        color: var(--text-muted);
+        color: var(--topbar-muted);
         display: block;
         font-size: 0.74rem;
         line-height: 1.2;
