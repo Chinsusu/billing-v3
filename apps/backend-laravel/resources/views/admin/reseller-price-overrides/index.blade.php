@@ -1,4 +1,4 @@
-@extends('layouts.app', ['title' => 'Reseller Price Overrides'])
+@extends('layouts.admin', ['title' => 'Reseller Price Overrides'])
 
 @section('content')
 <div class="panel">

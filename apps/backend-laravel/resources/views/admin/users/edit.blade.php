@@ -1,4 +1,4 @@
-@extends('layouts.app', ['title' => 'Edit User Authorization'])
+@extends('layouts.admin', ['title' => 'Edit User Authorization'])
 @section('content')
 <div class="panel">
     <h1>Edit User Authorization</h1>

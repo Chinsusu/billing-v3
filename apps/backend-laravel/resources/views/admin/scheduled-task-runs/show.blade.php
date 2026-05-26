@@ -1,4 +1,4 @@
-@extends('layouts.app', ['title' => 'Scheduled Task Run'])
+@extends('layouts.admin', ['title' => 'Scheduled Task Run'])
 @section('content')
 <div class="panel">
     <p><a href="/admin/scheduled-task-runs?task={{ $run->task }}">Back to {{ $run->task }} Runs</a></p>

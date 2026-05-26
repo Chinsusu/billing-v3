@@ -1,4 +1,4 @@
-@extends('layouts.app', ['title' => 'Notification Templates'])
+@extends('layouts.admin', ['title' => 'Notification Templates'])
 @section('content')
 <div class="panel">
     <h1>Notification Templates</h1>

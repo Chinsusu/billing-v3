@@ -1,4 +1,4 @@
-@extends('layouts.app', ['title' => 'Renewal Reporting'])
+@extends('layouts.admin', ['title' => 'Renewal Reporting'])
 @section('content')
 @php($canManageRenewals = auth()->user()?->can('renewals.manage') ?? false)
 <div class="panel">

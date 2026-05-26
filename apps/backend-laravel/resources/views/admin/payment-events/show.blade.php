@@ -1,4 +1,4 @@
-@extends('layouts.app', ['title' => 'Payment Event'])
+@extends('layouts.admin', ['title' => 'Payment Event'])
 @section('content')
 <div class="panel">
     <p><a href="/admin/payment-events">Back to Payment Events</a></p>

@@ -1,4 +1,4 @@
-@extends('layouts.app', ['title' => 'Edit Provider Account'])
+@extends('layouts.admin', ['title' => 'Edit Provider Account'])
 @section('content')
 <div class="panel">
     <h1>Edit Provider Account</h1>

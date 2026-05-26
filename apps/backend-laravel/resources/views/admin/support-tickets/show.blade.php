@@ -1,4 +1,4 @@
-@extends('layouts.app', ['title' => 'Admin Support Ticket'])
+@extends('layouts.admin', ['title' => 'Admin Support Ticket'])
 @section('content')
 <div class="panel">
     <h1>{{ $ticket->subject }}</h1>

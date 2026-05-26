@@ -1,4 +1,4 @@
-@extends('layouts.app', ['title' => 'Ops Health'])
+@extends('layouts.admin', ['title' => 'Ops Health'])
 @section('content')
 <div class="panel">
     <h1>Ops Health</h1>

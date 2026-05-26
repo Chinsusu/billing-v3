@@ -1,4 +1,4 @@
-@extends('layouts.app', ['title' => 'Admin Order '.$order->order_number])
+@extends('layouts.admin', ['title' => 'Admin Order '.$order->order_number])
 @section('content')
 <div class="panel">
     <p><a href="/admin/orders">Back to Orders</a></p>

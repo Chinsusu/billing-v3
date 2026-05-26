@@ -1,4 +1,4 @@
-@extends('layouts.app', ['title' => 'Notification Event'])
+@extends('layouts.admin', ['title' => 'Notification Event'])
 @section('content')
 <div class="panel">
     <p><a href="/admin/notification-events">Back to Notification Events</a></p>
