@@ -793,6 +793,165 @@
         margin-top: 4px;
     }
 
+    .product-form-panel {
+        padding: 24px;
+    }
+
+    .product-form-shell {
+        display: grid;
+        gap: 22px;
+    }
+
+    .product-form-grid {
+        align-items: start;
+        display: grid;
+        gap: 24px 28px;
+        grid-template-columns: minmax(0, 1fr) minmax(380px, 0.88fr);
+    }
+
+    .product-form-section {
+        border-top: 1px solid var(--border-subtle);
+        min-width: 0;
+        padding-top: 18px;
+    }
+
+    .product-form-section--wide {
+        grid-column: 1 / -1;
+    }
+
+    .product-form-section-header {
+        align-items: flex-start;
+        display: flex;
+        gap: 12px;
+        margin-bottom: 18px;
+    }
+
+    .product-form-section-index {
+        align-items: center;
+        background: rgba(var(--primary-rgb), 0.12);
+        border-radius: 8px;
+        color: rgb(var(--primary));
+        display: inline-flex;
+        flex: 0 0 36px;
+        font-size: 0.78rem;
+        font-weight: 800;
+        height: 36px;
+        justify-content: center;
+        line-height: 1;
+        width: 36px;
+    }
+
+    .product-form-section-title {
+        color: var(--text-heading);
+        font-size: 1.05rem;
+        line-height: 1.25;
+        margin: 0 0 4px;
+    }
+
+    .product-form-section-copy {
+        color: var(--text-muted);
+        font-size: 0.9rem;
+        line-height: 1.45;
+        margin: 0;
+    }
+
+    .product-form-fields {
+        display: grid;
+        gap: 14px 16px;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .product-form-fields--three {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+
+    .product-form-field {
+        color: var(--text-heading);
+        display: grid;
+        font-size: 0.86rem;
+        font-weight: 700;
+        gap: 7px;
+        letter-spacing: 0;
+        line-height: 1.25;
+        margin: 0;
+        min-width: 0;
+        text-transform: none;
+    }
+
+    .product-form-field--wide {
+        grid-column: 1 / -1;
+    }
+
+    .product-form-field input,
+    .product-form-field select,
+    .product-form-field textarea {
+        font-size: 0.9rem;
+        min-height: 42px;
+    }
+
+    .product-form-field textarea {
+        line-height: 1.5;
+        resize: vertical;
+    }
+
+    .product-form-field .field-help {
+        font-size: 0.8rem;
+        font-weight: 500;
+        line-height: 1.45;
+        margin-top: 0;
+    }
+
+    .product-form-toggle {
+        align-items: flex-start;
+        background: var(--surface-soft);
+        border: 1px solid var(--border-subtle);
+        border-radius: 8px;
+        color: var(--text-heading);
+        cursor: pointer;
+        display: flex;
+        gap: 12px;
+        line-height: 1.35;
+        margin: 0;
+        min-height: 70px;
+        padding: 14px;
+        text-transform: none;
+    }
+
+    .product-form-toggle input {
+        flex: 0 0 18px;
+        height: 18px;
+        margin-top: 2px;
+        padding: 0;
+        width: 18px;
+    }
+
+    .product-form-toggle span {
+        display: grid;
+        gap: 4px;
+        min-width: 0;
+    }
+
+    .product-form-toggle strong {
+        color: var(--text-heading);
+        font-size: 0.9rem;
+        line-height: 1.25;
+    }
+
+    .product-form-toggle small {
+        color: var(--text-muted);
+        font-size: 0.82rem;
+        font-weight: 500;
+    }
+
+    .product-form-actions {
+        align-items: center;
+        border-top: 1px solid var(--border-subtle);
+        display: flex;
+        gap: 12px;
+        justify-content: space-between;
+        padding-top: 20px;
+    }
+
     button, .button {
         gap: 8px;
         min-height: 38px;
@@ -1015,6 +1174,22 @@
 
         .filter-bar {
             grid-template-columns: 1fr;
+        }
+
+        .product-form-grid,
+        .product-form-fields,
+        .product-form-fields--three {
+            grid-template-columns: 1fr;
+        }
+
+        .product-form-actions {
+            align-items: stretch;
+            flex-direction: column-reverse;
+        }
+
+        .product-form-actions .button,
+        .product-form-actions button {
+            width: 100%;
         }
 
         .panel {

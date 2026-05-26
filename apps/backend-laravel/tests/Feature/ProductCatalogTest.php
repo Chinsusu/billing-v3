@@ -73,6 +73,28 @@ class ProductCatalogTest extends TestCase
         ]);
     }
 
+    public function test_admin_create_product_page_uses_scannable_form_sections(): void
+    {
+        $this->seed(RolesAndPermissionsSeeder::class);
+        $admin = User::factory()->create();
+        $admin->assignRole('super_admin');
+
+        $this->actingAs($admin)
+            ->get('/admin/products/create')
+            ->assertOk()
+            ->assertSee('product-form-shell', false)
+            ->assertSee('product-form-grid', false)
+            ->assertSee('product-form-section--identity', false)
+            ->assertSee('product-form-actions', false)
+            ->assertSeeInOrder([
+                'Product identity',
+                'Pricing & lifecycle',
+                'Provisioning provider',
+                'Auto-renew Policy',
+                'Provider lifecycle response',
+            ]);
+    }
+
     public function test_admin_can_store_provider_mapping_on_product(): void
     {
         $this->seed(RolesAndPermissionsSeeder::class);
