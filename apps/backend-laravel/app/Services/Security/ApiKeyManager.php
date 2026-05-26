@@ -12,10 +12,11 @@ class ApiKeyManager
      * @param  list<string>  $scopes
      * @return array{0: ApiKey, 1: string}
      */
-    public function create(User $user, string $name, array $scopes): array
+    public function create(User $user, string $name, array $scopes, ?int $rateLimitPerMinute = null): array
     {
         $secret = 'bv3_'.Str::random(48);
         $prefix = substr($secret, 0, 12);
+        $rateLimitPerMinute ??= (int) config('api_keys.default_rate_limit_per_minute', 60);
 
         $apiKey = ApiKey::create([
             'user_id' => $user->id,
@@ -23,6 +24,7 @@ class ApiKeyManager
             'prefix' => $prefix,
             'key_hash' => $this->hash($secret),
             'scopes' => array_values(array_unique($scopes)),
+            'rate_limit_per_minute' => max(1, $rateLimitPerMinute),
         ]);
 
         return [$apiKey, $secret];

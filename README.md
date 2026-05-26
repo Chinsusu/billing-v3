@@ -433,6 +433,18 @@ Operators can require or reset MFA, revoke sessions, impersonate customers with 
 
 Production hardening adds `/ops/readiness`, configurable audit log retention through `AUDIT_LOG_RETENTION_DAYS`, and `docs/operations/production-runbook.md`.
 
+## Sprint 41 API Rate Limiting and Usage Logs
+
+Routes:
+
+- `GET /api-keys`
+- `POST /api-keys`
+- `GET /api/v1/me`
+
+API keys now have a per-minute request limit. Customer-created keys default to `API_KEY_DEFAULT_RATE_LIMIT_PER_MINUTE` and are capped by `API_KEY_MAX_RATE_LIMIT_PER_MINUTE`.
+
+Valid API key attempts write `api_key_usage_logs` rows with route, method, path, status code, error reason, IP, and user agent metadata. Raw bearer tokens and key hashes are never logged. Successful and rate-limited API responses include `X-RateLimit-Limit`, `X-RateLimit-Remaining`, and `X-RateLimit-Reset`; over-limit requests return `429` with `Retry-After`.
+
 ## Sprint 8 Shared Postgres Runtime
 
 The dev Compose runtime runs Laravel and the worker against the same Postgres database:
