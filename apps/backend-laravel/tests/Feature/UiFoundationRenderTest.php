@@ -164,4 +164,27 @@ class UiFoundationRenderTest extends TestCase
             ->assertSee('theme-toggle-btn icon-button topbar-action', false)
             ->assertSee('button secondary button-compact topbar-action', false);
     }
+
+    public function test_desktop_shell_uses_full_width_content_area(): void
+    {
+        $this->seed(RolesAndPermissionsSeeder::class);
+        $admin = User::factory()->create(['email' => 'ui-wide-admin@example.test']);
+        $admin->assignRole('super_admin');
+
+        $this->actingAs($admin)
+            ->get('/admin')
+            ->assertOk()
+            ->assertSee('--admin-desktop-content-max: none;', false)
+            ->assertSee('--admin-desktop-gutter: 20px;', false)
+            ->assertSee('body.app-shell--admin .content-wrapper', false)
+            ->assertSee('max-width: none;', false);
+
+        $this->actingAs($admin)
+            ->get('/dashboard')
+            ->assertOk()
+            ->assertSee('--customer-desktop-content-max: none;', false)
+            ->assertSee('--customer-desktop-gutter: 24px;', false)
+            ->assertSee('body.app-shell--customer .content-wrapper', false)
+            ->assertSee('max-width: none;', false);
+    }
 }

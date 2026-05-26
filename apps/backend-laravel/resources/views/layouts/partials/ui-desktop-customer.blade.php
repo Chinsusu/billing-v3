@@ -2,8 +2,8 @@
     /* customer-desktop-foundation */
     @media (min-width: 1024px) {
         body.app-shell--customer {
-            --customer-desktop-content-max: 1360px;
-            --customer-desktop-gutter: 32px;
+            --customer-desktop-content-max: none;
+            --customer-desktop-gutter: 24px;
         }
 
         body.app-shell--customer .navbar {
@@ -18,7 +18,7 @@
         }
 
         body.app-shell--customer .content-wrapper {
-            max-width: var(--customer-desktop-content-max);
+            max-width: none;
             padding: 24px var(--customer-desktop-gutter) 24px;
         }
 
@@ -86,6 +86,16 @@
     @media (min-width: 1700px) {
         body.app-shell--customer .recent-grid {
             grid-template-columns: repeat(4, minmax(0, 1fr));
+        }
+
+        body.app-shell--customer .product-grid {
+            grid-template-columns: repeat(4, minmax(0, 1fr));
+        }
+    }
+
+    @media (min-width: 2100px) {
+        body.app-shell--customer .product-grid {
+            grid-template-columns: repeat(5, minmax(0, 1fr));
         }
     }
 </style>

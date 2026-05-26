@@ -2,8 +2,8 @@
     /* admin-desktop-foundation */
     @media (min-width: 1024px) {
         body.app-shell--admin {
-            --admin-desktop-content-max: 1520px;
-            --admin-desktop-gutter: 28px;
+            --admin-desktop-content-max: none;
+            --admin-desktop-gutter: 20px;
             --admin-desktop-sidebar-width: 272px;
             --admin-desktop-table-cell-x: 12px;
             --admin-desktop-table-cell-y: 9px;
@@ -53,7 +53,7 @@
         }
 
         body.app-shell--admin .content-wrapper {
-            max-width: var(--admin-desktop-content-max);
+            max-width: none;
             padding: 22px var(--admin-desktop-gutter) 18px;
         }
 
