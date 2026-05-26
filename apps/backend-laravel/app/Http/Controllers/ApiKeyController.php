@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\ApiKey;
+use App\Models\ApiKeyUsageLog;
 use App\Services\Audit\AuditLogger;
 use App\Services\Security\ApiKeyManager;
 use Illuminate\Http\RedirectResponse;
@@ -18,6 +19,9 @@ class ApiKeyController extends Controller
     {
         return view('api-keys.index', [
             'apiKeys' => $request->user()->apiKeys()->latest()->get(),
+            'defaultRateLimit' => (int) config('api_keys.default_rate_limit_per_minute', 60),
+            'maxRateLimit' => (int) config('api_keys.max_rate_limit_per_minute', 120),
+            'recentUsageLogs' => ApiKeyUsageLog::where('user_id', $request->user()->id)->latest()->limit(20)->get(),
             'scopes' => self::SCOPES,
         ]);
     }
@@ -28,14 +32,21 @@ class ApiKeyController extends Controller
             'name' => ['required', 'string', 'max:120'],
             'scopes' => ['nullable', 'array'],
             'scopes.*' => ['string', Rule::in(self::SCOPES)],
+            'rate_limit_per_minute' => ['nullable', 'integer', 'min:1', 'max:'.((int) config('api_keys.max_rate_limit_per_minute', 120))],
         ]);
 
-        [$apiKey, $plainKey] = $manager->create($request->user(), $validated['name'], $validated['scopes'] ?? []);
+        [$apiKey, $plainKey] = $manager->create(
+            $request->user(),
+            $validated['name'],
+            $validated['scopes'] ?? [],
+            $validated['rate_limit_per_minute'] ?? null,
+        );
 
         $auditLogger->record($request->user(), 'api_key_created', $apiKey, [], [
             'name' => $apiKey->name,
             'prefix' => $apiKey->prefix,
             'scopes' => $apiKey->scopes,
+            'rate_limit_per_minute' => $apiKey->rate_limit_per_minute,
         ], [], $request, $apiKey->name);
 
         return redirect('/api-keys')

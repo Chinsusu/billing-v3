@@ -91,6 +91,11 @@ class User extends Authenticatable
         return $this->hasMany(ApiKey::class);
     }
 
+    public function apiKeyUsageLogs(): HasMany
+    {
+        return $this->hasMany(ApiKeyUsageLog::class);
+    }
+
     public function adminAuditLogs(): HasMany
     {
         return $this->hasMany(AdminAuditLog::class, 'actor_id');
