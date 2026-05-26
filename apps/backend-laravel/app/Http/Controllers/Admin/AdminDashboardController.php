@@ -13,12 +13,13 @@ use App\Models\ServiceAutoRenewalAttempt;
 use App\Models\SupportTicket;
 use App\Models\User;
 use Carbon\CarbonInterface;
-use Illuminate\Support\Facades\DB;
 use Illuminate\View\View;
 
 class AdminDashboardController extends Controller
 {
     private const STUCK_PROCESSING_MINUTES = 5;
+
+    private const QUEUE_PREVIEW_LIMIT = 8;
 
     private const REVENUE_CURRENCY = 'VND';
 
@@ -49,7 +50,6 @@ class AdminDashboardController extends Controller
             'paymentEventCount' => PaymentEvent::count(),
             'paymentExceptionCount' => PaymentEvent::whereIn('status', ['unmatched', 'rejected', 'expired'])->count(),
             'orderCount' => Order::count(),
-            'serviceCount' => Service::count(),
             'activeServiceCount' => Service::where('status', 'active')->count(),
             'pendingProvisioningServiceCount' => Service::where('status', 'pending_provision')->count(),
             'autoRenewEnabledServiceCount' => Service::where('status', 'active')->where('auto_renew_enabled', true)->count(),
@@ -69,18 +69,9 @@ class AdminDashboardController extends Controller
                 ->get(),
             'provisioningQueueJobs' => ProvisioningJob::with(['service', 'user'])
                 ->whereIn('status', ['failed', 'processing', 'pending'])
-                ->orderByRaw("case status when 'failed' then 0 when 'processing' then 1 else 2 end")
-                ->oldest('available_at')
-                ->limit(8)
-                ->get(),
-            'serviceStatusCounts' => Service::select('status', DB::raw('count(*) as aggregate'))
-                ->groupBy('status')
-                ->orderByDesc('aggregate')
-                ->get(),
-            'serviceTypeCounts' => Service::select('product_type', DB::raw('count(*) as aggregate'))
-                ->groupBy('product_type')
-                ->orderByDesc('aggregate')
-                ->limit(6)
+                ->latest('updated_at')
+                ->latest('created_at')
+                ->limit(self::QUEUE_PREVIEW_LIMIT)
                 ->get(),
         ]);
     }

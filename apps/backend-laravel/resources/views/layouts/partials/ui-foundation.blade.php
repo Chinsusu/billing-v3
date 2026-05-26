@@ -511,6 +511,37 @@
         margin-bottom: 20px;
     }
 
+    .admin-dashboard-grid--queue-only {
+        grid-template-columns: minmax(0, 1fr);
+    }
+
+    .admin-dashboard-panel--queue-preview {
+        display: flex;
+        flex-direction: column;
+        height: 360px;
+    }
+
+    .admin-dashboard-queue-scroll {
+        flex: 1 1 auto;
+        min-height: 0;
+        overflow-y: auto;
+        padding-right: 2px;
+    }
+
+    .admin-dashboard-queue-scroll .empty-state {
+        min-height: 100%;
+    }
+
+    .admin-dashboard-table--queue {
+        margin-top: 0;
+    }
+
+    .admin-dashboard-table--queue th {
+        position: sticky;
+        top: 0;
+        z-index: 1;
+    }
+
     .panel-heading {
         align-items: flex-start;
         display: flex;

@@ -61,91 +61,58 @@
     />
 </div>
 
-<div class="admin-dashboard-grid">
-    <div class="panel admin-dashboard-panel admin-dashboard-panel--wide">
+<div class="admin-dashboard-grid admin-dashboard-grid--queue-only">
+    <div class="panel admin-dashboard-panel admin-dashboard-panel--wide admin-dashboard-panel--queue-preview">
         <div class="panel-heading">
             <div>
                 <h2>Provisioning queue</h2>
-                <p class="page-subtitle">{{ $pendingProvisioningJobCount }} pending, {{ $processingProvisioningJobCount }} processing, {{ $failedProvisioningJobCount }} failed.</p>
+                <p class="page-subtitle">{{ $pendingProvisioningJobCount }} pending, {{ $processingProvisioningJobCount }} processing, {{ $failedProvisioningJobCount }} failed. Showing latest queue activity.</p>
             </div>
             @can('provisioning_jobs.view')
                 <a class="button secondary" href="/admin/provisioning-jobs">Review queue</a>
             @endcan
         </div>
 
-        @if ($provisioningQueueJobs->isEmpty())
-            <x-empty-state title="No active provisioning work." message="Pending, processing, and failed provisioning jobs will appear here." />
-        @else
-            <div class="data-table admin-dashboard-table">
-                <table>
-                    <thead>
-                        <tr>
-                            <th>Job</th>
-                            <th>Service</th>
-                            <th>Customer</th>
-                            <th>Status</th>
-                            <th>Waiting</th>
-                            <th>Last error</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @foreach ($provisioningQueueJobs as $job)
-                            @php
-                                $statusTone = match ($job->status) {
-                                    'failed' => 'danger',
-                                    'processing' => 'warning',
-                                    default => 'neutral',
-                                };
-                                $waitingSince = $job->available_at ?? $job->created_at;
-                            @endphp
+        <div class="admin-dashboard-queue-scroll" data-dashboard-section="provisioning-queue-preview">
+            @if ($provisioningQueueJobs->isEmpty())
+                <x-empty-state title="No active provisioning work." message="Pending, processing, and failed provisioning jobs will appear here." />
+            @else
+                <div class="data-table admin-dashboard-table admin-dashboard-table--queue">
+                    <table>
+                        <thead>
                             <tr>
-                                <td><a href="/admin/provisioning-jobs/{{ $job->id }}">{{ $job->type }}</a></td>
-                                <td>{{ $job->service?->product_name ?? '-' }}</td>
-                                <td>{{ $job->user?->email ?? '-' }}</td>
-                                <td><x-status-badge :tone="$statusTone">{{ $job->status }}</x-status-badge></td>
-                                <td>{{ $waitingSince?->diffForHumans() ?? '-' }}</td>
-                                <td>{{ $job->last_error ? \Illuminate\Support\Str::limit($job->last_error, 80) : '-' }}</td>
+                                <th>Job</th>
+                                <th>Service</th>
+                                <th>Customer</th>
+                                <th>Status</th>
+                                <th>Waiting</th>
+                                <th>Last error</th>
                             </tr>
-                        @endforeach
-                    </tbody>
-                </table>
-            </div>
-        @endif
-    </div>
-
-    <div class="panel admin-dashboard-panel">
-        <div class="panel-heading">
-            <div>
-                <h2>Service mix</h2>
-                <p class="page-subtitle">{{ $serviceCount }} total services.</p>
-            </div>
-            @can('services.view')
-                <a class="button secondary" href="/admin/services">Review Services</a>
-            @endcan
-        </div>
-
-        <div class="metric-list">
-            @forelse ($serviceStatusCounts as $row)
-                <div class="metric-row">
-                    <span>{{ $row->status }}</span>
-                    <strong>{{ $row->aggregate }}</strong>
+                        </thead>
+                        <tbody>
+                            @foreach ($provisioningQueueJobs as $job)
+                                @php
+                                    $statusTone = match ($job->status) {
+                                        'failed' => 'danger',
+                                        'processing' => 'warning',
+                                        default => 'neutral',
+                                    };
+                                    $waitingSince = $job->available_at ?? $job->created_at;
+                                @endphp
+                                <tr>
+                                    <td><a href="/admin/provisioning-jobs/{{ $job->id }}">{{ $job->type }}</a></td>
+                                    <td>{{ $job->service?->product_name ?? '-' }}</td>
+                                    <td>{{ $job->user?->email ?? '-' }}</td>
+                                    <td><x-status-badge :tone="$statusTone">{{ $job->status }}</x-status-badge></td>
+                                    <td>{{ $waitingSince?->diffForHumans() ?? '-' }}</td>
+                                    <td>{{ $job->last_error ? \Illuminate\Support\Str::limit($job->last_error, 80) : '-' }}</td>
+                                </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
                 </div>
-            @empty
-                <x-empty-state title="No services yet." message="Services will appear after checkout." />
-            @endforelse
+            @endif
         </div>
-
-        @if ($serviceTypeCounts->isNotEmpty())
-            <h3 class="section-kicker">By type</h3>
-            <div class="metric-list metric-list--compact">
-                @foreach ($serviceTypeCounts as $row)
-                    <div class="metric-row">
-                        <span>{{ $row->product_type ?: 'unknown' }}</span>
-                        <strong>{{ $row->aggregate }}</strong>
-                    </div>
-                @endforeach
-            </div>
-        @endif
     </div>
 </div>
 

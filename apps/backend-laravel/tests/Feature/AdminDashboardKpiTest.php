@@ -179,9 +179,51 @@ class AdminDashboardKpiTest extends TestCase
             ->assertSee('1 urgent')
             ->assertSee('Payment exceptions')
             ->assertSee('Provisioning queue')
+            ->assertSee('data-dashboard-section="provisioning-queue-preview"', false)
+            ->assertSee('admin-dashboard-queue-scroll', false)
+            ->assertSee('height: 360px;', false)
+            ->assertSee('overflow-y: auto;', false)
             ->assertSee('Pending Proxy A')
             ->assertSee('Provider timeout.')
+            ->assertDontSee('Service mix')
+            ->assertDontSee('By type')
             ->assertDontSee('999,000 VND');
+    }
+
+    public function test_admin_dashboard_queue_preview_is_fixed_and_recent_only_without_service_mix(): void
+    {
+        $this->travelTo(CarbonImmutable::parse('2026-05-26 11:00:00'));
+        $this->seed(RolesAndPermissionsSeeder::class);
+
+        $admin = User::factory()->create(['email' => 's43-preview-admin@example.test']);
+        $admin->assignRole('super_admin');
+        $customer = User::factory()->create(['email' => 's43-preview-customer@example.test']);
+        $customer->assignRole('customer');
+        $service = $this->serviceFor($customer, ['status' => 'active', 'product_name' => 'Preview Service']);
+
+        foreach (range(1, 9) as $index) {
+            $this->provisioningJobFor($service, [
+                'status' => 'processing',
+                'type' => sprintf('recent_job_%02d', $index),
+                'created_at' => now()->subMinutes(20 - $index),
+                'updated_at' => now()->subMinutes(20 - $index),
+            ]);
+        }
+
+        $this->actingAs($admin)
+            ->get('/admin')
+            ->assertOk()
+            ->assertSee('data-dashboard-section="provisioning-queue-preview"', false)
+            ->assertSee('admin-dashboard-grid--queue-only', false)
+            ->assertSee('admin-dashboard-panel--queue-preview', false)
+            ->assertSee('admin-dashboard-queue-scroll', false)
+            ->assertSee('height: 360px;', false)
+            ->assertSee('overflow-y: auto;', false)
+            ->assertSee('recent_job_09')
+            ->assertSee('recent_job_02')
+            ->assertDontSee('recent_job_01')
+            ->assertDontSee('Service mix')
+            ->assertDontSee('By type');
     }
 
     private function serviceFor(User $user, array $attributes = []): Service

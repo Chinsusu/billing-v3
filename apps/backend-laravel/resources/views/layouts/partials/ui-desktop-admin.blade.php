@@ -118,6 +118,10 @@
             gap: 18px;
         }
 
+        body.app-shell--admin .admin-dashboard-grid--queue-only {
+            grid-template-columns: minmax(0, 1fr);
+        }
+
         body.app-shell--admin .admin-dashboard-grid--secondary {
             grid-template-columns: repeat(3, minmax(0, 1fr));
         }
@@ -203,6 +207,10 @@
     @media (min-width: 1800px) {
         body.app-shell--admin .admin-dashboard-grid {
             grid-template-columns: minmax(0, 1.75fr) minmax(420px, 0.75fr);
+        }
+
+        body.app-shell--admin .admin-dashboard-grid--queue-only {
+            grid-template-columns: minmax(0, 1fr);
         }
 
         body.app-shell--admin .admin-dashboard-grid--secondary {
