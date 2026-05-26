@@ -33,14 +33,14 @@
         data-kpi-card="active-services"
         label="Active services"
         :value="$activeServiceCount"
-        :meta="$activeServiceCount.' active / '.$pendingProvisioningServiceCount.' pending'"
+        :meta="$activeServiceCount.' currently active'"
         :href="auth()->user()->can('services.view') ? '/admin/services?status=active' : null"
     />
     <x-stat-card
-        data-kpi-card="pending-provisioning"
-        label="Pending provisioning"
+        data-kpi-card="provisioning"
+        label="Provisioning"
         :value="$pendingProvisioningServiceCount"
-        :meta="$pendingProvisioningServiceCount.' services waiting / '.$pendingProvisioningJobCount.' queued'"
+        :meta="$pendingProvisioningServiceCount.' waiting services / '.$pendingProvisioningJobCount.' queued jobs'"
         tone="warning"
         :href="auth()->user()->can('provisioning_jobs.view') ? '/admin/provisioning-jobs?status=pending' : null"
     />
