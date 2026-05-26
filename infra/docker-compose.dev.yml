@@ -49,6 +49,125 @@ services:
       - "1025:1025"
       - "8025:8025"
 
+  proxy:
+    image: caddy:2-alpine
+    container_name: billing_v3_proxy
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./caddy/Caddyfile:/etc/caddy/Caddyfile:ro
+      - billing_v3_caddy_data:/data
+      - billing_v3_caddy_config:/config
+    depends_on:
+      backend:
+        condition: service_healthy
+
+  backend:
+    build:
+      context: ../apps/backend-laravel
+      dockerfile: Dockerfile.dev
+    container_name: billing_v3_backend
+    working_dir: /app
+    command: ["sh", "-lc", "composer install --no-interaction --prefer-dist && if [ ! -f .env ] || ! grep -q '^DB_CONNECTION=pgsql$' .env; then old_key=$(grep '^APP_KEY=' .env 2>/dev/null | cut -d= -f2-); cp .env.compose.example .env; if [ -n \"$$old_key\" ]; then sed -i \"s|^APP_KEY=.*|APP_KEY=$$old_key|\" .env; else php artisan key:generate --ansi --force; fi; fi && php artisan config:clear && php artisan migrate --force && php artisan db:seed --force && php artisan serve --host=0.0.0.0 --port=8000"]
+    environment:
+      APP_ENV: local
+      APP_DEBUG: "true"
+      APP_URL: http://localhost:8000
+      DB_CONNECTION: pgsql
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_DATABASE: billing_v3
+      DB_USERNAME: billing
+      DB_PASSWORD: billing_secret
+      DB_SSLMODE: disable
+      SESSION_DRIVER: database
+      QUEUE_CONNECTION: database
+      CACHE_STORE: database
+      REDIS_HOST: redis
+      MAIL_MAILER: smtp
+      MAIL_HOST: mailpit
+      MAIL_PORT: 1025
+      BANK_SANDBOX_WEBHOOK_SECRET: local-bank-sandbox-secret
+      INTERNAL_PROVISIONING_TOKEN: local-internal-provisioning-token
+    ports:
+      - "8000:8000"
+    volumes:
+      - ../apps/backend-laravel:/app
+      - ../infra:/infra:ro
+    depends_on:
+      postgres:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "curl -fsS http://127.0.0.1:8000/products >/dev/null"]
+      interval: 5s
+      timeout: 5s
+      retries: 30
+      start_period: 90s
+
+  scheduler:
+    build:
+      context: ../apps/backend-laravel
+      dockerfile: Dockerfile.dev
+    container_name: billing_v3_scheduler
+    working_dir: /app
+    command: ["sh", "-lc", "composer install --no-interaction --prefer-dist && if [ ! -f .env ] || ! grep -q '^DB_CONNECTION=pgsql$' .env; then old_key=$(grep '^APP_KEY=' .env 2>/dev/null | cut -d= -f2-); cp .env.compose.example .env; if [ -n \"$$old_key\" ]; then sed -i \"s|^APP_KEY=.*|APP_KEY=$$old_key|\" .env; else php artisan key:generate --ansi --force; fi; fi && php artisan config:clear && php artisan migrate --force && exec php artisan schedule:work"]
+    restart: unless-stopped
+    environment:
+      APP_ENV: local
+      APP_DEBUG: "true"
+      APP_URL: http://localhost:8000
+      DB_CONNECTION: pgsql
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_DATABASE: billing_v3
+      DB_USERNAME: billing
+      DB_PASSWORD: billing_secret
+      DB_SSLMODE: disable
+      SESSION_DRIVER: database
+      QUEUE_CONNECTION: database
+      CACHE_STORE: database
+      REDIS_HOST: redis
+      MAIL_MAILER: smtp
+      MAIL_HOST: mailpit
+      MAIL_PORT: 1025
+      BANK_SANDBOX_WEBHOOK_SECRET: local-bank-sandbox-secret
+      INTERNAL_PROVISIONING_TOKEN: local-internal-provisioning-token
+    volumes:
+      - ../apps/backend-laravel:/app
+      - ../infra:/infra:ro
+    depends_on:
+      backend:
+        condition: service_healthy
+      postgres:
+        condition: service_healthy
+
+  worker:
+    image: golang:1.26.3
+    container_name: billing_v3_worker
+    working_dir: /app
+    command: ["go", "run", "./cmd/worker", "--daemon"]
+    environment:
+      DATABASE_URL: postgres://billing:billing_secret@postgres:5432/billing_v3?sslmode=disable
+      LOG_LEVEL: info
+      WORKER_POLL_INTERVAL: 5s
+      PROVISIONING_STUCK_AFTER: 5m
+      PROVISIONING_MAX_ATTEMPTS: 3
+      PROVISIONING_RETRY_BACKOFF: 60s
+      PROVISIONING_EXECUTOR_TIMEOUT: 30s
+      BACKEND_INTERNAL_URL: http://backend:8000
+      INTERNAL_PROVISIONING_TOKEN: local-internal-provisioning-token
+    volumes:
+      - ../apps/worker-go:/app
+    depends_on:
+      backend:
+        condition: service_healthy
+      postgres:
+        condition: service_healthy
+
 volumes:
   billing_v3_pg:
   billing_v3_rabbitmq:
+  billing_v3_caddy_data:
+  billing_v3_caddy_config:

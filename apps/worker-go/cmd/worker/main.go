@@ -1,13 +1,77 @@
 package main
 
 import (
+	"context"
+	"database/sql"
+	"flag"
 	"fmt"
 	"os"
+	"os/signal"
+	"syscall"
+	"time"
 
 	"github.com/Chinsusu/billing-v3/apps/worker-go/internal/config"
+	"github.com/Chinsusu/billing-v3/apps/worker-go/internal/provisioning"
+	"github.com/Chinsusu/billing-v3/apps/worker-go/internal/provisioningstore"
+	_ "github.com/lib/pq"
 )
 
 func main() {
+	once := flag.Bool("once", true, "process one provisioning job and exit")
+	daemonMode := flag.Bool("daemon", false, "run provisioning worker continuously")
+	flag.Parse()
+
 	cfg := config.Load()
-	fmt.Fprintf(os.Stdout, "billing worker ready log_level=%s\n", cfg.LogLevel)
+	db, err := sql.Open("postgres", cfg.DatabaseURL)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "open database: %v\n", err)
+		os.Exit(1)
+	}
+	defer db.Close()
+
+	store := provisioningstore.NewStoreWithPolicy(db, provisioningstore.RetryPolicy{
+		MaxAttempts:  cfg.ProvisioningMaxAttempts,
+		RetryBackoff: cfg.ProvisioningRetryBackoff,
+	})
+	processor := provisioning.NewInternalExecutorProcessor(cfg.BackendInternalURL, cfg.InternalProvisioningToken, cfg.ProvisioningExecutorTimeout)
+	executor := provisioning.NewExecutor(store, processor)
+	if *daemonMode {
+		ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
+		defer stop()
+
+		daemon := provisioning.NewDaemon(executor, func(ctx context.Context) error {
+			result, err := store.RecoverStuck(ctx, cfg.ProvisioningStuckAfter)
+			if err != nil {
+				return err
+			}
+			if result.Requeued > 0 || result.Failed > 0 {
+				fmt.Fprintf(os.Stdout, "billing worker recovered provisioning_jobs requeued=%d failed=%d\n", result.Requeued, result.Failed)
+			}
+
+			return nil
+		}, cfg.WorkerPollInterval)
+
+		fmt.Fprintf(os.Stdout, "billing worker ready log_level=%s mode=daemon poll_interval=%s stuck_after=%s max_attempts=%d retry_backoff=%s backend_internal_url=%s\n", cfg.LogLevel, cfg.WorkerPollInterval, cfg.ProvisioningStuckAfter, cfg.ProvisioningMaxAttempts, cfg.ProvisioningRetryBackoff, cfg.BackendInternalURL)
+		if err := daemon.Run(ctx); err != nil {
+			fmt.Fprintf(os.Stderr, "run provisioning daemon: %v\n", err)
+			os.Exit(1)
+		}
+
+		return
+	}
+
+	for {
+		processed, err := executor.ProcessOnce(context.Background())
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "process provisioning job: %v\n", err)
+			os.Exit(1)
+		}
+
+		fmt.Fprintf(os.Stdout, "billing worker ready log_level=%s mode=internal-executor processed=%t backend_internal_url=%s\n", cfg.LogLevel, processed, cfg.BackendInternalURL)
+		if *once || !processed {
+			return
+		}
+
+		time.Sleep(time.Second)
+	}
 }

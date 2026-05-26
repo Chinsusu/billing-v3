@@ -1,0 +1,94 @@
+<?php
+
+namespace App\Models;
+
+use Database\Factories\ServiceFactory;
+use Illuminate\Database\Eloquent\Attributes\Fillable;
+use Illuminate\Database\Eloquent\Concerns\HasUuids;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+
+#[Fillable(['user_id', 'order_id', 'order_item_id', 'product_id', 'product_code', 'product_name', 'product_type', 'status', 'external_id', 'config', 'meta', 'provisioned_at', 'expires_at', 'auto_renew_enabled'])]
+class Service extends Model
+{
+    /** @use HasFactory<ServiceFactory> */
+    use HasFactory, HasUuids;
+
+    protected function casts(): array
+    {
+        return [
+            'config' => 'array',
+            'meta' => 'array',
+            'provisioned_at' => 'datetime',
+            'expires_at' => 'datetime',
+            'auto_renew_enabled' => 'boolean',
+        ];
+    }
+
+    public function user(): BelongsTo
+    {
+        return $this->belongsTo(User::class);
+    }
+
+    public function order(): BelongsTo
+    {
+        return $this->belongsTo(Order::class);
+    }
+
+    public function orderItem(): BelongsTo
+    {
+        return $this->belongsTo(OrderItem::class);
+    }
+
+    public function product(): BelongsTo
+    {
+        return $this->belongsTo(Product::class);
+    }
+
+    public function provisioningJobs(): HasMany
+    {
+        return $this->hasMany(ProvisioningJob::class);
+    }
+
+    public function provisioningExecutionLogs(): HasMany
+    {
+        return $this->hasMany(ProvisioningExecutionLog::class);
+    }
+
+    public function providerActionJobs(): HasMany
+    {
+        return $this->hasMany(ProviderActionJob::class);
+    }
+
+    public function providerCallbackEvents(): HasMany
+    {
+        return $this->hasMany(ProviderCallbackEvent::class);
+    }
+
+    public function cancellations(): HasMany
+    {
+        return $this->hasMany(ServiceCancellation::class);
+    }
+
+    public function autoRenewalAttempts(): HasMany
+    {
+        return $this->hasMany(ServiceAutoRenewalAttempt::class);
+    }
+
+    public function latestAutoRenewalAttemptForCurrentExpiry(): ?ServiceAutoRenewalAttempt
+    {
+        if ($this->expires_at === null) {
+            return null;
+        }
+
+        $attempts = $this->relationLoaded('autoRenewalAttempts')
+            ? $this->autoRenewalAttempts
+            : $this->autoRenewalAttempts()->latest()->get();
+
+        return $attempts->first(
+            fn (ServiceAutoRenewalAttempt $attempt): bool => $attempt->expires_at?->isSameSecond($this->expires_at) ?? false
+        );
+    }
+}

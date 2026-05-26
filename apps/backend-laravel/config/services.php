@@ -35,4 +35,12 @@ return [
         ],
     ],
 
+    'bank_sandbox' => [
+        'webhook_secret' => env('BANK_SANDBOX_WEBHOOK_SECRET', 'local-bank-sandbox-secret'),
+    ],
+
+    'internal_provisioning' => [
+        'token' => env('INTERNAL_PROVISIONING_TOKEN', 'local-internal-provisioning-token'),
+    ],
+
 ];
