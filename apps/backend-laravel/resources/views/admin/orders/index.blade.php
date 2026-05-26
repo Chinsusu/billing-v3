@@ -1,7 +1,21 @@
 @extends('layouts.admin', ['title' => 'Admin Orders'])
 @section('content')
+<x-page-header
+    title="Orders"
+    subtitle="Review customer orders, payment status, and provisioning outcomes."
+    eyebrow="Resources"
+>
+    @can('orders.create')
+        <x-slot:actions>
+            <a href="/admin/orders/create" class="button">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2Z"/></svg>
+                <span>Create Order</span>
+            </a>
+        </x-slot:actions>
+    @endcan
+</x-page-header>
+
 <div class="panel">
-    <h1>Orders</h1>
     <form method="GET" action="/admin/orders">
         <div class="grid">
             <div>

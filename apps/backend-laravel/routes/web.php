@@ -199,6 +199,8 @@ Route::middleware('auth')->group(function (): void {
                     Route::put('/provisioning-provider-accounts/{provisioningProviderAccount}', [ProvisioningProviderAccountController::class, 'update'])->middleware('permission:provisioning_provider_accounts.manage')->name('provisioning-provider-accounts.update');
                     Route::post('/provisioning-provider-accounts/{provisioningProviderAccount}/test', ProvisioningProviderAccountTestController::class)->middleware('permission:provisioning_provider_accounts.manage')->name('provisioning-provider-accounts.test');
                     Route::get('/orders', [AdminOrderController::class, 'index'])->middleware('permission:orders.view')->name('orders.index');
+                    Route::get('/orders/create', [AdminOrderController::class, 'create'])->middleware('permission:orders.create')->name('orders.create');
+                    Route::post('/orders', [AdminOrderController::class, 'store'])->middleware('permission:orders.create')->name('orders.store');
                     Route::get('/orders/{order}', [AdminOrderController::class, 'show'])->middleware('permission:orders.view')->name('orders.show');
                     Route::get('/renewals', ServiceRenewalReportController::class)->middleware('permission:renewals.view')->name('renewals.index');
                     Route::post('/renewals/bulk', ServiceAutoRenewalBulkActionController::class)->middleware('permission:renewals.manage')->name('renewals.bulk');
