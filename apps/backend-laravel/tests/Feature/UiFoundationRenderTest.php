@@ -22,6 +22,8 @@ class UiFoundationRenderTest extends TestCase
             ->get('/dashboard')
             ->assertOk()
             ->assertSee('app-shell--customer', false)
+            ->assertSee('customer-desktop-foundation', false)
+            ->assertSee('--customer-desktop-content-max', false)
             ->assertSee('page-header', false)
             ->assertSee('stat-card', false)
             ->assertSee('empty-state', false);
@@ -65,6 +67,8 @@ class UiFoundationRenderTest extends TestCase
             ->get('/admin')
             ->assertOk()
             ->assertSee('app-shell--admin', false)
+            ->assertSee('admin-desktop-foundation', false)
+            ->assertSee('--admin-desktop-content-max', false)
             ->assertSee('ops-dashboard-grid', false)
             ->assertSee('stat-card', false)
             ->assertSee('quick-action-grid', false);

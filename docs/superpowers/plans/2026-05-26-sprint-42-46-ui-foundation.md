@@ -8,16 +8,21 @@
 
 **Tech Stack:** Laravel Blade, embedded CSS, anonymous Blade components, PHPUnit feature tests, Playwright screenshot QA.
 
+**Desktop-first addendum:** Admin and customer desktop overrides live in separate Blade partials. Desktop polish targets browser widths first; mobile remains protected against overflow and will get a dedicated pass later.
+
 ---
 
 ### Task 1: Shared UI Foundation
 
 **Files:**
 - Create: `apps/backend-laravel/resources/views/layouts/partials/ui-foundation.blade.php`
+- Create: `apps/backend-laravel/resources/views/layouts/partials/ui-desktop-admin.blade.php`
+- Create: `apps/backend-laravel/resources/views/layouts/partials/ui-desktop-customer.blade.php`
 - Modify: `apps/backend-laravel/resources/views/layouts/app.blade.php`
 - Modify: `apps/backend-laravel/resources/views/layouts/admin.blade.php`
 
 - [x] Add shared CSS tokens for customer/admin primary colors, panels, buttons, tables, topbars, footers, and mobile behavior.
+- [x] Split desktop admin and customer overrides into separate partials.
 - [x] Include the shared partial from both layouts after their existing CSS blocks.
 - [x] Add stable shell body classes for customer and admin layouts.
 - [x] Fix the customer footer year output.

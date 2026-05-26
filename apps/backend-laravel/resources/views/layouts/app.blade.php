@@ -525,6 +525,7 @@
         }
     </style>
     @include('layouts.partials.ui-foundation')
+    @include('layouts.partials.ui-desktop-customer')
 </head>
 <body class="app-shell app-shell--customer">
 <div class="app-wrapper">

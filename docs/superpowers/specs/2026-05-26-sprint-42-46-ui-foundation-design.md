@@ -8,6 +8,8 @@ Make the Billing v3 Blade UI clearer, more consistent, and usable on desktop and
 
 This sprint covers the shared customer/admin shell, common visual components, key dashboards, table-heavy admin screens, and screenshot QA. It does not introduce a SPA framework, change backend workflows, or redesign reseller/accounting features.
 
+The current polish pass is desktop-browser first. Desktop breakpoints receive the primary layout treatment for admin density, customer scanability, and side-by-side workflows. Mobile keeps the existing anti-overflow safeguards and will be polished in a later pass.
+
 ## UX Direction
 
 Use an operational SaaS style: restrained, dense enough for repeated admin work, and obvious about state and next action. Customer pages should emphasize wallet, unpaid invoices, services, and renewal alerts. Admin pages should emphasize queues, health, failed actions, integrations, and fast navigation to workbench screens.
@@ -18,12 +20,13 @@ Use an operational SaaS style: restrained, dense enough for repeated admin work,
 - Use indigo for customer primary actions.
 - Use blue/teal for admin primary actions; reserve red for destructive or failed states.
 - Add shared Blade/CSS primitives for page headers, stat cards, action groups, responsive tables, filter bars, status badges, empty states, and compact form sections.
+- Keep desktop admin and desktop customer overrides in separate partials so each shell can evolve without hard-coding one experience into the other.
 - Keep card radius at 8px and avoid card nesting where the card is not a distinct repeated item.
 
 ## Screens
 
-- Customer dashboard becomes a scannable account overview with key stats and recent activity cards.
-- Admin dashboard becomes an operations command center instead of a long list of duplicate navigation buttons.
+- Customer dashboard becomes a scannable account overview with key stats and recent activity cards tuned for common desktop widths.
+- Admin dashboard becomes a dense operations command center instead of a long list of duplicate navigation buttons.
 - Admin tables get consistent responsive behavior so mobile never overflows outside the viewport.
 - Provider accounts, bank integrations, customers, ops health, and API keys get clearer action placement and safer visual hierarchy.
 

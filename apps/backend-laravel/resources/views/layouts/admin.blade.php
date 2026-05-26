@@ -541,6 +541,7 @@
         }
     </style>
     @include('layouts.partials.ui-foundation')
+    @include('layouts.partials.ui-desktop-admin')
 </head>
 <body class="app-shell app-shell--admin">
 <div class="app-wrapper">
