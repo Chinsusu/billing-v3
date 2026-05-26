@@ -118,6 +118,16 @@ class UiFoundationRenderTest extends TestCase
             ->assertSee('data-menu-icon="support-tickets"', false)
             ->assertSee('fill="none"', false)
             ->assertSee('stroke="currentColor"', false)
+            ->assertSeeInOrder([
+                'Admin Overview',
+                'Resources',
+                'Products',
+                'Orders',
+                'Services',
+                'Financials',
+                'Invoices',
+                'Payment Events',
+            ])
             ->assertSee('ops-dashboard-grid', false)
             ->assertSee('stat-card', false)
             ->assertSee('quick-action-grid', false);

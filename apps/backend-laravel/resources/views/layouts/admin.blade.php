@@ -573,6 +573,20 @@
                 <span>Admin Overview</span>
             </a>
 
+            <div class="sidebar-section-header">Resources</div>
+            <a href="/admin/products" class="sidebar-menu-item {{ Request::is('admin/products*') ? 'active' : '' }}">
+                <x-sidebar-icon name="products" />
+                <span>Products</span>
+            </a>
+            <a href="/admin/orders" class="sidebar-menu-item {{ Request::is('admin/orders*') ? 'active' : '' }}">
+                <x-sidebar-icon name="orders" />
+                <span>Orders</span>
+            </a>
+            <a href="/admin/services" class="sidebar-menu-item {{ Request::is('admin/services*') ? 'active' : '' }}">
+                <x-sidebar-icon name="services" />
+                <span>Services</span>
+            </a>
+
             <div class="sidebar-section-header">Financials</div>
             <a href="/admin/invoices" class="sidebar-menu-item {{ Request::is('admin/invoices*') ? 'active' : '' }}">
                 <x-sidebar-icon name="invoices" />
@@ -594,20 +608,6 @@
                     <span>Billing Reports</span>
                 </a>
             @endcan
-
-            <div class="sidebar-section-header">Resources</div>
-            <a href="/admin/products" class="sidebar-menu-item {{ Request::is('admin/products*') ? 'active' : '' }}">
-                <x-sidebar-icon name="products" />
-                <span>Products</span>
-            </a>
-            <a href="/admin/orders" class="sidebar-menu-item {{ Request::is('admin/orders*') ? 'active' : '' }}">
-                <x-sidebar-icon name="orders" />
-                <span>Orders</span>
-            </a>
-            <a href="/admin/services" class="sidebar-menu-item {{ Request::is('admin/services*') ? 'active' : '' }}">
-                <x-sidebar-icon name="services" />
-                <span>Services</span>
-            </a>
 
             <div class="sidebar-section-header">Integrations</div>
             <a href="/admin/bank-integrations" class="sidebar-menu-item {{ Request::is('admin/bank-integrations*') ? 'active' : '' }}">
