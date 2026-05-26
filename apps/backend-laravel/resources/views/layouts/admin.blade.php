@@ -683,13 +683,13 @@
             
             <div class="navbar-right">
                 <!-- Return to Customer Dashboard -->
-                <a href="/dashboard" class="button secondary button-compact button-soft">
+                <a href="/dashboard" class="button secondary button-compact button-soft topbar-action portal-switch">
                     <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg>
                     <span>Client</span>
                 </a>
 
                 <!-- Theme Toggler -->
-                <button class="theme-toggle-btn icon-button" id="theme-toggle" title="Toggle Light/Dark Theme" aria-label="Toggle Light/Dark Theme">
+                <button class="theme-toggle-btn icon-button topbar-action" id="theme-toggle" title="Toggle Light/Dark Theme" aria-label="Toggle Light/Dark Theme">
                     <!-- Sun Icon (visible in dark mode) -->
                     <svg id="theme-sun-icon" viewBox="0 0 24 24" style="display: none;"><path d="M6.993 12c0 2.761 2.246 5.007 5.007 5.007s5.007-2.246 5.007-5.007S14.761 6.993 12 6.993 6.993 9.239 6.993 12zM12 8.993c1.658 0 3.007 1.349 3.007 3.007s-1.349 3.007-3.007 3.007S8.993 13.658 8.993 12s1.349-3.007 3.007-3.007zm0-6.993c-.553 0-1 .447-1 1v2c0 .553.447 1 1 1s1-.447 1-1v-2c0-.553-.447-1-1-1zm0 16c-.553 0-1 .447-1 1v2c0 .553.447 1 1 1s1-.447 1-1v-2c0-.553-.447-1-1-1zM3 11H1c-.553 0-1 .447-1 1s.447 1 1 1h2c.553 0 1-.447 1-1s-.447-1-1-1zm16 0h-2c-.553 0-1 .447-1 1s.447 1 1 1h2c.553 0 1-.447 1-1s-.447-1-1-1zM5.222 5.222c-.391-.391-1.024-.391-1.414 0s-.391 1.024 0 1.414l1.414 1.414c.391.391 1.024.391 1.414 0s.391-1.024 0-1.414L5.222 5.222zm12.164 12.164c-.391-.391-1.024-.391-1.414 0s-.391 1.024 0 1.414l1.414 1.414c.391.391 1.024.391 1.414 0s.391-1.024 0-1.414l-1.414-1.414zm0-12.164-1.414 1.414c-.391.391-.391 1.024 0 1.414s1.024.391 1.414 0l1.414-1.414c.391-.391.391-1.024 0-1.414s-1.024-.391-1.414 0zm-12.164 12.164-1.414 1.414c-.391.391-.391 1.024 0 1.414s1.024.391 1.414 0l1.414-1.414c.391-.391.391-1.024 0-1.414s-1.024-.391-1.414 0z"/></svg>
                     <!-- Moon Icon (visible in light mode) -->
@@ -706,7 +706,7 @@
                     </div>
                     <form method="POST" action="/logout" style="display:inline">
                         @csrf
-                        <button type="submit" class="button secondary button-compact">Logout</button>
+                        <button type="submit" class="button secondary button-compact topbar-action">Logout</button>
                     </form>
                 @endauth
             </div>

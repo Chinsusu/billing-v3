@@ -41,6 +41,11 @@
         --sidebar-title: #444050;
         --sidebar-hover-bg: rgba(var(--primary-rgb), 0.08);
         --sidebar-hover-text: rgb(var(--primary));
+        --topbar-action-bg: #ffffff;
+        --topbar-action-border: rgba(219, 218, 222, 0.86);
+        --topbar-action-color: #5d596c;
+        --topbar-action-hover-bg: rgba(var(--primary-rgb), 0.1);
+        --topbar-action-shadow: 0 0.125rem 0.375rem rgba(75, 70, 92, 0.08);
         --topbar-chip-bg: #ffffff;
         --topbar-muted: #6f6b7d;
         background:
@@ -57,6 +62,11 @@
         --sidebar-title: #ffffff;
         --sidebar-hover-bg: rgba(255, 255, 255, 0.06);
         --sidebar-hover-text: #ffffff;
+        --topbar-action-bg: rgba(255, 255, 255, 0.12);
+        --topbar-action-border: rgba(219, 218, 222, 0.2);
+        --topbar-action-color: #ffffff;
+        --topbar-action-hover-bg: rgba(var(--primary-rgb), 0.22);
+        --topbar-action-shadow: 0 0.125rem 0.5rem rgba(15, 10, 30, 0.28);
         --topbar-chip-bg: #2f3349;
         --topbar-muted: #b6bee3;
     }
@@ -236,17 +246,19 @@
 
     .icon-button,
     .theme-toggle-btn.icon-button {
-        background: var(--surface-soft);
-        border: 1px solid transparent;
+        background: var(--topbar-action-bg);
+        border: 1px solid var(--topbar-action-border);
         border-radius: 8px;
-        color: var(--text-color);
-        height: 40px;
-        width: 40px;
+        box-shadow: var(--topbar-action-shadow);
+        color: var(--topbar-action-color);
+        height: 44px;
+        width: 44px;
     }
 
     .icon-button:hover,
     .theme-toggle-btn.icon-button:hover {
-        background: rgba(var(--primary-rgb), 0.1);
+        background: var(--topbar-action-hover-bg);
+        border-color: rgba(var(--primary-rgb), 0.3);
         color: rgb(var(--primary));
         transform: translateY(-1px);
     }
@@ -263,6 +275,28 @@
     button.button-compact {
         min-height: 38px;
         padding: 8px 12px;
+    }
+
+    .topbar-action {
+        align-items: center;
+        display: inline-flex;
+        flex: 0 0 auto;
+        height: 44px;
+        justify-content: center;
+        min-height: 44px;
+        text-decoration: none;
+    }
+
+    body.app-shell--vuexy .portal-switch {
+        gap: 8px;
+        min-width: 96px;
+        padding-left: 14px;
+        padding-right: 14px;
+    }
+
+    body.app-shell--vuexy .topbar-action:hover,
+    body.app-shell--vuexy .topbar-action:focus {
+        text-decoration: none;
     }
 
     .button-soft,

@@ -142,4 +142,26 @@ class UiFoundationRenderTest extends TestCase
             ->assertSee('--sidebar-text', false)
             ->assertSee('--topbar-muted', false);
     }
+
+    public function test_vuexy_topbar_actions_use_consistent_controls(): void
+    {
+        $this->seed(RolesAndPermissionsSeeder::class);
+        $admin = User::factory()->create(['email' => 'ui-topbar-admin@example.test']);
+        $admin->assignRole('super_admin');
+
+        $this->actingAs($admin)
+            ->get('/admin')
+            ->assertOk()
+            ->assertSee('topbar-action portal-switch', false)
+            ->assertSee('theme-toggle-btn icon-button topbar-action', false)
+            ->assertSee('button secondary button-compact topbar-action', false)
+            ->assertSee('body.app-shell--vuexy .portal-switch', false);
+
+        $this->actingAs($admin)
+            ->get('/dashboard')
+            ->assertOk()
+            ->assertSee('topbar-action portal-switch', false)
+            ->assertSee('theme-toggle-btn icon-button topbar-action', false)
+            ->assertSee('button secondary button-compact topbar-action', false);
+    }
 }
