@@ -86,11 +86,21 @@ class ProductCatalogTest extends TestCase
             ->assertSee('product-form-grid', false)
             ->assertSee('product-form-section--identity', false)
             ->assertSee('product-form-actions', false)
+            ->assertSee('data-lifecycle-source-select', false)
             ->assertSee('data-lifecycle-unit-select', false)
-            ->assertSee('data-lifecycle-duration-field', false)
+            ->assertSee('data-lifecycle-unit-field', false)
+            ->assertSee('data-lifecycle-count-field', false)
             ->assertSee('data-lifecycle-count-input', false)
-            ->assertSee('--product-form-help-min-height', false)
-            ->assertSee('.product-form-field:not(:has(.field-help))::after', false)
+            ->assertSee('data-lifecycle-duration-field', false)
+            ->assertSee('data-provider-response-field', false)
+            ->assertSee('data-provider-lookup-field', false)
+            ->assertDontSee('Stable SKU used by API, orders, and reports.')
+            ->assertDontSee('Only active products appear in the customer catalog.')
+            ->assertDontSee('Fallback duration for reports and local day-based products.')
+            ->assertDontSee('Use provider lookup when dates must be fetched after external_id exists.')
+            ->assertDontSee('Keep this concise; it is shown to customers before purchase.')
+            ->assertDontSee('--product-form-help-min-height', false)
+            ->assertDontSee('.product-form-field:not(:has(.field-help))::after', false)
             ->assertSeeInOrder([
                 'Product identity',
                 'Pricing & lifecycle',
@@ -140,6 +150,56 @@ class ProductCatalogTest extends TestCase
         $product->refresh();
         $this->assertSame(2, $product->lifecycle_count);
         $this->assertSame(60, $product->duration_days);
+    }
+
+    public function test_admin_can_save_provider_lifecycle_product_without_local_policy_inputs(): void
+    {
+        $this->seed(RolesAndPermissionsSeeder::class);
+        $admin = User::factory()->create();
+        $admin->assignRole('super_admin');
+
+        $this->actingAs($admin)->post('/admin/products', [
+            'code' => 'provider-response-plan',
+            'name' => 'Provider Response Plan',
+            'type' => 'proxy',
+            'status' => 'active',
+            'price_amount' => 99000,
+            'currency' => 'VND',
+            'description' => 'Dates are returned in the provider response.',
+            'lifecycle_source' => 'provider_response',
+            'provider_lifecycle_ordered_at_path' => 'data.ordered_at',
+            'provider_lifecycle_expires_at_path' => 'data.expires_at',
+            'provider_lifecycle_date_format' => 'iso8601',
+            'provider_lifecycle_timezone' => 'UTC',
+        ])->assertRedirect('/admin/products');
+
+        $product = Product::where('code', 'provider-response-plan')->firstOrFail();
+        $this->assertSame('provider_response', $product->lifecycle_source);
+        $this->assertSame('day', $product->lifecycle_unit);
+        $this->assertSame(30, $product->lifecycle_count);
+        $this->assertSame(30, $product->duration_days);
+        $this->assertNull($product->provider_lifecycle_path);
+
+        $this->actingAs($admin)->put("/admin/products/{$product->id}", [
+            'code' => 'provider-response-plan',
+            'name' => 'Provider Lookup Plan',
+            'type' => 'proxy',
+            'status' => 'active',
+            'price_amount' => 109000,
+            'currency' => 'VND',
+            'description' => 'Dates are fetched after external_id exists.',
+            'lifecycle_source' => 'provider_lookup',
+            'provider_lifecycle_path' => '/api/services/{external_id}',
+            'provider_lifecycle_ordered_at_path' => 'data.ordered_at',
+            'provider_lifecycle_expires_at_path' => 'data.expires_at',
+            'provider_lifecycle_date_format' => 'iso8601',
+            'provider_lifecycle_timezone' => 'UTC',
+        ])->assertRedirect('/admin/products');
+
+        $product->refresh();
+        $this->assertSame('provider_lookup', $product->lifecycle_source);
+        $this->assertSame('/api/services/{external_id}', $product->provider_lifecycle_path);
+        $this->assertSame(30, $product->duration_days);
     }
 
     public function test_admin_can_store_provider_mapping_on_product(): void

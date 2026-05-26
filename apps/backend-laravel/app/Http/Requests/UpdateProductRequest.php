@@ -14,8 +14,10 @@ class UpdateProductRequest extends FormRequest
         $lifecycleCount = $this->input('lifecycle_count', $this->input('duration_days', 30));
         $durationDays = $this->input('duration_days');
 
-        if ($lifecycleUnit === 'calendar_month' && ($durationDays === null || $durationDays === '')) {
-            $durationDays = max(1, (int) $lifecycleCount) * 30;
+        if ($durationDays === null || $durationDays === '') {
+            $durationDays = $lifecycleUnit === 'calendar_month'
+                ? max(1, (int) $lifecycleCount) * 30
+                : max(1, (int) $lifecycleCount);
         }
 
         $this->merge([

@@ -22,7 +22,6 @@
             <label class="product-form-field" for="product-code">
                 <span>Code</span>
                 <input id="product-code" name="code" value="{{ old('code', $product->code) }}" required>
-                <small class="field-help">Stable SKU used by API, orders, and reports.</small>
             </label>
 
             <label class="product-form-field" for="product-name">
@@ -46,13 +45,11 @@
                         <option value="{{ $value }}" @selected($statusValue === $value)>{{ $label }}</option>
                     @endforeach
                 </select>
-                <small class="field-help">Only active products appear in the customer catalog.</small>
             </label>
 
             <label class="product-form-field product-form-field--wide" for="product-description">
                 <span>Description</span>
                 <textarea id="product-description" name="description" rows="5">{{ old('description', $product->description) }}</textarea>
-                <small class="field-help">Keep this concise; it is shown to customers before purchase.</small>
             </label>
         </div>
     </section>
@@ -80,20 +77,18 @@
             <label class="product-form-field product-form-field--duration" for="product-duration-days" data-lifecycle-duration-field>
                 <span>Duration Days</span>
                 <input id="product-duration-days" type="number" name="duration_days" value="{{ old('duration_days', $product->duration_days ?: 30) }}" min="1" inputmode="numeric" required>
-                <small class="field-help">Fallback duration for reports and local day-based products.</small>
             </label>
 
             <label class="product-form-field" for="product-lifecycle-source">
                 <span>Lifecycle Source</span>
-                <select id="product-lifecycle-source" name="lifecycle_source" required>
+                <select id="product-lifecycle-source" name="lifecycle_source" required data-lifecycle-source-select>
                     @foreach (['local_policy' => 'Local Policy', 'provider_response' => 'Provider Response', 'provider_lookup' => 'Provider Lookup'] as $value => $label)
                         <option value="{{ $value }}" @selected($lifecycleSourceValue === $value)>{{ $label }}</option>
                     @endforeach
                 </select>
-                <small class="field-help">Use provider lookup when dates must be fetched after external_id exists.</small>
             </label>
 
-            <label class="product-form-field" for="product-lifecycle-unit">
+            <label class="product-form-field" for="product-lifecycle-unit" data-lifecycle-unit-field>
                 <span>Lifecycle Unit</span>
                 <select id="product-lifecycle-unit" name="lifecycle_unit" required data-lifecycle-unit-select>
                     @foreach (['day' => 'Days', 'calendar_month' => 'Calendar Months'] as $value => $label)
@@ -102,7 +97,7 @@
                 </select>
             </label>
 
-            <label class="product-form-field" for="product-lifecycle-count">
+            <label class="product-form-field" for="product-lifecycle-count" data-lifecycle-count-field>
                 <span>Lifecycle Count</span>
                 <input id="product-lifecycle-count" type="number" name="lifecycle_count" value="{{ old('lifecycle_count', $product->lifecycle_count ?: $product->duration_days ?: 30) }}" min="1" inputmode="numeric" required data-lifecycle-count-input>
             </label>
@@ -218,22 +213,22 @@
         </div>
 
         <div class="product-form-fields">
-            <label class="product-form-field product-form-field--wide" for="product-provider-lifecycle-path">
+            <label class="product-form-field product-form-field--wide" for="product-provider-lifecycle-path" data-provider-lookup-field>
                 <span>Lifecycle Lookup Path</span>
-                <input id="product-provider-lifecycle-path" name="provider_lifecycle_path" value="{{ old('provider_lifecycle_path', $product->provider_lifecycle_path) }}" placeholder="/api/services/{external_id}">
+                <input id="product-provider-lifecycle-path" name="provider_lifecycle_path" value="{{ old('provider_lifecycle_path', $product->provider_lifecycle_path) }}" placeholder="/api/services/{external_id}" data-required-when-enabled="true">
             </label>
 
-            <label class="product-form-field" for="product-provider-ordered-path">
+            <label class="product-form-field" for="product-provider-ordered-path" data-provider-response-field>
                 <span>Ordered At Path</span>
-                <input id="product-provider-ordered-path" name="provider_lifecycle_ordered_at_path" value="{{ old('provider_lifecycle_ordered_at_path', $product->provider_lifecycle_ordered_at_path) }}" placeholder="data.ordered_at">
+                <input id="product-provider-ordered-path" name="provider_lifecycle_ordered_at_path" value="{{ old('provider_lifecycle_ordered_at_path', $product->provider_lifecycle_ordered_at_path) }}" placeholder="data.ordered_at" data-required-when-enabled="true">
             </label>
 
-            <label class="product-form-field" for="product-provider-expires-path">
+            <label class="product-form-field" for="product-provider-expires-path" data-provider-response-field>
                 <span>Expires At Path</span>
-                <input id="product-provider-expires-path" name="provider_lifecycle_expires_at_path" value="{{ old('provider_lifecycle_expires_at_path', $product->provider_lifecycle_expires_at_path) }}" placeholder="data.expires_at">
+                <input id="product-provider-expires-path" name="provider_lifecycle_expires_at_path" value="{{ old('provider_lifecycle_expires_at_path', $product->provider_lifecycle_expires_at_path) }}" placeholder="data.expires_at" data-required-when-enabled="true">
             </label>
 
-            <label class="product-form-field" for="product-provider-date-format">
+            <label class="product-form-field" for="product-provider-date-format" data-provider-response-field>
                 <span>Date Format</span>
                 <select id="product-provider-date-format" name="provider_lifecycle_date_format" required>
                     @foreach (['iso8601' => 'ISO 8601', 'unix_seconds' => 'Unix Seconds', 'unix_ms' => 'Unix Milliseconds'] as $value => $label)
@@ -242,9 +237,9 @@
                 </select>
             </label>
 
-            <label class="product-form-field" for="product-provider-timezone">
+            <label class="product-form-field" for="product-provider-timezone" data-provider-response-field>
                 <span>Date Timezone</span>
-                <input id="product-provider-timezone" name="provider_lifecycle_timezone" value="{{ old('provider_lifecycle_timezone', $product->provider_lifecycle_timezone ?: 'UTC') }}" placeholder="UTC">
+                <input id="product-provider-timezone" name="provider_lifecycle_timezone" value="{{ old('provider_lifecycle_timezone', $product->provider_lifecycle_timezone ?: 'UTC') }}" placeholder="UTC" data-required-when-enabled="true">
             </label>
         </div>
     </section>
@@ -261,24 +256,65 @@
 <script>
     document.addEventListener('DOMContentLoaded', () => {
         document.querySelectorAll('.product-form-shell').forEach((form) => {
+            const sourceSelect = form.querySelector('[data-lifecycle-source-select]');
             const unitSelect = form.querySelector('[data-lifecycle-unit-select]');
+            const unitField = form.querySelector('[data-lifecycle-unit-field]');
             const countInput = form.querySelector('[data-lifecycle-count-input]');
+            const countField = form.querySelector('[data-lifecycle-count-field]');
             const durationField = form.querySelector('[data-lifecycle-duration-field]');
             const durationInput = durationField?.querySelector('input[name="duration_days"]');
+            const providerResponseFields = Array.from(form.querySelectorAll('[data-provider-response-field]'));
+            const providerLookupFields = Array.from(form.querySelectorAll('[data-provider-lookup-field]'));
 
-            if (!unitSelect || !durationField || !durationInput) {
+            if (!sourceSelect || !unitSelect || !durationField || !durationInput) {
                 return;
             }
 
-            const syncDurationVisibility = () => {
+            const controlsIn = (field) => Array.from(field.querySelectorAll('input, select, textarea'));
+            const setFieldDisabled = (field, disabled) => {
+                if (!field) {
+                    return;
+                }
+
+                field.classList.toggle('is-disabled', disabled);
+                field.setAttribute('aria-disabled', disabled ? 'true' : 'false');
+                controlsIn(field).forEach((control) => {
+                    control.disabled = disabled;
+                    control.required = disabled ? false : control.hasAttribute('data-required-when-enabled');
+                });
+            };
+            const setFieldsDisabled = (fields, disabled) => fields.forEach((field) => setFieldDisabled(field, disabled));
+            const rememberRequiredState = (field) => {
+                if (!field) {
+                    return;
+                }
+
+                controlsIn(field).forEach((control) => {
+                    if (control.required) {
+                        control.setAttribute('data-required-when-enabled', 'true');
+                    }
+                });
+            };
+
+            [unitField, countField, durationField, ...providerResponseFields, ...providerLookupFields].forEach(rememberRequiredState);
+
+            const syncLifecycleControls = () => {
+                const usesLocalPolicy = sourceSelect.value === 'local_policy';
                 const usesCalendarMonth = unitSelect.value === 'calendar_month';
-                durationField.hidden = usesCalendarMonth;
-                durationInput.disabled = usesCalendarMonth;
-                durationInput.required = !usesCalendarMonth;
+
+                setFieldDisabled(unitField, !usesLocalPolicy);
+                setFieldDisabled(durationField, !usesLocalPolicy || usesCalendarMonth);
+                setFieldDisabled(countField, !usesLocalPolicy || !usesCalendarMonth);
+                setFieldsDisabled(providerResponseFields, usesLocalPolicy);
+                setFieldsDisabled(providerLookupFields, sourceSelect.value !== 'provider_lookup');
 
                 if (usesCalendarMonth && (!durationInput.value || Number.parseInt(durationInput.value, 10) < 1)) {
                     const lifecycleCount = Math.max(1, Number.parseInt(countInput?.value || '1', 10) || 1);
                     durationInput.value = String(lifecycleCount * 30);
+                }
+
+                if (usesLocalPolicy && !usesCalendarMonth && countInput) {
+                    countInput.value = durationInput.value || countInput.value || '30';
                 }
             };
 
@@ -287,10 +323,12 @@
                     countInput.value = '1';
                 }
 
-                syncDurationVisibility();
+                syncLifecycleControls();
             });
-            countInput?.addEventListener('input', syncDurationVisibility);
-            syncDurationVisibility();
+            sourceSelect.addEventListener('change', syncLifecycleControls);
+            durationInput.addEventListener('input', syncLifecycleControls);
+            countInput?.addEventListener('input', syncLifecycleControls);
+            syncLifecycleControls();
         });
     });
 </script>

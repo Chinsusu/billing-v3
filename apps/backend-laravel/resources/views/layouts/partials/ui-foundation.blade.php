@@ -798,7 +798,6 @@
     }
 
     .product-form-shell {
-        --product-form-help-min-height: 2.35rem;
         display: grid;
         gap: 22px;
     }
@@ -902,18 +901,25 @@
         resize: vertical;
     }
 
+    .product-form-field.is-disabled {
+        color: var(--text-muted);
+        opacity: 0.72;
+    }
+
+    .product-form-field.is-disabled input,
+    .product-form-field.is-disabled select,
+    .product-form-field.is-disabled textarea {
+        background: var(--surface-soft);
+        border-color: var(--border-subtle);
+        color: var(--text-muted);
+        cursor: not-allowed;
+    }
+
     .product-form-field .field-help {
         font-size: 0.8rem;
         font-weight: 500;
         line-height: 1.45;
         margin-top: 0;
-        min-height: var(--product-form-help-min-height);
-    }
-
-    .product-form-field:not(:has(.field-help))::after {
-        content: "";
-        display: block;
-        min-height: var(--product-form-help-min-height);
     }
 
     .product-form-toggle {
