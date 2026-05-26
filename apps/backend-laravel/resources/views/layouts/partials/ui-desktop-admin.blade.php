@@ -85,6 +85,10 @@
             margin-bottom: 18px;
         }
 
+        body.app-shell--admin .admin-kpi-card--wide {
+            grid-column: span 2;
+        }
+
         body.app-shell--admin .stat-card {
             min-height: 108px;
             padding: 16px;
@@ -107,6 +111,19 @@
         body.app-shell--admin .quick-action {
             min-height: 82px;
             padding: 12px;
+        }
+
+        body.app-shell--admin .admin-dashboard-grid {
+            grid-template-columns: minmax(0, 1.55fr) minmax(360px, 0.75fr);
+            gap: 18px;
+        }
+
+        body.app-shell--admin .admin-dashboard-grid--secondary {
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+        }
+
+        body.app-shell--admin .panel-heading {
+            margin-bottom: 14px;
         }
 
         body.app-shell--admin .filter-bar {
@@ -172,6 +189,16 @@
     @media (min-width: 1280px) {
         body.app-shell--admin .ops-dashboard-grid {
             grid-template-columns: repeat(6, minmax(0, 1fr));
+        }
+    }
+
+    @media (min-width: 1800px) {
+        body.app-shell--admin .admin-dashboard-grid {
+            grid-template-columns: minmax(0, 1.75fr) minmax(420px, 0.75fr);
+        }
+
+        body.app-shell--admin .admin-dashboard-grid--secondary {
+            grid-template-columns: repeat(3, minmax(0, 1fr));
         }
     }
 </style>
