@@ -10,10 +10,19 @@ class UpdateProductRequest extends FormRequest
 {
     protected function prepareForValidation(): void
     {
+        $lifecycleUnit = $this->input('lifecycle_unit', 'day');
+        $lifecycleCount = $this->input('lifecycle_count', $this->input('duration_days', 30));
+        $durationDays = $this->input('duration_days');
+
+        if ($lifecycleUnit === 'calendar_month' && ($durationDays === null || $durationDays === '')) {
+            $durationDays = max(1, (int) $lifecycleCount) * 30;
+        }
+
         $this->merge([
             'lifecycle_source' => $this->input('lifecycle_source', 'local_policy'),
-            'lifecycle_unit' => $this->input('lifecycle_unit', 'day'),
-            'lifecycle_count' => $this->input('lifecycle_count', $this->input('duration_days', 30)),
+            'lifecycle_unit' => $lifecycleUnit,
+            'lifecycle_count' => $lifecycleCount,
+            'duration_days' => $durationDays,
             'provider_lifecycle_date_format' => $this->input('provider_lifecycle_date_format', 'iso8601'),
             'provider_lifecycle_timezone' => $this->input('provider_lifecycle_timezone', 'UTC'),
             'auto_renew_allowed' => $this->has('auto_renew_allowed') ? $this->boolean('auto_renew_allowed') : true,

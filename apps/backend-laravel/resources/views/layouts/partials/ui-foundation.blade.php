@@ -856,6 +856,7 @@
     }
 
     .product-form-fields {
+        align-items: start;
         display: grid;
         gap: 14px 16px;
         grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -866,6 +867,7 @@
     }
 
     .product-form-field {
+        align-content: start;
         color: var(--text-heading);
         display: grid;
         font-size: 0.86rem;
@@ -887,6 +889,11 @@
     .product-form-field textarea {
         font-size: 0.9rem;
         min-height: 42px;
+    }
+
+    .product-form-field input:not([type="checkbox"]),
+    .product-form-field select {
+        height: 42px;
     }
 
     .product-form-field textarea {

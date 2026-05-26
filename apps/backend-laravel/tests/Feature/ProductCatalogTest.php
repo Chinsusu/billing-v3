@@ -86,6 +86,9 @@ class ProductCatalogTest extends TestCase
             ->assertSee('product-form-grid', false)
             ->assertSee('product-form-section--identity', false)
             ->assertSee('product-form-actions', false)
+            ->assertSee('data-lifecycle-unit-select', false)
+            ->assertSee('data-lifecycle-duration-field', false)
+            ->assertSee('data-lifecycle-count-input', false)
             ->assertSeeInOrder([
                 'Product identity',
                 'Pricing & lifecycle',
@@ -93,6 +96,48 @@ class ProductCatalogTest extends TestCase
                 'Auto-renew Policy',
                 'Provider lifecycle response',
             ]);
+    }
+
+    public function test_admin_can_save_calendar_month_product_without_choosing_duration_days(): void
+    {
+        $this->seed(RolesAndPermissionsSeeder::class);
+        $admin = User::factory()->create();
+        $admin->assignRole('super_admin');
+
+        $this->actingAs($admin)->post('/admin/products', [
+            'code' => 'vps-calendar-monthly',
+            'name' => 'Calendar Monthly VPS',
+            'type' => 'vps',
+            'status' => 'active',
+            'price_amount' => 199000,
+            'currency' => 'VND',
+            'description' => 'Calendar monthly plan',
+            'lifecycle_source' => 'local_policy',
+            'lifecycle_unit' => 'calendar_month',
+            'lifecycle_count' => 1,
+        ])->assertRedirect('/admin/products');
+
+        $product = Product::where('code', 'vps-calendar-monthly')->firstOrFail();
+        $this->assertSame('calendar_month', $product->lifecycle_unit);
+        $this->assertSame(1, $product->lifecycle_count);
+        $this->assertSame(30, $product->duration_days);
+
+        $this->actingAs($admin)->put("/admin/products/{$product->id}", [
+            'code' => 'vps-calendar-monthly',
+            'name' => 'Calendar Monthly VPS Updated',
+            'type' => 'vps',
+            'status' => 'active',
+            'price_amount' => 219000,
+            'currency' => 'VND',
+            'description' => 'Two calendar month plan',
+            'lifecycle_source' => 'local_policy',
+            'lifecycle_unit' => 'calendar_month',
+            'lifecycle_count' => 2,
+        ])->assertRedirect('/admin/products');
+
+        $product->refresh();
+        $this->assertSame(2, $product->lifecycle_count);
+        $this->assertSame(60, $product->duration_days);
     }
 
     public function test_admin_can_store_provider_mapping_on_product(): void

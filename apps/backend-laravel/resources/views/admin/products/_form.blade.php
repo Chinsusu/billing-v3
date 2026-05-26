@@ -77,7 +77,7 @@
                 <input id="product-currency" name="currency" value="{{ old('currency', $product->currency ?: 'VND') }}" maxlength="3" required>
             </label>
 
-            <label class="product-form-field" for="product-duration-days">
+            <label class="product-form-field product-form-field--duration" for="product-duration-days" data-lifecycle-duration-field>
                 <span>Duration Days</span>
                 <input id="product-duration-days" type="number" name="duration_days" value="{{ old('duration_days', $product->duration_days ?: 30) }}" min="1" inputmode="numeric" required>
                 <small class="field-help">Fallback duration for reports and local day-based products.</small>
@@ -95,7 +95,7 @@
 
             <label class="product-form-field" for="product-lifecycle-unit">
                 <span>Lifecycle Unit</span>
-                <select id="product-lifecycle-unit" name="lifecycle_unit" required>
+                <select id="product-lifecycle-unit" name="lifecycle_unit" required data-lifecycle-unit-select>
                     @foreach (['day' => 'Days', 'calendar_month' => 'Calendar Months'] as $value => $label)
                         <option value="{{ $value }}" @selected($lifecycleUnitValue === $value)>{{ $label }}</option>
                     @endforeach
@@ -104,7 +104,7 @@
 
             <label class="product-form-field" for="product-lifecycle-count">
                 <span>Lifecycle Count</span>
-                <input id="product-lifecycle-count" type="number" name="lifecycle_count" value="{{ old('lifecycle_count', $product->lifecycle_count ?: $product->duration_days ?: 30) }}" min="1" inputmode="numeric" required>
+                <input id="product-lifecycle-count" type="number" name="lifecycle_count" value="{{ old('lifecycle_count', $product->lifecycle_count ?: $product->duration_days ?: 30) }}" min="1" inputmode="numeric" required data-lifecycle-count-input>
             </label>
         </div>
     </section>
@@ -257,3 +257,40 @@
         <span>{{ $product->exists ? 'Save Changes' : 'Create Product' }}</span>
     </button>
 </div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        document.querySelectorAll('.product-form-shell').forEach((form) => {
+            const unitSelect = form.querySelector('[data-lifecycle-unit-select]');
+            const countInput = form.querySelector('[data-lifecycle-count-input]');
+            const durationField = form.querySelector('[data-lifecycle-duration-field]');
+            const durationInput = durationField?.querySelector('input[name="duration_days"]');
+
+            if (!unitSelect || !durationField || !durationInput) {
+                return;
+            }
+
+            const syncDurationVisibility = () => {
+                const usesCalendarMonth = unitSelect.value === 'calendar_month';
+                durationField.hidden = usesCalendarMonth;
+                durationInput.disabled = usesCalendarMonth;
+                durationInput.required = !usesCalendarMonth;
+
+                if (usesCalendarMonth && (!durationInput.value || Number.parseInt(durationInput.value, 10) < 1)) {
+                    const lifecycleCount = Math.max(1, Number.parseInt(countInput?.value || '1', 10) || 1);
+                    durationInput.value = String(lifecycleCount * 30);
+                }
+            };
+
+            unitSelect.addEventListener('change', () => {
+                if (unitSelect.value === 'calendar_month' && countInput && (!countInput.value || countInput.value === '30')) {
+                    countInput.value = '1';
+                }
+
+                syncDurationVisibility();
+            });
+            countInput?.addEventListener('input', syncDurationVisibility);
+            syncDurationVisibility();
+        });
+    });
+</script>
