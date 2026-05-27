@@ -14,6 +14,15 @@ use Illuminate\View\View;
 
 class InvoiceController extends Controller
 {
+    public function create(): View
+    {
+        return view('admin.invoices.create', [
+            'customers' => User::role('customer')
+                ->orderBy('email')
+                ->get(),
+        ]);
+    }
+
     public function index(Request $request): View
     {
         $filters = [

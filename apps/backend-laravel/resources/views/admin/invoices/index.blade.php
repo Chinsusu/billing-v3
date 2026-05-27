@@ -1,19 +1,19 @@
 @extends('layouts.admin', ['title' => 'Admin Invoices'])
 @section('content')
-<div class="panel">
-    <h1>Invoices</h1>
-    <form method="POST" action="/admin/invoices">
-        @csrf
-        <label for="user_email">Customer email</label>
-        <input id="user_email" name="user_email" type="email" required>
-        <label for="total_amount">Total amount</label>
-        <input id="total_amount" name="total_amount" type="number" min="1" required>
-        <input name="currency" type="hidden" value="VND">
-        <label for="description">Description</label>
-        <textarea id="description" name="description" rows="3" required></textarea>
-        <button type="submit">Create invoice</button>
-    </form>
-</div>
+<x-page-header
+    title="Invoices"
+    subtitle="Review invoice status, customer balances, and payment outcomes."
+    eyebrow="Financials"
+>
+    @can('invoices.create')
+        <x-slot:actions>
+            <a href="/admin/invoices/create" class="button">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2Z"/></svg>
+                <span>Create Invoice</span>
+            </a>
+        </x-slot:actions>
+    @endcan
+</x-page-header>
 
 <div class="panel">
     <h2>Filter</h2>

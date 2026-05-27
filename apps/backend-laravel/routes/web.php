@@ -166,6 +166,7 @@ Route::middleware('auth')->group(function (): void {
                     Route::put('/products/{product}', [ProductController::class, 'update'])->middleware('permission:products.update')->name('products.update');
                     Route::delete('/products/{product}', [ProductController::class, 'destroy'])->middleware('permission:products.delete')->name('products.destroy');
                     Route::get('/invoices', [AdminInvoiceController::class, 'index'])->middleware('permission:invoices.view')->name('invoices.index');
+                    Route::get('/invoices/create', [AdminInvoiceController::class, 'create'])->middleware('permission:invoices.create')->name('invoices.create');
                     Route::post('/invoices', [AdminInvoiceController::class, 'store'])->middleware('permission:invoices.create')->name('invoices.store');
                     Route::get('/invoices/{invoice}', [AdminInvoiceController::class, 'show'])->middleware('permission:invoices.view')->name('invoices.show');
                     Route::get('/payment-events', [PaymentEventController::class, 'index'])->middleware('permission:payment_events.view')->name('payment-events.index');

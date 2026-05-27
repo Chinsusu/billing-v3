@@ -7,11 +7,33 @@ use App\Models\PaymentEvent;
 use App\Models\User;
 use Database\Seeders\RolesAndPermissionsSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Spatie\Permission\Models\Permission;
 use Tests\TestCase;
 
 class AdminFinanceTest extends TestCase
 {
     use RefreshDatabase;
+
+    public function test_admin_can_view_create_invoice_button_and_page(): void
+    {
+        $admin = $this->adminUser();
+        User::factory()->create(['email' => 'invoice-create-customer@example.test'])->assignRole('customer');
+
+        $this->actingAs($admin)
+            ->get('/admin/invoices')
+            ->assertOk()
+            ->assertSee('Create Invoice')
+            ->assertSee('href="/admin/invoices/create"', false);
+
+        $this->actingAs($admin)
+            ->get('/admin/invoices/create')
+            ->assertOk()
+            ->assertSee('Create Invoice')
+            ->assertSee('invoice-create-customer@example.test')
+            ->assertSee('Customer email')
+            ->assertSee('Total amount')
+            ->assertSee('Description');
+    }
 
     public function test_admin_can_create_invoice_for_customer(): void
     {
@@ -69,7 +91,25 @@ class AdminFinanceTest extends TestCase
         $customer->assignRole('customer');
 
         $this->actingAs($customer)->get('/admin/invoices')->assertForbidden();
+        $this->actingAs($customer)->get('/admin/invoices/create')->assertForbidden();
+        $this->actingAs($customer)->post('/admin/invoices', [])->assertForbidden();
         $this->actingAs($customer)->get('/admin/payment-events')->assertForbidden();
+    }
+
+    public function test_invoice_create_permission_controls_create_entrypoint(): void
+    {
+        $this->seed(RolesAndPermissionsSeeder::class);
+        $viewer = User::factory()->create();
+        $viewer->givePermissionTo(Permission::findOrCreate('admin.access'));
+        $viewer->givePermissionTo(Permission::findOrCreate('invoices.view'));
+
+        $this->actingAs($viewer)
+            ->get('/admin/invoices')
+            ->assertOk()
+            ->assertDontSee('Create Invoice');
+
+        $this->actingAs($viewer)->get('/admin/invoices/create')->assertForbidden();
+        $this->actingAs($viewer)->post('/admin/invoices', [])->assertForbidden();
     }
 
     private function adminUser(): User
