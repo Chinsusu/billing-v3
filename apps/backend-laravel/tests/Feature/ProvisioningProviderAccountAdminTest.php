@@ -13,6 +13,67 @@ class ProvisioningProviderAccountAdminTest extends TestCase
 {
     use RefreshDatabase;
 
+    public function test_provider_account_create_and_edit_pages_use_scannable_form_sections(): void
+    {
+        $admin = $this->adminUser();
+        $accountId = (string) Str::uuid();
+        DB::table('provisioning_provider_accounts')->insert([
+            'id' => $accountId,
+            'slug' => 'provider-ui',
+            'name' => 'Provider UI',
+            'driver' => 'generic_http',
+            'base_url' => 'https://provider-ui.example.test',
+            'provision_path' => '/api/provision',
+            'auth_type' => 'header',
+            'auth_header_name' => 'X-API-Key',
+            'api_key' => app('encrypter')->encrypt('provider-ui-secret', false),
+            'api_key_last_four' => 'cret',
+            'enabled' => true,
+            'timeout_seconds' => 15,
+            'request_template' => json_encode(['source' => 'billing']),
+            'response_external_id_path' => 'external_id',
+            'response_status_path' => 'status',
+            'response_config_path' => null,
+            'callback_event_id_path' => 'event_id',
+            'callback_external_id_path' => 'external_id',
+            'callback_action_path' => 'action',
+            'callback_status_path' => 'status',
+            'created_by_id' => $admin->id,
+            'updated_by_id' => $admin->id,
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
+
+        foreach (['/admin/provisioning-provider-accounts/create', "/admin/provisioning-provider-accounts/{$accountId}/edit"] as $path) {
+            $this->actingAs($admin)
+                ->get($path)
+                ->assertOk()
+                ->assertSee('product-form-panel', false)
+                ->assertSee('provider-account-form', false)
+                ->assertSee('product-form-grid', false)
+                ->assertSee('product-form-section--provider-identity', false)
+                ->assertSee('product-form-section--provider-http', false)
+                ->assertSee('product-form-section--provider-auth', false)
+                ->assertSee('product-form-section--provider-mapping', false)
+                ->assertSee('product-form-section--provider-callbacks', false)
+                ->assertSee('data-provider-driver-select', false)
+                ->assertSee('data-provider-driver-field', false)
+                ->assertSee('data-provider-auth-select', false)
+                ->assertSee('data-provider-auth-header-field', false)
+                ->assertSee('data-provider-api-key-field', false)
+                ->assertSee('Back to Provider Accounts')
+                ->assertDontSee('<h2>Provider Callbacks</h2>', false)
+                ->assertDontSee('<p><button type="submit">Save Provider Account</button></p>', false)
+                ->assertSeeInOrder([
+                    'Provider identity',
+                    'HTTP connection',
+                    'Authentication',
+                    'Request & response mapping',
+                    'Provider callbacks',
+                ]);
+        }
+    }
+
     public function test_admin_can_create_provider_account_with_encrypted_secret_and_masked_ui(): void
     {
         $admin = $this->adminUser();
