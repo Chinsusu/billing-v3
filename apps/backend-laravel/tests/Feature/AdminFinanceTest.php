@@ -106,6 +106,20 @@ class AdminFinanceTest extends TestCase
             ->assertSee('TOPUP-VIEW');
     }
 
+    public function test_admin_invoice_index_uses_compact_filters_and_toast_status(): void
+    {
+        $admin = $this->adminUser();
+
+        $this->actingAs($admin)
+            ->withSession(['status' => 'Invoice created.'])
+            ->get('/admin/invoices')
+            ->assertOk()
+            ->assertSee('class="panel invoice-filter-panel"', false)
+            ->assertSee('class="invoice-filter-form"', false)
+            ->assertSee('data-flash-toast', false)
+            ->assertSee('data-toast-dismiss-ms="1200"', false);
+    }
+
     public function test_customer_cannot_access_admin_finance_pages(): void
     {
         $this->seed(RolesAndPermissionsSeeder::class);

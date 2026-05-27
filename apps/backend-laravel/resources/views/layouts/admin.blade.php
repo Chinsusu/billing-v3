@@ -741,7 +741,7 @@
 
             <!-- Success/Status Banner -->
             @if (session('status'))
-                <div class="flash-status">
+                <div class="flash-status" role="status" aria-live="polite" data-flash-toast data-toast-dismiss-ms="1200">
                     {{ session('status') }}
                 </div>
             @endif
@@ -817,6 +817,17 @@
             }
         });
     }
+
+    document.querySelectorAll('[data-flash-toast]').forEach((toast) => {
+        const delay = Number(toast.dataset.toastDismissMs || 1200);
+        const hide = () => {
+            toast.classList.add('is-hiding');
+            window.setTimeout(() => toast.remove(), 220);
+        };
+
+        window.setTimeout(hide, delay);
+        toast.addEventListener('click', hide);
+    });
 </script>
 </body>
 </html>

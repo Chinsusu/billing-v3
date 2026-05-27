@@ -15,28 +15,27 @@
     @endcan
 </x-page-header>
 
-<div class="panel">
-    <h2>Filter</h2>
-    <form method="GET" action="/admin/invoices">
-        <div class="grid">
-            <div>
-                <label for="status">Status</label>
+<div class="panel invoice-filter-panel">
+    <form class="invoice-filter-form" method="GET" action="/admin/invoices">
+        <div class="invoice-filter-fields">
+            <label class="invoice-filter-field" for="status">
+                <span>Status</span>
                 <select id="status" name="status">
                     <option value="">All statuses</option>
                     @foreach ($statuses as $status)
                         <option value="{{ $status }}" @selected($filters['status'] === $status)>{{ $status }}</option>
                     @endforeach
                 </select>
-            </div>
-            <div>
-                <label for="customer">Customer email</label>
-                <input id="customer" name="customer" value="{{ $filters['customer'] }}">
-            </div>
+            </label>
+            <label class="invoice-filter-field invoice-filter-field--grow" for="customer">
+                <span>Customer email</span>
+                <input id="customer" name="customer" value="{{ $filters['customer'] }}" placeholder="customer@example.test">
+            </label>
         </div>
-        <p>
+        <div class="invoice-filter-actions">
             <button type="submit">Filter</button>
             <a class="button secondary" href="/admin/invoices">Reset</a>
-        </p>
+        </div>
     </form>
 </div>
 
