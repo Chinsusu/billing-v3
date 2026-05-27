@@ -31,6 +31,10 @@ class AdminFinanceTest extends TestCase
             ->assertSee('Create Invoice')
             ->assertSee('invoice-create-customer@example.test')
             ->assertSee('Customer email')
+            ->assertSee('Search customers')
+            ->assertSee('data-customer-picker', false)
+            ->assertSee('data-customer-search', false)
+            ->assertSee('data-customer-option', false)
             ->assertSee('Total amount')
             ->assertSee('Description');
     }
