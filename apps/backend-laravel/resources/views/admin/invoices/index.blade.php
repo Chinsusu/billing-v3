@@ -16,6 +16,7 @@
 </x-page-header>
 
 @php
+    $invoiceTableColumns = auth()->user()?->can('invoices.update') ? 5 : 4;
     $customerOptions = $customers
         ->map(fn ($customer) => [
             'value' => $customer->email,
@@ -66,6 +67,9 @@
                 <th>Customer</th>
                 <th>Status</th>
                 <th>Total</th>
+                @can('invoices.update')
+                    <th>Actions</th>
+                @endcan
             </tr>
         </thead>
         <tbody>
@@ -73,11 +77,19 @@
                 <tr>
                     <td><a href="/admin/invoices/{{ $invoice->id }}">{{ $invoice->invoice_number }}</a></td>
                     <td><a href="/admin/customers/{{ $invoice->user_id }}">{{ $invoice->user->email }}</a></td>
-                    <td>{{ $invoice->status }}</td>
+                    <td><x-status-badge :tone="$invoice->status === 'paid' ? 'success' : ($invoice->status === 'void' ? 'neutral' : 'warning')">{{ $invoice->status }}</x-status-badge></td>
                     <td>{{ number_format($invoice->total_amount) }} {{ $invoice->currency }}</td>
+                    @can('invoices.update')
+                        <td>
+                            <a href="/admin/invoices/{{ $invoice->id }}/edit" class="button secondary button-soft button-compact">
+                                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m14.06 9.02.92.92L5.92 19H5v-.92l9.06-9.06ZM17.66 3c-.25 0-.51.1-.7.29l-1.83 1.83 3.75 3.75 1.83-1.83a.996.996 0 0 0 0-1.41l-2.34-2.34c-.2-.2-.45-.29-.71-.29Zm-3.6 3.19L3 17.25V21h3.75L17.81 9.94l-3.75-3.75Z"/></svg>
+                                <span>Edit</span>
+                            </a>
+                        </td>
+                    @endcan
                 </tr>
             @empty
-                <tr><td colspan="4" class="muted">No invoices yet.</td></tr>
+                <tr><td colspan="{{ $invoiceTableColumns }}" class="muted">No invoices yet.</td></tr>
             @endforelse
         </tbody>
     </table>

@@ -84,6 +84,60 @@ class AdminFinanceTest extends TestCase
         $this->assertSame([['description' => 'Nạp Tiền', 'amount' => 500000]], $invoice->lines);
     }
 
+    public function test_admin_can_edit_invoice_status(): void
+    {
+        $admin = $this->adminUser();
+        $customer = User::factory()->create(['email' => 'status-buyer@example.test']);
+        $invoice = Invoice::factory()->for($customer)->create([
+            'invoice_number' => 'INV-STATUS-EDIT',
+            'status' => 'open',
+            'paid_at' => null,
+        ]);
+
+        $this->actingAs($admin)
+            ->get("/admin/invoices/{$invoice->id}/edit")
+            ->assertOk()
+            ->assertSee('Edit Invoice')
+            ->assertSee('INV-STATUS-EDIT')
+            ->assertSee('Status')
+            ->assertSee('value="paid"', false);
+
+        $this->actingAs($admin)
+            ->from("/admin/invoices/{$invoice->id}/edit")
+            ->put("/admin/invoices/{$invoice->id}", [
+                'status' => 'paid',
+            ])
+            ->assertRedirect("/admin/invoices/{$invoice->id}");
+
+        $invoice->refresh();
+        $this->assertSame('paid', $invoice->status);
+        $this->assertNotNull($invoice->paid_at);
+
+        $this->assertDatabaseHas('admin_audit_logs', [
+            'actor_id' => $admin->id,
+            'action' => 'invoice_status_updated',
+            'auditable_type' => Invoice::class,
+            'auditable_id' => $invoice->id,
+        ]);
+    }
+
+    public function test_invoice_update_permission_controls_edit_entrypoint(): void
+    {
+        $this->seed(RolesAndPermissionsSeeder::class);
+        $viewer = User::factory()->create();
+        $viewer->givePermissionTo(Permission::findOrCreate('admin.access'));
+        $viewer->givePermissionTo(Permission::findOrCreate('invoices.view'));
+        $invoice = Invoice::factory()->for(User::factory()->create())->create();
+
+        $this->actingAs($viewer)
+            ->get('/admin/invoices')
+            ->assertOk()
+            ->assertDontSee('Edit</span>', false);
+
+        $this->actingAs($viewer)->get("/admin/invoices/{$invoice->id}/edit")->assertForbidden();
+        $this->actingAs($viewer)->put("/admin/invoices/{$invoice->id}", ['status' => 'void'])->assertForbidden();
+    }
+
     public function test_admin_can_view_payment_events(): void
     {
         $admin = $this->adminUser();
@@ -137,6 +191,8 @@ class AdminFinanceTest extends TestCase
         $this->actingAs($customer)->get('/admin/invoices')->assertForbidden();
         $this->actingAs($customer)->get('/admin/invoices/create')->assertForbidden();
         $this->actingAs($customer)->post('/admin/invoices', [])->assertForbidden();
+        $this->actingAs($customer)->get('/admin/invoices/'.Invoice::factory()->for($customer)->create()->id.'/edit')->assertForbidden();
+        $this->actingAs($customer)->put('/admin/invoices/'.Invoice::factory()->for($customer)->create()->id, ['status' => 'void'])->assertForbidden();
         $this->actingAs($customer)->get('/admin/payment-events')->assertForbidden();
     }
 

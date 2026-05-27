@@ -4,16 +4,21 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\StoreInvoiceRequest;
+use App\Http\Requests\Admin\UpdateInvoiceStatusRequest;
 use App\Models\Invoice;
 use App\Models\LedgerEntry;
 use App\Models\PaymentEvent;
 use App\Models\User;
+use App\Services\Audit\AuditLogger;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\View\View;
 
 class InvoiceController extends Controller
 {
+    private const AUDIT_FIELDS = ['status', 'paid_at'];
+
     public function create(): View
     {
         return view('admin.invoices.create', [
@@ -64,6 +69,16 @@ class InvoiceController extends Controller
         ]);
     }
 
+    public function edit(Invoice $invoice): View
+    {
+        $invoice->load('user');
+
+        return view('admin.invoices.edit', [
+            'invoice' => $invoice,
+            'statuses' => ['open', 'paid', 'void'],
+        ]);
+    }
+
     public function store(StoreInvoiceRequest $request): RedirectResponse
     {
         $validated = $request->validated();
@@ -83,6 +98,41 @@ class InvoiceController extends Controller
         ]);
 
         return redirect('/admin/invoices')->with('status', 'Invoice created.');
+    }
+
+    public function update(UpdateInvoiceStatusRequest $request, Invoice $invoice, AuditLogger $audit): RedirectResponse
+    {
+        $validated = $request->validated();
+        $before = $audit->snapshot($invoice, self::AUDIT_FIELDS);
+
+        DB::transaction(function () use ($audit, $before, $invoice, $request, $validated): void {
+            $invoice->status = $validated['status'];
+
+            if ($invoice->status === 'paid') {
+                $invoice->paid_at ??= now();
+            } else {
+                $invoice->paid_at = null;
+            }
+
+            $invoice->save();
+
+            [$beforeChanges, $afterChanges] = $audit->diff($before, $audit->snapshot($invoice, self::AUDIT_FIELDS));
+
+            if ($beforeChanges !== [] || $afterChanges !== []) {
+                $audit->record(
+                    $request->user(),
+                    'invoice_status_updated',
+                    $invoice,
+                    $beforeChanges,
+                    $afterChanges,
+                    [],
+                    $request,
+                    $invoice->invoice_number,
+                );
+            }
+        });
+
+        return redirect("/admin/invoices/{$invoice->id}")->with('status', 'Invoice status updated.');
     }
 
     private function newInvoiceNumber(): string

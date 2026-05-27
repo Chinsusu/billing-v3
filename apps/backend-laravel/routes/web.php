@@ -168,6 +168,8 @@ Route::middleware('auth')->group(function (): void {
                     Route::get('/invoices', [AdminInvoiceController::class, 'index'])->middleware('permission:invoices.view')->name('invoices.index');
                     Route::get('/invoices/create', [AdminInvoiceController::class, 'create'])->middleware('permission:invoices.create')->name('invoices.create');
                     Route::post('/invoices', [AdminInvoiceController::class, 'store'])->middleware('permission:invoices.create')->name('invoices.store');
+                    Route::get('/invoices/{invoice}/edit', [AdminInvoiceController::class, 'edit'])->middleware('permission:invoices.update')->name('invoices.edit');
+                    Route::put('/invoices/{invoice}', [AdminInvoiceController::class, 'update'])->middleware('permission:invoices.update')->name('invoices.update');
                     Route::get('/invoices/{invoice}', [AdminInvoiceController::class, 'show'])->middleware('permission:invoices.view')->name('invoices.show');
                     Route::get('/payment-events', [PaymentEventController::class, 'index'])->middleware('permission:payment_events.view')->name('payment-events.index');
                     Route::get('/payment-events/{paymentEvent}', [PaymentEventController::class, 'show'])->middleware('permission:payment_events.view')->name('payment-events.show');
