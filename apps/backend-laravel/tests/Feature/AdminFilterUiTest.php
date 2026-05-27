@@ -2,8 +2,8 @@
 
 namespace Tests\Feature;
 
-use App\Models\NotificationEvent;
 use App\Models\Invoice;
+use App\Models\NotificationEvent;
 use App\Models\Order;
 use App\Models\PaymentEvent;
 use App\Models\Product;
