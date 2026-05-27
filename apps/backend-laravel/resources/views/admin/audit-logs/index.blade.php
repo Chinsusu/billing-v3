@@ -10,25 +10,46 @@
         <div class="invoice-filter-fields audit-log-filter-fields">
             <label class="invoice-filter-field audit-log-filter-field" for="actor">
                 <span>Actor</span>
-                <input id="actor" name="actor" value="{{ $filters['actor'] ?? '' }}" placeholder="admin@example.test">
+                <input id="actor" name="actor" value="{{ $filters['actor'] ?? '' }}" placeholder="Search actor" list="audit-log-actor-options" autocomplete="off">
             </label>
             <label class="invoice-filter-field audit-log-filter-field" for="action">
                 <span>Action</span>
-                <input id="action" name="action" value="{{ $filters['action'] ?? '' }}" placeholder="updated">
+                <input id="action" name="action" value="{{ $filters['action'] ?? '' }}" placeholder="Search action" list="audit-log-action-options" autocomplete="off">
             </label>
             <label class="invoice-filter-field audit-log-filter-field" for="auditable_type">
                 <span>Subject Type</span>
-                <input id="auditable_type" name="auditable_type" value="{{ $filters['auditable_type'] ?? '' }}" placeholder="Product">
+                <input id="auditable_type" name="auditable_type" value="{{ $filters['auditable_type'] ?? '' }}" placeholder="Search type" list="audit-log-subject-type-options" autocomplete="off">
             </label>
             <label class="invoice-filter-field audit-log-filter-field" for="auditable_id">
                 <span>Subject ID</span>
-                <input id="auditable_id" name="auditable_id" value="{{ $filters['auditable_id'] ?? '' }}">
+                <input id="auditable_id" name="auditable_id" value="{{ $filters['auditable_id'] ?? '' }}" placeholder="Search ID" list="audit-log-subject-id-options" autocomplete="off">
             </label>
         </div>
         <div class="invoice-filter-actions audit-log-filter-actions">
             <button type="submit">Filter</button>
             <a class="button secondary button-soft" href="/admin/audit-logs">Clear</a>
         </div>
+
+        <datalist id="audit-log-actor-options">
+            @foreach ($filterOptions['actor_emails'] as $actorEmail)
+                <option value="{{ $actorEmail }}"></option>
+            @endforeach
+        </datalist>
+        <datalist id="audit-log-action-options">
+            @foreach ($filterOptions['actions'] as $action)
+                <option value="{{ $action }}"></option>
+            @endforeach
+        </datalist>
+        <datalist id="audit-log-subject-type-options">
+            @foreach ($filterOptions['auditable_types'] as $auditableType)
+                <option value="{{ $auditableType }}"></option>
+            @endforeach
+        </datalist>
+        <datalist id="audit-log-subject-id-options">
+            @foreach ($filterOptions['auditable_subjects'] as $auditableSubject)
+                <option value="{{ $auditableSubject['value'] }}" label="{{ $auditableSubject['label'] }}"></option>
+            @endforeach
+        </datalist>
     </form>
 </div>
 
