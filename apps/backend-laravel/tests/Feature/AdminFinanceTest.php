@@ -66,6 +66,23 @@ class AdminFinanceTest extends TestCase
             ->assertSee('buyer@example.test');
     }
 
+    public function test_admin_create_invoice_uses_default_description_when_blank(): void
+    {
+        $admin = $this->adminUser();
+        $customer = User::factory()->create(['email' => 'topup-buyer@example.test']);
+        $customer->assignRole('customer');
+
+        $this->actingAs($admin)->post('/admin/invoices', [
+            'user_email' => 'topup-buyer@example.test',
+            'total_amount' => 500000,
+            'currency' => 'VND',
+        ])->assertRedirect('/admin/invoices');
+
+        $invoice = Invoice::firstOrFail();
+        $this->assertSame('Nạp Tiền', $invoice->description);
+        $this->assertSame([['description' => 'Nạp Tiền', 'amount' => 500000]], $invoice->lines);
+    }
+
     public function test_admin_can_view_payment_events(): void
     {
         $admin = $this->adminUser();

@@ -92,7 +92,7 @@
 
                     <label class="product-form-field product-form-field--wide" for="invoice-description">
                         <span>Description</span>
-                        <textarea id="invoice-description" name="description" rows="5" placeholder="Nạp Tiền" required>{{ old('description') }}</textarea>
+                        <textarea id="invoice-description" name="description" rows="5" placeholder="Nạp Tiền">{{ old('description') }}</textarea>
                     </label>
                 </div>
             </section>
