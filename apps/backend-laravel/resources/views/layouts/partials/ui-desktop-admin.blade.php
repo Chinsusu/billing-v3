@@ -169,6 +169,10 @@
             min-width: 960px;
         }
 
+        body.app-shell--admin .data-table--compact table {
+            min-width: 100%;
+        }
+
         body.app-shell--admin th {
             font-size: 0.72rem;
             padding: 9px var(--admin-desktop-table-cell-x);
