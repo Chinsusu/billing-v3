@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\LedgerEntry;
 use App\Models\User;
+use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
 
@@ -39,18 +40,62 @@ class CustomerController extends Controller
         ]);
     }
 
-    public function show(User $user): View
+    public function show(Request $request, User $user): View
     {
         $user->load('reseller');
+        $activityPerPage = 10;
+        $activeCustomerTab = $this->activeCustomerTab($request);
 
         return view('admin.customers.show', [
             'customer' => $user,
+            'activeCustomerTab' => $activeCustomerTab,
             'resellers' => User::role('reseller')->orderBy('email')->get(),
             'wallets' => $user->wallets()->latest()->get(),
-            'ledgerEntries' => LedgerEntry::where('user_id', $user->id)->latest()->limit(20)->get(),
-            'invoices' => $user->invoices()->latest()->limit(10)->get(),
-            'orders' => $user->orders()->latest()->limit(10)->get(),
-            'services' => $user->services()->latest()->limit(10)->get(),
+            'ledgerEntries' => $this->activityPaginator(
+                LedgerEntry::where('user_id', $user->id)->latest(),
+                $request,
+                'ledger_page',
+                'ledger',
+                $activityPerPage,
+            ),
+            'invoices' => $this->activityPaginator(
+                $user->invoices()->latest(),
+                $request,
+                'invoices_page',
+                'invoices',
+                $activityPerPage,
+            ),
+            'orders' => $this->activityPaginator(
+                $user->orders()->latest(),
+                $request,
+                'orders_page',
+                'orders',
+                $activityPerPage,
+            ),
+            'services' => $this->activityPaginator(
+                $user->services()->latest(),
+                $request,
+                'services_page',
+                'services',
+                $activityPerPage,
+            ),
         ]);
+    }
+
+    private function activeCustomerTab(Request $request): string
+    {
+        $tab = (string) $request->query('activity_tab', 'details');
+
+        return in_array($tab, ['details', 'ledger', 'invoices', 'orders', 'services'], true) ? $tab : 'details';
+    }
+
+    private function activityPaginator($query, Request $request, string $pageName, string $tab, int $perPage): LengthAwarePaginator
+    {
+        return $query
+            ->paginate($perPage, ['*'], $pageName)
+            ->appends(array_merge(
+                $request->except(['activity_tab', 'ledger_page', 'invoices_page', 'orders_page', 'services_page']),
+                ['activity_tab' => $tab],
+            ));
     }
 }

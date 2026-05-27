@@ -1,5 +1,9 @@
 @extends('layouts.admin', ['title' => 'Customer '.$customer->email])
 @section('content')
+@php
+    $isActiveCustomerTab = fn (string $tab): bool => $activeCustomerTab === $tab;
+@endphp
+
 <x-page-header
     title="{{ $customer->name }}"
     subtitle="{{ $customer->email }}"
@@ -22,7 +26,7 @@
     </x-slot:actions>
 </x-page-header>
 
-<div class="panel customer-activity-panel" data-customer-activity-tabs>
+<div class="panel customer-activity-panel" data-customer-activity-tabs data-active-customer-tab="{{ $activeCustomerTab }}">
     <div class="panel-heading">
         <div>
             <h2>Customer Workspace</h2>
@@ -35,9 +39,10 @@
             class="customer-activity-tab"
             id="customer-details-tab"
             role="tab"
-            aria-selected="true"
+            aria-selected="{{ $isActiveCustomerTab('details') ? 'true' : 'false' }}"
             aria-controls="customer-details-panel"
             data-customer-activity-tab="customer-details-panel"
+            @if (! $isActiveCustomerTab('details')) tabindex="-1" @endif
         >
             <span>Customer Details</span>
         </button>
@@ -46,52 +51,56 @@
             class="customer-activity-tab"
             id="customer-ledger-tab"
             role="tab"
-            aria-selected="false"
+            aria-selected="{{ $isActiveCustomerTab('ledger') ? 'true' : 'false' }}"
             aria-controls="customer-ledger-panel"
             data-customer-activity-tab="customer-ledger-panel"
+            @if (! $isActiveCustomerTab('ledger')) tabindex="-1" @endif
         >
             <span>Recent Ledger</span>
-            <strong>{{ $ledgerEntries->count() }}</strong>
+            <strong>{{ $ledgerEntries->total() }}</strong>
         </button>
         <button
             type="button"
             class="customer-activity-tab"
             id="customer-invoices-tab"
             role="tab"
-            aria-selected="false"
+            aria-selected="{{ $isActiveCustomerTab('invoices') ? 'true' : 'false' }}"
             aria-controls="customer-invoices-panel"
             data-customer-activity-tab="customer-invoices-panel"
+            @if (! $isActiveCustomerTab('invoices')) tabindex="-1" @endif
         >
             <span>Invoices</span>
-            <strong>{{ $invoices->count() }}</strong>
+            <strong>{{ $invoices->total() }}</strong>
         </button>
         <button
             type="button"
             class="customer-activity-tab"
             id="customer-orders-tab"
             role="tab"
-            aria-selected="false"
+            aria-selected="{{ $isActiveCustomerTab('orders') ? 'true' : 'false' }}"
             aria-controls="customer-orders-panel"
             data-customer-activity-tab="customer-orders-panel"
+            @if (! $isActiveCustomerTab('orders')) tabindex="-1" @endif
         >
             <span>Orders</span>
-            <strong>{{ $orders->count() }}</strong>
+            <strong>{{ $orders->total() }}</strong>
         </button>
         <button
             type="button"
             class="customer-activity-tab"
             id="customer-services-tab"
             role="tab"
-            aria-selected="false"
+            aria-selected="{{ $isActiveCustomerTab('services') ? 'true' : 'false' }}"
             aria-controls="customer-services-panel"
             data-customer-activity-tab="customer-services-panel"
+            @if (! $isActiveCustomerTab('services')) tabindex="-1" @endif
         >
             <span>Services</span>
-            <strong>{{ $services->count() }}</strong>
+            <strong>{{ $services->total() }}</strong>
         </button>
     </div>
 
-    <section class="customer-activity-panel__body" id="customer-details-panel" role="tabpanel" aria-labelledby="customer-details-tab">
+    <section class="customer-activity-panel__body" id="customer-details-panel" role="tabpanel" aria-labelledby="customer-details-tab" @if (! $isActiveCustomerTab('details')) hidden @endif>
         <div class="customer-detail-grid customer-detail-grid--compact">
             <section class="customer-detail-section">
                 <div class="customer-detail-section__heading">
@@ -169,10 +178,10 @@
         </div>
     </section>
 
-    <section class="customer-activity-panel__body" id="customer-ledger-panel" role="tabpanel" aria-labelledby="customer-ledger-tab" hidden>
+    <section class="customer-activity-panel__body" id="customer-ledger-panel" role="tabpanel" aria-labelledby="customer-ledger-tab" @if (! $isActiveCustomerTab('ledger')) hidden @endif>
         <div class="customer-activity-panel__heading">
             <h3>Recent Ledger</h3>
-            <span class="muted">Latest {{ $ledgerEntries->count() }} entries</span>
+            <span class="muted">{{ number_format($ledgerEntries->total()) }} entries</span>
         </div>
         <div class="data-table">
             <table>
@@ -193,12 +202,13 @@
                 </tbody>
             </table>
         </div>
+        <x-activity-pagination :paginator="$ledgerEntries" name="ledger" />
     </section>
 
-    <section class="customer-activity-panel__body" id="customer-invoices-panel" role="tabpanel" aria-labelledby="customer-invoices-tab" hidden>
+    <section class="customer-activity-panel__body" id="customer-invoices-panel" role="tabpanel" aria-labelledby="customer-invoices-tab" @if (! $isActiveCustomerTab('invoices')) hidden @endif>
         <div class="customer-activity-panel__heading">
             <h3>Invoices</h3>
-            <span class="muted">Latest {{ $invoices->count() }} invoices</span>
+            <span class="muted">{{ number_format($invoices->total()) }} invoices</span>
         </div>
         <div class="data-table">
             <table>
@@ -217,12 +227,13 @@
                 </tbody>
             </table>
         </div>
+        <x-activity-pagination :paginator="$invoices" name="invoices" />
     </section>
 
-    <section class="customer-activity-panel__body" id="customer-orders-panel" role="tabpanel" aria-labelledby="customer-orders-tab" hidden>
+    <section class="customer-activity-panel__body" id="customer-orders-panel" role="tabpanel" aria-labelledby="customer-orders-tab" @if (! $isActiveCustomerTab('orders')) hidden @endif>
         <div class="customer-activity-panel__heading">
             <h3>Orders</h3>
-            <span class="muted">Latest {{ $orders->count() }} orders</span>
+            <span class="muted">{{ number_format($orders->total()) }} orders</span>
         </div>
         <div class="data-table">
             <table>
@@ -241,12 +252,13 @@
                 </tbody>
             </table>
         </div>
+        <x-activity-pagination :paginator="$orders" name="orders" />
     </section>
 
-    <section class="customer-activity-panel__body" id="customer-services-panel" role="tabpanel" aria-labelledby="customer-services-tab" hidden>
+    <section class="customer-activity-panel__body" id="customer-services-panel" role="tabpanel" aria-labelledby="customer-services-tab" @if (! $isActiveCustomerTab('services')) hidden @endif>
         <div class="customer-activity-panel__heading">
             <h3>Services</h3>
-            <span class="muted">Latest {{ $services->count() }} services</span>
+            <span class="muted">{{ number_format($services->total()) }} services</span>
         </div>
         <div class="data-table">
             <table>
@@ -265,6 +277,7 @@
                 </tbody>
             </table>
         </div>
+        <x-activity-pagination :paginator="$services" name="services" />
     </section>
 </div>
 

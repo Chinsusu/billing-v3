@@ -135,6 +135,75 @@ class AdminCustomerWalletTest extends TestCase
         ]);
     }
 
+    public function test_admin_customer_activity_tabs_are_paginated_by_default(): void
+    {
+        $admin = $this->userWithRole('super_admin');
+        $customer = $this->customer('activity-pages@example.test');
+        $wallet = Wallet::factory()->for($customer)->create(['balance_amount' => 500000]);
+
+        foreach (range(1, 12) as $index) {
+            $createdAt = now()->subMinutes(12 - $index);
+            $entry = LedgerEntry::create([
+                'wallet_id' => $wallet->id,
+                'user_id' => $customer->id,
+                'direction' => 'credit',
+                'amount' => 1000 + $index,
+                'currency' => 'VND',
+                'balance_after' => 1000 + $index,
+                'source_type' => 'seed',
+                'idempotency_key' => 'activity-page-ledger-'.$index,
+                'description' => sprintf('Ledger item %02d', $index),
+                'meta' => [],
+            ]);
+            $entry->forceFill(['created_at' => $createdAt, 'updated_at' => $createdAt])->save();
+
+            Invoice::factory()->for($customer)->create([
+                'invoice_number' => sprintf('INV-PAGE-%02d', $index),
+                'created_at' => $createdAt,
+                'updated_at' => $createdAt,
+            ]);
+            Order::factory()->for($customer)->create([
+                'order_number' => sprintf('ORD-PAGE-%02d', $index),
+                'created_at' => $createdAt,
+                'updated_at' => $createdAt,
+            ]);
+            Service::factory()->for($customer)->create([
+                'product_name' => sprintf('Service Page %02d', $index),
+                'created_at' => $createdAt,
+                'updated_at' => $createdAt,
+            ]);
+        }
+
+        $this->actingAs($admin)
+            ->get("/admin/customers/{$customer->id}")
+            ->assertOk()
+            ->assertSee('data-active-customer-tab="details"', false)
+            ->assertSee('data-activity-pagination="ledger"', false)
+            ->assertSee('data-activity-pagination="invoices"', false)
+            ->assertSee('data-activity-pagination="orders"', false)
+            ->assertSee('data-activity-pagination="services"', false)
+            ->assertSee('ledger_page=2', false)
+            ->assertSee('invoices_page=2', false)
+            ->assertSee('orders_page=2', false)
+            ->assertSee('services_page=2', false)
+            ->assertSee('Ledger item 12')
+            ->assertDontSee('Ledger item 02')
+            ->assertSee('INV-PAGE-12')
+            ->assertDontSee('INV-PAGE-02')
+            ->assertSee('ORD-PAGE-12')
+            ->assertDontSee('ORD-PAGE-02')
+            ->assertSee('Service Page 12')
+            ->assertDontSee('Service Page 02');
+
+        $this->actingAs($admin)
+            ->get("/admin/customers/{$customer->id}?activity_tab=ledger&ledger_page=2")
+            ->assertOk()
+            ->assertSee('data-active-customer-tab="ledger"', false)
+            ->assertSee('Ledger item 02')
+            ->assertSee('Ledger item 01')
+            ->assertDontSee('Ledger item 12');
+    }
+
     public function test_admin_wallet_debit_cannot_overdraw_balance(): void
     {
         $finance = $this->userWithRole('finance');
