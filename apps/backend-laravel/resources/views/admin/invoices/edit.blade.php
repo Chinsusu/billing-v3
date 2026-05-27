@@ -1,5 +1,10 @@
 @extends('layouts.admin', ['title' => 'Edit Invoice '.$invoice->invoice_number])
 @section('content')
+@php
+    $currentTimestamp = now();
+    $processedAtValue = old('processed_at', ($manualPaymentEvent?->processed_at ?? $currentTimestamp)->format('Y-m-d\TH:i'));
+    $paidAtValue = old('paid_at', ($invoice->paid_at ?? $currentTimestamp)->format('Y-m-d\TH:i'));
+@endphp
 <x-page-header
     title="Edit Invoice"
     subtitle="Update invoice status and manual transaction details."
@@ -24,7 +29,7 @@
                     <span class="product-form-section-index">01</span>
                     <div>
                         <h2 class="product-form-section-title" id="invoice-status-title">Invoice status</h2>
-                        <p class="product-form-section-copy">Mark an invoice as open, paid, or void.</p>
+                        <p class="product-form-section-copy">Payment timing and manual transaction details.</p>
                     </div>
                 </div>
 
@@ -43,7 +48,16 @@
                             id="invoice-processed-at"
                             name="processed_at"
                             type="datetime-local"
-                            value="{{ old('processed_at', $manualPaymentEvent?->processed_at?->format('Y-m-d\TH:i')) }}"
+                            value="{{ $processedAtValue }}"
+                        >
+                    </label>
+                    <label class="product-form-field" for="invoice-paid-at">
+                        <span>Paid at</span>
+                        <input
+                            id="invoice-paid-at"
+                            name="paid_at"
+                            type="datetime-local"
+                            value="{{ $paidAtValue }}"
                         >
                     </label>
                     <label class="product-form-field product-form-field--wide" for="invoice-provider-transaction-id">
@@ -72,7 +86,7 @@
                     <span class="product-form-section-index">02</span>
                     <div>
                         <h2 class="product-form-section-title" id="invoice-summary-title">Invoice summary</h2>
-                        <p class="product-form-section-copy">Read-only billing context before saving.</p>
+                        <p class="product-form-section-copy">Billing context before saving.</p>
                     </div>
                 </div>
 
@@ -88,10 +102,6 @@
                     <div class="product-form-field">
                         <span>Total</span>
                         <input value="{{ number_format($invoice->total_amount) }} {{ $invoice->currency }}" readonly>
-                    </div>
-                    <div class="product-form-field">
-                        <span>Paid at</span>
-                        <input value="{{ $invoice->paid_at?->toDateTimeString() ?? '-' }}" readonly>
                     </div>
                 </div>
             </section>

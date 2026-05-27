@@ -21,7 +21,7 @@ class ManualInvoicePaymentService
     ) {}
 
     /**
-     * @param  array{provider_transaction_id?: ?string, payment_reference?: ?string, processed_at?: ?string}  $transaction
+     * @param  array{provider_transaction_id?: ?string, payment_reference?: ?string, processed_at?: ?string, paid_at?: ?string}  $transaction
      * @return array{event: PaymentEvent, ledger: LedgerEntry}
      */
     public function record(Invoice $invoice, ?User $actor, array $transaction = []): array
@@ -34,7 +34,9 @@ class ManualInvoicePaymentService
                 ->where('invoice_id', $invoice->id)
                 ->lockForUpdate()
                 ->first();
-            $processedAt = $this->processedAt($transaction['processed_at'] ?? null, $invoice);
+            $fallbackTimestamp = now();
+            $processedAt = $this->timestamp($transaction['processed_at'] ?? null, $fallbackTimestamp);
+            $paidAt = $this->timestamp($transaction['paid_at'] ?? null, $processedAt);
 
             $event = $this->upsertEvent($event, $invoice, $wallet, $actor, $transaction, $processedAt);
             $ledger = $this->wallets->credit(
@@ -58,7 +60,7 @@ class ManualInvoicePaymentService
 
             $invoice->forceFill([
                 'status' => 'paid',
-                'paid_at' => $processedAt,
+                'paid_at' => $paidAt,
             ])->save();
 
             $this->notifications->enqueue(
@@ -138,16 +140,12 @@ class ManualInvoicePaymentService
         return $reference !== '' ? $reference : $invoice->invoice_number;
     }
 
-    private function processedAt(?string $processedAt, Invoice $invoice): Carbon
+    private function timestamp(?string $timestamp, Carbon $fallback): Carbon
     {
-        if (is_string($processedAt) && trim($processedAt) !== '') {
-            return Carbon::parse($processedAt);
+        if (is_string($timestamp) && trim($timestamp) !== '') {
+            return Carbon::parse($timestamp);
         }
 
-        if ($invoice->paid_at !== null) {
-            return $invoice->paid_at;
-        }
-
-        return now();
+        return $fallback->copy();
     }
 }

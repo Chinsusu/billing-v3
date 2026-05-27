@@ -9,6 +9,7 @@ use App\Models\User;
 use App\Models\Wallet;
 use Database\Seeders\RolesAndPermissionsSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Carbon;
 use Spatie\Permission\Models\Permission;
 use Tests\TestCase;
 
@@ -89,6 +90,7 @@ class AdminFinanceTest extends TestCase
     public function test_admin_can_edit_invoice_status(): void
     {
         $admin = $this->adminUser();
+        $this->travelTo(Carbon::parse('2026-05-27 10:43:00'));
         $customer = User::factory()->create(['email' => 'status-buyer@example.test']);
         $invoice = Invoice::factory()->for($customer)->create([
             'invoice_number' => 'INV-STATUS-EDIT',
@@ -102,7 +104,10 @@ class AdminFinanceTest extends TestCase
             ->assertSee('Edit Invoice')
             ->assertSee('INV-STATUS-EDIT')
             ->assertSee('Status')
-            ->assertSee('value="paid"', false);
+            ->assertSee('value="paid"', false)
+            ->assertSee('name="processed_at"', false)
+            ->assertSee('name="paid_at"', false)
+            ->assertSee('value="2026-05-27T10:43"', false);
 
         $this->actingAs($admin)
             ->from("/admin/invoices/{$invoice->id}/edit")
@@ -113,7 +118,7 @@ class AdminFinanceTest extends TestCase
 
         $invoice->refresh();
         $this->assertSame('paid', $invoice->status);
-        $this->assertNotNull($invoice->paid_at);
+        $this->assertSame('2026-05-27 10:43:00', $invoice->paid_at?->format('Y-m-d H:i:s'));
 
         $this->assertDatabaseHas('admin_audit_logs', [
             'actor_id' => $admin->id,
@@ -141,6 +146,7 @@ class AdminFinanceTest extends TestCase
                 'provider_transaction_id' => 'MANUAL-TXN-001',
                 'payment_reference' => 'MANUAL-REF-001',
                 'processed_at' => '2026-05-27 09:30:00',
+                'paid_at' => '2026-05-27 10:45:00',
             ])
             ->assertRedirect("/admin/invoices/{$invoice->id}");
 
@@ -154,6 +160,8 @@ class AdminFinanceTest extends TestCase
         $this->assertSame('accepted', $event->status);
         $this->assertSame($invoice->id, $event->invoice_id);
         $this->assertSame($wallet->id, $event->wallet_id);
+        $this->assertSame('2026-05-27 09:30:00', $event->processed_at?->format('Y-m-d H:i:s'));
+        $this->assertSame('2026-05-27 10:45:00', $invoice->refresh()->paid_at?->format('Y-m-d H:i:s'));
         $this->assertSame(250000, $wallet->balance_amount);
         $this->assertSame('credit', $ledger->direction);
         $this->assertSame('manual_invoice_payment', $ledger->source_type);

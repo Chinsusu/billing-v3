@@ -33,6 +33,7 @@ class UpdateInvoiceStatusRequest extends FormRequest
             ],
             'payment_reference' => ['nullable', 'string', 'max:120'],
             'processed_at' => ['nullable', 'date'],
+            'paid_at' => ['nullable', 'date'],
         ];
     }
 }
