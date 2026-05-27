@@ -633,6 +633,29 @@
         margin-bottom: 18px;
     }
 
+    .customer-detail-section {
+        border: 1px solid var(--border-subtle);
+        border-radius: 8px;
+        padding: 16px;
+    }
+
+    .customer-detail-section--full {
+        margin-top: 18px;
+    }
+
+    .customer-detail-section__heading {
+        margin-bottom: 14px;
+    }
+
+    .customer-detail-section__heading h4 {
+        font-size: 0.98rem;
+        margin: 0 0 4px;
+    }
+
+    .customer-detail-section__heading p {
+        margin: 0;
+    }
+
     .customer-detail-action-form {
         margin: 0;
     }

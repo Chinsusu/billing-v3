@@ -22,106 +22,32 @@
     </x-slot:actions>
 </x-page-header>
 
-<div class="customer-detail-grid">
-    <div class="panel">
-        <div class="panel-heading">
-            <div>
-                <h2>Account owner</h2>
-                <p class="muted">Current assignment and reseller routing.</p>
-            </div>
-        </div>
-        <div class="metric-list metric-list--compact">
-            <div class="metric-row">
-                <span>Email</span>
-                <strong>{{ $customer->email }}</strong>
-            </div>
-            <div class="metric-row">
-                <span>Reseller</span>
-                <strong>{{ $customer->reseller?->email ?? 'Direct customer' }}</strong>
-            </div>
-        </div>
-        <form method="POST" action="/admin/customers/{{ $customer->id }}/reseller" class="customer-detail-form">
-            @csrf
-            <label for="reseller_id">Assigned reseller</label>
-            <div class="customer-detail-form-row">
-                <select id="reseller_id" name="reseller_id">
-                    <option value="">Direct customer</option>
-                    @foreach ($resellers as $reseller)
-                        <option value="{{ $reseller->id }}" @selected($customer->reseller_id === $reseller->id)>{{ $reseller->email }}</option>
-                    @endforeach
-                </select>
-                <button type="submit">Save Reseller</button>
-            </div>
-        </form>
-    </div>
-
-    <div class="panel">
-        <div class="panel-heading">
-            <div>
-                <h2>Wallets</h2>
-                <p class="muted">Available balances by currency.</p>
-            </div>
-        </div>
-        <div class="data-table data-table--compact">
-            <table>
-                <thead><tr><th>Currency</th><th>Balance</th></tr></thead>
-                <tbody>
-                    @forelse ($wallets as $wallet)
-                        <tr>
-                            <td>{{ $wallet->currency }}</td>
-                            <td><strong>{{ number_format($wallet->balance_amount) }} {{ $wallet->currency }}</strong></td>
-                        </tr>
-                    @empty
-                        <tr><td colspan="2" class="muted">No wallets yet.</td></tr>
-                    @endforelse
-                </tbody>
-            </table>
-        </div>
-    </div>
-</div>
-
-@can('wallets.adjust')
-<div class="panel">
-    <div class="panel-heading">
-        <div>
-            <h2>Manual Adjustment</h2>
-            <p class="muted">Credit or debit the customer wallet with an audited ledger entry.</p>
-        </div>
-    </div>
-    <form method="POST" action="/admin/customers/{{ $customer->id }}/wallet-adjustments" class="customer-adjustment-form">
-        @csrf
-        <label>Direction
-            <select name="direction">
-                <option value="credit">credit</option>
-                <option value="debit">debit</option>
-            </select>
-        </label>
-        <label>Amount<input name="amount" type="number" min="1" required></label>
-        <label>Currency<input name="currency" value="VND" maxlength="3" required></label>
-        <label class="customer-adjustment-form__wide">Reason<textarea name="reason" rows="3" required></textarea></label>
-        <label>Reference<input name="reference" placeholder="Optional idempotency reference"></label>
-        <div class="customer-adjustment-form__actions">
-            <button type="submit">Record Adjustment</button>
-        </div>
-    </form>
-</div>
-@endcan
-
 <div class="panel customer-activity-panel" data-customer-activity-tabs>
     <div class="panel-heading">
         <div>
-            <h2>Customer Activity</h2>
-            <p class="muted">Recent ledger, invoices, orders, and services are separated for faster review.</p>
+            <h2>Customer Workspace</h2>
+            <p class="muted">Account details, ledger, invoices, orders, and services are separated into tabs for faster review.</p>
         </div>
     </div>
 
-    <div class="customer-activity-tabs__list" role="tablist" aria-label="Customer activity tables">
+    <div class="customer-activity-tabs__list" role="tablist" aria-label="Customer workspace sections">
+        <button
+            type="button"
+            class="customer-activity-tab"
+            id="customer-details-tab"
+            role="tab"
+            aria-selected="true"
+            aria-controls="customer-details-panel"
+            data-customer-activity-tab="customer-details-panel"
+        >
+            <span>Customer Details</span>
+        </button>
         <button
             type="button"
             class="customer-activity-tab"
             id="customer-ledger-tab"
             role="tab"
-            aria-selected="true"
+            aria-selected="false"
             aria-controls="customer-ledger-panel"
             data-customer-activity-tab="customer-ledger-panel"
         >
@@ -166,7 +92,93 @@
         </button>
     </div>
 
-    <section class="customer-activity-panel__body" id="customer-ledger-panel" role="tabpanel" aria-labelledby="customer-ledger-tab">
+    <section class="customer-activity-panel__body" id="customer-details-panel" role="tabpanel" aria-labelledby="customer-details-tab">
+        <div class="customer-activity-panel__heading">
+            <h3>Customer Details</h3>
+            <span class="muted">Profile, wallet, and admin controls</span>
+        </div>
+
+        <div class="customer-detail-grid">
+            <section class="customer-detail-section">
+                <div class="customer-detail-section__heading">
+                    <h4>Account owner</h4>
+                    <p class="muted">Current assignment and reseller routing.</p>
+                </div>
+                <div class="metric-list metric-list--compact">
+                    <div class="metric-row">
+                        <span>Email</span>
+                        <strong>{{ $customer->email }}</strong>
+                    </div>
+                    <div class="metric-row">
+                        <span>Reseller</span>
+                        <strong>{{ $customer->reseller?->email ?? 'Direct customer' }}</strong>
+                    </div>
+                </div>
+                <form method="POST" action="/admin/customers/{{ $customer->id }}/reseller" class="customer-detail-form">
+                    @csrf
+                    <label for="reseller_id">Assigned reseller</label>
+                    <div class="customer-detail-form-row">
+                        <select id="reseller_id" name="reseller_id">
+                            <option value="">Direct customer</option>
+                            @foreach ($resellers as $reseller)
+                                <option value="{{ $reseller->id }}" @selected($customer->reseller_id === $reseller->id)>{{ $reseller->email }}</option>
+                            @endforeach
+                        </select>
+                        <button type="submit">Save Reseller</button>
+                    </div>
+                </form>
+            </section>
+
+            <section class="customer-detail-section">
+                <div class="customer-detail-section__heading">
+                    <h4>Wallets</h4>
+                    <p class="muted">Available balances by currency.</p>
+                </div>
+                <div class="data-table data-table--compact">
+                    <table>
+                        <thead><tr><th>Currency</th><th>Balance</th></tr></thead>
+                        <tbody>
+                            @forelse ($wallets as $wallet)
+                                <tr>
+                                    <td>{{ $wallet->currency }}</td>
+                                    <td><strong>{{ number_format($wallet->balance_amount) }} {{ $wallet->currency }}</strong></td>
+                                </tr>
+                            @empty
+                                <tr><td colspan="2" class="muted">No wallets yet.</td></tr>
+                            @endforelse
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+        </div>
+
+        @can('wallets.adjust')
+            <section class="customer-detail-section customer-detail-section--full">
+                <div class="customer-detail-section__heading">
+                    <h4>Manual Adjustment</h4>
+                    <p class="muted">Credit or debit the customer wallet with an audited ledger entry.</p>
+                </div>
+                <form method="POST" action="/admin/customers/{{ $customer->id }}/wallet-adjustments" class="customer-adjustment-form">
+                    @csrf
+                    <label>Direction
+                        <select name="direction">
+                            <option value="credit">credit</option>
+                            <option value="debit">debit</option>
+                        </select>
+                    </label>
+                    <label>Amount<input name="amount" type="number" min="1" required></label>
+                    <label>Currency<input name="currency" value="VND" maxlength="3" required></label>
+                    <label class="customer-adjustment-form__wide">Reason<textarea name="reason" rows="3" required></textarea></label>
+                    <label>Reference<input name="reference" placeholder="Optional idempotency reference"></label>
+                    <div class="customer-adjustment-form__actions">
+                        <button type="submit">Record Adjustment</button>
+                    </div>
+                </form>
+            </section>
+        @endcan
+    </section>
+
+    <section class="customer-activity-panel__body" id="customer-ledger-panel" role="tabpanel" aria-labelledby="customer-ledger-tab" hidden>
         <div class="customer-activity-panel__heading">
             <h3>Recent Ledger</h3>
             <span class="muted">Latest {{ $ledgerEntries->count() }} entries</span>
