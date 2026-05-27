@@ -2,7 +2,7 @@
 @section('content')
 <x-page-header
     title="Edit Invoice"
-    subtitle="Update invoice status without changing wallet ledger or payment history."
+    subtitle="Update invoice status and manual transaction details."
     eyebrow="Financials"
 >
     <x-slot:actions>
@@ -29,13 +29,40 @@
                 </div>
 
                 <div class="product-form-fields">
-                    <label class="product-form-field product-form-field--wide" for="invoice-status">
+                    <label class="product-form-field" for="invoice-status">
                         <span>Status</span>
                         <select id="invoice-status" name="status" required>
                             @foreach ($statuses as $status)
                                 <option value="{{ $status }}" @selected(old('status', $invoice->status) === $status)>{{ ucfirst($status) }}</option>
                             @endforeach
                         </select>
+                    </label>
+                    <label class="product-form-field" for="invoice-processed-at">
+                        <span>Processed at</span>
+                        <input
+                            id="invoice-processed-at"
+                            name="processed_at"
+                            type="datetime-local"
+                            value="{{ old('processed_at', $manualPaymentEvent?->processed_at?->format('Y-m-d\TH:i')) }}"
+                        >
+                    </label>
+                    <label class="product-form-field product-form-field--wide" for="invoice-provider-transaction-id">
+                        <span>Transaction ID</span>
+                        <input
+                            id="invoice-provider-transaction-id"
+                            name="provider_transaction_id"
+                            value="{{ old('provider_transaction_id', $manualPaymentEvent?->provider_transaction_id) }}"
+                            placeholder="MANUAL-{{ $invoice->invoice_number }}"
+                        >
+                    </label>
+                    <label class="product-form-field product-form-field--wide" for="invoice-payment-reference">
+                        <span>Reference</span>
+                        <input
+                            id="invoice-payment-reference"
+                            name="payment_reference"
+                            value="{{ old('payment_reference', $manualPaymentEvent?->reference) }}"
+                            placeholder="{{ $invoice->invoice_number }}"
+                        >
                     </label>
                 </div>
             </section>

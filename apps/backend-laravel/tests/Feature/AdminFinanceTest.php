@@ -3,8 +3,10 @@
 namespace Tests\Feature;
 
 use App\Models\Invoice;
+use App\Models\LedgerEntry;
 use App\Models\PaymentEvent;
 use App\Models\User;
+use App\Models\Wallet;
 use Database\Seeders\RolesAndPermissionsSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Spatie\Permission\Models\Permission;
@@ -118,6 +120,97 @@ class AdminFinanceTest extends TestCase
             'action' => 'invoice_status_updated',
             'auditable_type' => Invoice::class,
             'auditable_id' => $invoice->id,
+        ]);
+    }
+
+    public function test_admin_paid_invoice_status_records_manual_transaction_and_ledger(): void
+    {
+        $admin = $this->adminUser();
+        $customer = User::factory()->create(['email' => 'manual-topup@example.test']);
+        $invoice = Invoice::factory()->for($customer)->create([
+            'invoice_number' => 'INV-MANUAL-TOPUP',
+            'status' => 'open',
+            'total_amount' => 250000,
+            'currency' => 'VND',
+        ]);
+
+        $this->actingAs($admin)
+            ->from("/admin/invoices/{$invoice->id}/edit")
+            ->put("/admin/invoices/{$invoice->id}", [
+                'status' => 'paid',
+                'provider_transaction_id' => 'MANUAL-TXN-001',
+                'payment_reference' => 'MANUAL-REF-001',
+                'processed_at' => '2026-05-27 09:30:00',
+            ])
+            ->assertRedirect("/admin/invoices/{$invoice->id}");
+
+        $event = PaymentEvent::firstOrFail();
+        $wallet = Wallet::where('user_id', $customer->id)->firstOrFail();
+        $ledger = LedgerEntry::firstOrFail();
+
+        $this->assertSame('manual_admin', $event->provider);
+        $this->assertSame('MANUAL-TXN-001', $event->provider_transaction_id);
+        $this->assertSame('MANUAL-REF-001', $event->reference);
+        $this->assertSame('accepted', $event->status);
+        $this->assertSame($invoice->id, $event->invoice_id);
+        $this->assertSame($wallet->id, $event->wallet_id);
+        $this->assertSame(250000, $wallet->balance_amount);
+        $this->assertSame('credit', $ledger->direction);
+        $this->assertSame('manual_invoice_payment', $ledger->source_type);
+        $this->assertSame($invoice->id, $ledger->source_id);
+        $this->assertSame("manual-invoice-payment:{$invoice->id}", $ledger->idempotency_key);
+        $this->assertSame($event->id, $ledger->meta['payment_event_id']);
+
+        $this->actingAs($admin)
+            ->get("/admin/invoices/{$invoice->id}")
+            ->assertOk()
+            ->assertSee('MANUAL-TXN-001')
+            ->assertSee('MANUAL-REF-001')
+            ->assertSee('Manual invoice top-up INV-MANUAL-TOPUP')
+            ->assertSee('manual_invoice_payment');
+    }
+
+    public function test_admin_can_edit_manual_payment_event_transaction_fields(): void
+    {
+        $admin = $this->adminUser();
+        $customer = User::factory()->create(['email' => 'manual-event-edit@example.test']);
+        $invoice = Invoice::factory()->for($customer)->create(['invoice_number' => 'INV-MANUAL-EVENT']);
+
+        $this->actingAs($admin)->put("/admin/invoices/{$invoice->id}", [
+            'status' => 'paid',
+            'provider_transaction_id' => 'MANUAL-TXN-OLD',
+            'payment_reference' => 'MANUAL-REF-OLD',
+        ]);
+
+        $event = PaymentEvent::firstOrFail();
+
+        $this->actingAs($admin)
+            ->get("/admin/payment-events/{$event->id}/edit")
+            ->assertOk()
+            ->assertSee('Edit Transaction')
+            ->assertSee('MANUAL-TXN-OLD')
+            ->assertSee('MANUAL-REF-OLD');
+
+        $this->actingAs($admin)
+            ->from("/admin/payment-events/{$event->id}/edit")
+            ->put("/admin/payment-events/{$event->id}", [
+                'provider_transaction_id' => 'MANUAL-TXN-NEW',
+                'reference' => 'MANUAL-REF-NEW',
+                'processed_at' => '2026-05-27 11:15:00',
+            ])
+            ->assertRedirect("/admin/payment-events/{$event->id}");
+
+        $event->refresh();
+        $this->assertSame('MANUAL-TXN-NEW', $event->provider_transaction_id);
+        $this->assertSame('MANUAL-REF-NEW', $event->reference);
+        $this->assertSame(99000, Wallet::where('user_id', $customer->id)->firstOrFail()->balance_amount);
+        $this->assertSame(1, LedgerEntry::count());
+
+        $this->assertDatabaseHas('admin_audit_logs', [
+            'actor_id' => $admin->id,
+            'action' => 'payment_event_updated',
+            'auditable_type' => PaymentEvent::class,
+            'auditable_id' => $event->id,
         ]);
     }
 

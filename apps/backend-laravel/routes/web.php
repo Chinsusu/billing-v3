@@ -172,6 +172,8 @@ Route::middleware('auth')->group(function (): void {
                     Route::put('/invoices/{invoice}', [AdminInvoiceController::class, 'update'])->middleware('permission:invoices.update')->name('invoices.update');
                     Route::get('/invoices/{invoice}', [AdminInvoiceController::class, 'show'])->middleware('permission:invoices.view')->name('invoices.show');
                     Route::get('/payment-events', [PaymentEventController::class, 'index'])->middleware('permission:payment_events.view')->name('payment-events.index');
+                    Route::get('/payment-events/{paymentEvent}/edit', [PaymentEventController::class, 'edit'])->middleware('permission:payment_events.update')->name('payment-events.edit');
+                    Route::put('/payment-events/{paymentEvent}', [PaymentEventController::class, 'update'])->middleware('permission:payment_events.update')->name('payment-events.update');
                     Route::get('/payment-events/{paymentEvent}', [PaymentEventController::class, 'show'])->middleware('permission:payment_events.view')->name('payment-events.show');
                     Route::post('/payment-events/{paymentEvent}/reconcile-wallet', PaymentEventReconciliationController::class)->middleware('permission:wallets.adjust')->name('payment-events.reconcile-wallet');
                     Route::get('/reports/billing', [BillingReportController::class, 'index'])->middleware('permission:invoices.view')->name('reports.billing');
