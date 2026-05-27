@@ -68,9 +68,19 @@
                                     $durationLabel = $product->lifecycle_unit === 'calendar_month'
                                         ? $product->lifecycle_count.' calendar month'.($product->lifecycle_count === 1 ? '' : 's')
                                         : $product->duration_days.' day'.($product->duration_days === 1 ? '' : 's');
+                                    $isOrderable = $product->status === 'active';
+                                    $statusLabel = ucfirst($product->status);
+                                    $optionLabel = $isOrderable
+                                        ? "{$product->name} - ".number_format($product->price_amount)." {$product->currency} - {$durationLabel}"
+                                        : "{$product->name} - {$statusLabel} (activate before ordering)";
                                 @endphp
-                                <option value="{{ $product->id }}" @selected(old('product_id') === $product->id)>
-                                    {{ $product->name }} - {{ number_format($product->price_amount) }} {{ $product->currency }} - {{ $durationLabel }}
+                                <option
+                                    value="{{ $isOrderable ? $product->id : '' }}"
+                                    @selected($isOrderable && old('product_id') === $product->id)
+                                    @disabled(! $isOrderable)
+                                    data-product-status="{{ $product->status }}"
+                                >
+                                    {{ $optionLabel }}
                                 </option>
                             @endforeach
                         </select>

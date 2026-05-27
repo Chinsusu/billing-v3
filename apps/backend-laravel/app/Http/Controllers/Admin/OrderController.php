@@ -47,7 +47,7 @@ class OrderController extends Controller
                 ->orderBy('email')
                 ->get(),
             'products' => Product::query()
-                ->where('status', 'active')
+                ->orderByRaw("case when status = 'active' then 0 else 1 end")
                 ->orderBy('name')
                 ->get(),
         ]);

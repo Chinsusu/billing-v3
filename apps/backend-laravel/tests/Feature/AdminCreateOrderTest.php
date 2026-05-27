@@ -29,6 +29,11 @@ class AdminCreateOrderTest extends TestCase
             'status' => 'active',
             'price_amount' => 99000,
         ]);
+        Product::factory()->create([
+            'name' => 'Draft Admin Product',
+            'status' => 'draft',
+            'price_amount' => 149000,
+        ]);
 
         $this->actingAs($admin)
             ->get('/admin/orders')
@@ -42,6 +47,9 @@ class AdminCreateOrderTest extends TestCase
             ->assertSee('Create Order')
             ->assertSee('admin-order-customer@example.test')
             ->assertSee('Admin Order Proxy')
+            ->assertSee('Draft Admin Product - Draft (activate before ordering)')
+            ->assertSee('data-product-status="draft"', false)
+            ->assertSee('disabled', false)
             ->assertSee('Wallet will be debited immediately');
     }
 
