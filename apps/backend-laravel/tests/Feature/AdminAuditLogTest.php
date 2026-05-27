@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use App\Models\AdminAuditLog;
 use App\Models\BankIntegration;
 use App\Models\NotificationTemplate;
 use App\Models\Product;
@@ -228,6 +229,41 @@ class AdminAuditLogTest extends TestCase
             ->assertOk()
             ->assertSee('Audit Logs')
             ->assertSee('/admin/audit-logs', false);
+    }
+
+    public function test_audit_log_index_uses_operations_layout_and_safe_pagination_controls(): void
+    {
+        $admin = $this->adminUser('audit-layout@example.test');
+
+        foreach (range(1, 21) as $index) {
+            AdminAuditLog::create([
+                'actor_id' => $admin->id,
+                'actor_email' => $admin->email,
+                'action' => 'updated',
+                'auditable_type' => Product::class,
+                'auditable_id' => (string) $index,
+                'auditable_label' => sprintf('Audit product %02d', $index),
+                'route_name' => 'admin.products.update',
+                'ip_address' => '127.0.0.1',
+                'user_agent' => 'Feature Test',
+                'before' => [],
+                'after' => ['name' => sprintf('Audit product %02d', $index)],
+                'metadata' => [],
+                'created_at' => now()->subMinutes(21 - $index),
+            ]);
+        }
+
+        $this->actingAs($admin)
+            ->get('/admin/audit-logs?actor=audit-layout@example.test&action=updated')
+            ->assertOk()
+            ->assertSee('data-audit-log-index', false)
+            ->assertSee('invoice-filter-panel audit-log-filter-panel', false)
+            ->assertSee('data-admin-pagination="audit-logs"', false)
+            ->assertSee('aria-label="Audit Logs pagination"', false)
+            ->assertSee('viewBox="0 0 24 24"', false)
+            ->assertDontSee('Pagination Navigation')
+            ->assertSee('Audit product 20')
+            ->assertSee('/admin/audit-logs?actor=audit-layout%40example.test&amp;action=updated&amp;page=2', false);
     }
 
     private function adminUser(string $email = 'admin-audit@example.test'): User

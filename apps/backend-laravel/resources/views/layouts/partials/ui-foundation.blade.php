@@ -792,7 +792,8 @@
         margin-top: 0;
     }
 
-    .activity-pagination {
+    .activity-pagination,
+    .admin-pagination {
         align-items: center;
         border-top: 1px solid var(--border-subtle);
         display: flex;
@@ -802,14 +803,16 @@
         padding-top: 12px;
     }
 
-    .activity-pagination__summary {
+    .activity-pagination__summary,
+    .admin-pagination__summary {
         color: var(--text-muted);
         font-size: 0.86rem;
         font-weight: 700;
         white-space: nowrap;
     }
 
-    .activity-pagination__controls {
+    .activity-pagination__controls,
+    .admin-pagination__controls {
         align-items: center;
         display: flex;
         flex-wrap: wrap;
@@ -818,7 +821,9 @@
     }
 
     .activity-pagination__control,
-    .activity-pagination__page {
+    .activity-pagination__page,
+    .admin-pagination__control,
+    .admin-pagination__page {
         align-items: center;
         background: var(--surface-soft);
         border: 1px solid var(--border-subtle);
@@ -835,7 +840,8 @@
         transition: all 0.15s ease-in-out;
     }
 
-    .activity-pagination__control svg {
+    .activity-pagination__control svg,
+    .admin-pagination__control svg {
         fill: currentColor;
         height: 18px;
         width: 18px;
@@ -843,23 +849,59 @@
 
     .activity-pagination__control:hover,
     .activity-pagination__page:hover,
-    .activity-pagination__page.is-current {
+    .activity-pagination__page.is-current,
+    .admin-pagination__control:hover,
+    .admin-pagination__page:hover,
+    .admin-pagination__page.is-current {
         background: rgba(var(--primary-rgb), 0.12);
         border-color: rgba(var(--primary-rgb), 0.35);
         color: rgb(var(--primary));
         text-decoration: none;
     }
 
-    .activity-pagination__control.is-disabled {
+    .activity-pagination__control.is-disabled,
+    .admin-pagination__control.is-disabled {
         color: var(--text-muted);
         cursor: not-allowed;
         opacity: 0.55;
     }
 
-    .activity-pagination__ellipsis {
+    .activity-pagination__ellipsis,
+    .admin-pagination__ellipsis {
         color: var(--text-muted);
         font-weight: 800;
         padding: 0 2px;
+    }
+
+    .audit-log-filter-panel {
+        padding: 16px;
+    }
+
+    .audit-log-row__action {
+        white-space: nowrap;
+    }
+
+    .audit-log-subject {
+        display: grid;
+        gap: 2px;
+        min-width: 220px;
+    }
+
+    .audit-log-subject strong,
+    .audit-log-route {
+        color: var(--text-heading);
+        font-weight: 800;
+    }
+
+    .audit-log-subject span,
+    .audit-log-actor {
+        color: var(--text-muted);
+        font-size: 0.86rem;
+    }
+
+    .audit-log-route {
+        font-size: 0.86rem;
+        word-break: break-word;
     }
 
     .customer-detail-section .data-table th,
