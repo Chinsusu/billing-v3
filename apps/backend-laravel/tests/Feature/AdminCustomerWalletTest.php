@@ -37,12 +37,20 @@ class AdminCustomerWalletTest extends TestCase
         $invoice = Invoice::factory()->for($customer)->create(['invoice_number' => 'INV-CUSTOMER-VIEW']);
         $order = Order::factory()->for($customer)->create(['order_number' => 'ORD-CUSTOMER-VIEW']);
         Service::factory()->for($customer)->create(['product_name' => 'Managed Proxy', 'status' => 'active']);
+        Service::factory()->for($customer)->create(['status' => 'suspended']);
+        Service::factory()->for($customer)->create(['status' => 'cancelled']);
 
         $this->actingAs($admin)
             ->get('/admin/customers?search=buyer@example.test')
             ->assertOk()
+            ->assertSee('Customers')
+            ->assertDontSee('Customer Base')
             ->assertSee('Buyer Account')
             ->assertSee('buyer@example.test')
+            ->assertSee('250,000 VND')
+            ->assertSee('1 active')
+            ->assertSee('1 suspended')
+            ->assertSee('1 cancelled')
             ->assertDontSee($other->email);
 
         $this->actingAs($admin)

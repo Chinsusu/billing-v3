@@ -21,7 +21,14 @@ class CustomerController extends Controller
                         ->orWhere('name', 'like', "%{$search}%");
                 });
             })
-            ->withCount(['invoices', 'orders', 'services'])
+            ->with(['wallets' => fn ($query) => $query->orderBy('currency')])
+            ->withCount([
+                'invoices',
+                'orders',
+                'services as active_services_count' => fn ($query) => $query->where('status', 'active'),
+                'services as suspended_services_count' => fn ($query) => $query->where('status', 'suspended'),
+                'services as cancelled_services_count' => fn ($query) => $query->where('status', 'cancelled'),
+            ])
             ->latest()
             ->paginate(20)
             ->withQueryString();

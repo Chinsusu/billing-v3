@@ -23,15 +23,38 @@
     @else
         <div class="data-table">
             <table>
-                <thead><tr><th>Name</th><th>Email</th><th>Invoices</th><th>Orders</th><th>Services</th><th>Action</th></tr></thead>
+                <thead>
+                    <tr>
+                        <th>Customer</th>
+                        <th>Balance</th>
+                        <th>Active</th>
+                        <th>Suspended</th>
+                        <th>Cancelled</th>
+                        <th>Invoices</th>
+                        <th>Orders</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
                 <tbody>
                     @foreach ($customers as $customer)
+                        @php
+                            $walletSummary = $customer->wallets->isEmpty()
+                                ? '-'
+                                : $customer->wallets
+                                    ->map(fn ($wallet) => number_format($wallet->balance_amount).' '.$wallet->currency)
+                                    ->implode(' / ');
+                        @endphp
                         <tr>
-                            <td>{{ $customer->name }}</td>
-                            <td>{{ $customer->email }}</td>
+                            <td>
+                                <strong>{{ $customer->name }}</strong><br>
+                                <span class="muted">{{ $customer->email }}</span>
+                            </td>
+                            <td><strong>{{ $walletSummary }}</strong></td>
+                            <td><x-status-badge tone="success">{{ $customer->active_services_count }} active</x-status-badge></td>
+                            <td><x-status-badge tone="warning">{{ $customer->suspended_services_count }} suspended</x-status-badge></td>
+                            <td><x-status-badge tone="neutral">{{ $customer->cancelled_services_count }} cancelled</x-status-badge></td>
                             <td>{{ $customer->invoices_count }}</td>
                             <td>{{ $customer->orders_count }}</td>
-                            <td>{{ $customer->services_count }}</td>
                             <td><a class="button secondary" href="/admin/customers/{{ $customer->id }}">View</a></td>
                         </tr>
                     @endforeach

@@ -644,7 +644,7 @@
             <div class="sidebar-section-header">Security &amp; Support</div>
             <a href="/admin/customers" class="sidebar-menu-item {{ Request::is('admin/customers*') ? 'active' : '' }}">
                 <x-sidebar-icon name="customers" />
-                <span>Customer Base</span>
+                <span>Customers</span>
             </a>
             @can('users.view')
                 <a href="/admin/users" class="sidebar-menu-item {{ Request::is('admin/users*') ? 'active' : '' }}">
