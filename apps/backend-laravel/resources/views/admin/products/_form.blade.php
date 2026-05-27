@@ -14,7 +14,6 @@
             <span class="product-form-section-index">01</span>
             <div>
                 <h2 class="product-form-section-title" id="product-identity-title">Product identity</h2>
-                <p class="product-form-section-copy">Customer-facing catalog details and admin status.</p>
             </div>
         </div>
 
@@ -59,7 +58,6 @@
             <span class="product-form-section-index">02</span>
             <div>
                 <h2 class="product-form-section-title" id="product-pricing-title">Pricing &amp; lifecycle</h2>
-                <p class="product-form-section-copy">Charge amount and how service dates are calculated.</p>
             </div>
         </div>
 
@@ -109,7 +107,6 @@
             <span class="product-form-section-index">03</span>
             <div>
                 <h2 class="product-form-section-title" id="product-provider-title">Provisioning provider</h2>
-                <p class="product-form-section-copy">Route this plan to a provider account, endpoint paths, and request options.</p>
             </div>
         </div>
 
@@ -162,7 +159,6 @@
             <label class="product-form-field product-form-field--wide" for="product-provider-options">
                 <span>Provider Options</span>
                 <textarea id="product-provider-options" name="provider_options" rows="6">{{ $providerOptions }}</textarea>
-                <small class="field-help">JSON object merged into provider request templates.</small>
             </label>
         </div>
     </section>
@@ -172,7 +168,6 @@
             <span class="product-form-section-index">04</span>
             <div>
                 <h2 class="product-form-section-title" id="product-renewal-title">Auto-renew Policy</h2>
-                <p class="product-form-section-copy">Controls renewal eligibility, lead time, and retry behavior.</p>
             </div>
         </div>
 
@@ -182,7 +177,6 @@
                 <input id="product-auto-renew-allowed" type="checkbox" name="auto_renew_allowed" value="1" @checked(old('auto_renew_allowed', $product->exists ? $product->auto_renew_allowed : true))>
                 <span>
                     <strong>Allow auto-renewal</strong>
-                    <small>Customers can renew this service automatically when wallet balance is enough.</small>
                 </span>
             </label>
 
@@ -208,7 +202,6 @@
             <span class="product-form-section-index">05</span>
             <div>
                 <h2 class="product-form-section-title" id="product-provider-lifecycle-title">Provider lifecycle response</h2>
-                <p class="product-form-section-copy">Map provider date fields when lifecycle comes from API responses.</p>
             </div>
         </div>
 

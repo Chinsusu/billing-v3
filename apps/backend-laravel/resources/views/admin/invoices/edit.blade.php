@@ -7,7 +7,6 @@
 @endphp
 <x-page-header
     title="Edit Invoice"
-    subtitle="Update invoice status and manual transaction details."
     eyebrow="Financials"
 >
     <x-slot:actions>
@@ -29,7 +28,6 @@
                     <span class="product-form-section-index">01</span>
                     <div>
                         <h2 class="product-form-section-title" id="invoice-status-title">Invoice status</h2>
-                        <p class="product-form-section-copy">Payment timing and manual transaction details.</p>
                     </div>
                 </div>
 
@@ -86,7 +84,6 @@
                     <span class="product-form-section-index">02</span>
                     <div>
                         <h2 class="product-form-section-title" id="invoice-summary-title">Invoice summary</h2>
-                        <p class="product-form-section-copy">Billing context before saving.</p>
                     </div>
                 </div>
 

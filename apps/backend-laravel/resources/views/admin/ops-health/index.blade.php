@@ -2,7 +2,6 @@
 @section('content')
 <x-page-header
     title="Ops Health"
-    subtitle="Monitor scheduler freshness, queue pressure, provider actions, and bank integration readiness."
 >
     <x-slot:actions>
         <a class="button secondary" href="/admin/scheduled-task-runs">Scheduled Task Runs</a>

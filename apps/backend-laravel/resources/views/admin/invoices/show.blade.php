@@ -2,7 +2,6 @@
 @section('content')
 <x-page-header
     title="{{ $invoice->invoice_number }}"
-    subtitle="Review invoice details, payment events, and ledger activity."
     eyebrow="Financials"
 >
     <x-slot:actions>

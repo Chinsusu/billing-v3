@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Product;
 use App\Models\Service;
 use App\Models\ServiceAutoRenewalAttempt;
+use App\Models\User;
 use App\Services\Services\ServiceAutoRenewalPolicy;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
@@ -73,6 +74,7 @@ class ServiceRenewalReportController extends Controller
                 'product_id' => $productId,
                 'customer' => $customer,
             ],
+            'customerOptions' => User::role('customer')->orderBy('email')->limit(100)->pluck('email')->all(),
             'autoRenewEnabledCount' => $activeAutoRenewServices->count(),
             'dueWithinPolicyCount' => $activeAutoRenewServices
                 ->filter(fn (Service $service): bool => $renewalPolicy->isDue($service))

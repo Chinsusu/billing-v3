@@ -4,29 +4,38 @@
     $paymentEventTableColumns = auth()->user()?->can('payment_events.update') ? 6 : 5;
 @endphp
 
-<div class="panel">
-    <h1>Payment Events</h1>
-    <form method="GET" action="/admin/payment-events">
-        <div class="grid">
-            <div>
-                <label for="status">Status</label>
+<x-page-header title="Payment Events" eyebrow="Financials" />
+
+<div class="panel invoice-filter-panel payment-event-filter-panel">
+    <form class="invoice-filter-form" method="GET" action="/admin/payment-events">
+        <div class="invoice-filter-fields admin-filter-fields--2">
+            <label class="invoice-filter-field" for="status">
+                <span>Status</span>
                 <select id="status" name="status">
                     <option value="">All statuses</option>
                     @foreach ($statuses as $status)
                         <option value="{{ $status }}" @selected($filters['status'] === $status)>{{ $status }}</option>
                     @endforeach
                 </select>
-            </div>
-            <div>
-                <label for="reference">Reference</label>
-                <input id="reference" name="reference" value="{{ $filters['reference'] }}">
-            </div>
+            </label>
+            <label class="invoice-filter-field" for="reference">
+                <span>Reference</span>
+                <input id="reference" name="reference" value="{{ $filters['reference'] }}" placeholder="Search reference" list="payment-event-reference-options" autocomplete="off">
+            </label>
         </div>
-        <p>
+        <div class="invoice-filter-actions">
             <button type="submit">Filter</button>
-            <a class="button secondary" href="/admin/payment-events">Reset</a>
-        </p>
+            <a class="button secondary button-soft" href="/admin/payment-events">Reset</a>
+        </div>
+        <datalist id="payment-event-reference-options">
+            @foreach ($referenceOptions as $reference)
+                <option value="{{ $reference }}"></option>
+            @endforeach
+        </datalist>
     </form>
+</div>
+
+<div class="panel">
     <table>
         <thead>
             <tr>

@@ -2,7 +2,6 @@
 @section('content')
 <x-page-header
     title="Edit Product"
-    subtitle="Update catalog details, lifecycle rules, and provider routing for this product."
     eyebrow="Resources"
 >
     <x-slot:actions>

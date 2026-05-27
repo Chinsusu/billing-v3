@@ -2,18 +2,24 @@
 @section('content')
 <x-page-header
     title="Customers"
-    subtitle="Search customer accounts, inspect billing state, and open account workbenches."
 />
 
-<div class="panel">
-    <form method="GET" action="/admin/customers">
-        <div class="filter-bar">
-            <div>
-                <label for="search">Search</label>
-                <input id="search" name="search" value="{{ $search }}" placeholder="Email or name">
-            </div>
+<div class="panel invoice-filter-panel customer-filter-panel">
+    <form class="invoice-filter-form" method="GET" action="/admin/customers">
+        <div class="invoice-filter-fields admin-filter-fields--1">
+            <label class="invoice-filter-field" for="search">
+                <span>Search</span>
+                <input id="search" name="search" value="{{ $search }}" placeholder="Search customer" list="admin-customer-search-options" autocomplete="off">
+            </label>
+        </div>
+        <div class="invoice-filter-actions">
             <button type="submit">Search</button>
         </div>
+        <datalist id="admin-customer-search-options">
+            @foreach ($customerOptions as $customerOption)
+                <option value="{{ $customerOption['value'] }}" label="{{ $customerOption['label'] }}"></option>
+            @endforeach
+        </datalist>
     </form>
 </div>
 

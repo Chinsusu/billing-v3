@@ -15,5 +15,4 @@
 <label>Webhook Secret
     <input type="password" name="webhook_secret" autocomplete="new-password" placeholder="{{ $bankIntegration->webhook_secret_last_four ? 'Configured ...'.$bankIntegration->webhook_secret_last_four : 'Enter webhook secret' }}">
 </label>
-<p class="muted">Secret fields are write-only. Leave blank to keep existing values.</p>
 <p><button type="submit">Save Bank Integration</button></p>

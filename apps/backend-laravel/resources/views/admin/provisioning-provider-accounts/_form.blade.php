@@ -39,5 +39,4 @@
 <label>Callback External ID Path<input name="callback_external_id_path" value="{{ old('callback_external_id_path', $providerAccount->callback_external_id_path ?: 'external_id') }}" required></label>
 <label>Callback Action Path<input name="callback_action_path" value="{{ old('callback_action_path', $providerAccount->callback_action_path ?: 'action') }}" required></label>
 <label>Callback Status Path<input name="callback_status_path" value="{{ old('callback_status_path', $providerAccount->callback_status_path ?: 'status') }}" required></label>
-<p class="muted">Secret fields are write-only. Leave blank to keep existing values.</p>
 <p><button type="submit">Save Provider Account</button></p>

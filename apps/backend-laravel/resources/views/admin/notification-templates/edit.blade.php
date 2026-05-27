@@ -19,7 +19,6 @@
         <label>Body template
             <textarea name="body_template" rows="8" required>{{ old('body_template', $notificationTemplate->body_template) }}</textarea>
         </label>
-        <p class="muted">Variables: {{ implode(', ', $notificationTemplate->variables ?? []) }}</p>
         <button type="submit">Save</button>
         <a href="/admin/notification-templates">Cancel</a>
     </form>

@@ -2,7 +2,6 @@
 @section('content')
 <x-page-header
     title="Payment Event"
-    subtitle="Inspect transaction metadata, wallet linkage, and raw payload."
     eyebrow="Financials"
 >
     <x-slot:actions>

@@ -2,7 +2,6 @@
 @section('content')
 <x-page-header
     title="Edit Transaction"
-    subtitle="Update manual transaction metadata without changing wallet ledger amount."
     eyebrow="Financials"
 >
     <x-slot:actions>
@@ -24,7 +23,6 @@
                     <span class="product-form-section-index">01</span>
                     <div>
                         <h2 class="product-form-section-title" id="transaction-edit-title">Manual transaction</h2>
-                        <p class="product-form-section-copy">Only manual admin transactions can be edited.</p>
                     </div>
                 </div>
 
@@ -49,7 +47,6 @@
                     <span class="product-form-section-index">02</span>
                     <div>
                         <h2 class="product-form-section-title" id="transaction-summary-title">Read-only accounting</h2>
-                        <p class="product-form-section-copy">Amount and ledger movement are preserved.</p>
                     </div>
                 </div>
 

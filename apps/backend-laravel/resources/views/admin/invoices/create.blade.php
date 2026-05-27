@@ -2,7 +2,6 @@
 @section('content')
 <x-page-header
     title="Create Invoice"
-    subtitle="Create an open invoice for a customer to pay from wallet balance."
     eyebrow="Financials"
 >
     <x-slot:actions>
@@ -33,7 +32,6 @@
                     <span class="product-form-section-index">01</span>
                     <div>
                         <h2 class="product-form-section-title" id="invoice-customer-title">Customer</h2>
-                        <p class="product-form-section-copy">Select the account that will own this invoice.</p>
                     </div>
                 </div>
 
@@ -58,7 +56,6 @@
                     <span class="product-form-section-index">02</span>
                     <div>
                         <h2 class="product-form-section-title" id="invoice-billing-title">Billing</h2>
-                        <p class="product-form-section-copy">Set the payable amount and invoice line description.</p>
                     </div>
                 </div>
 

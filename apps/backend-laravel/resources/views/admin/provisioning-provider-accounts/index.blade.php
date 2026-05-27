@@ -2,7 +2,6 @@
 @section('content')
 <x-page-header
     title="Provider Accounts"
-    subtitle="Manage provider endpoints, auth methods, and API-key backed account routing."
 >
     <x-slot:actions>
         <a class="button" href="/admin/provisioning-provider-accounts/create">Create Provider Account</a>

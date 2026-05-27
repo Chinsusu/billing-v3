@@ -2,7 +2,6 @@
 @section('content')
 <x-page-header
     title="Create Order"
-    subtitle="Wallet will be debited immediately and provisioning will be queued after payment."
     eyebrow="Resources"
 >
     <x-slot:actions>
@@ -23,7 +22,6 @@
                     <span class="product-form-section-index">01</span>
                     <div>
                         <h2 class="product-form-section-title" id="order-customer-title">Customer</h2>
-                        <p class="product-form-section-copy">Choose the customer wallet that will be charged.</p>
                     </div>
                 </div>
 
@@ -54,7 +52,6 @@
                     <span class="product-form-section-index">02</span>
                     <div>
                         <h2 class="product-form-section-title" id="order-product-title">Product</h2>
-                        <p class="product-form-section-copy">Only active products can be ordered for a customer.</p>
                     </div>
                 </div>
 

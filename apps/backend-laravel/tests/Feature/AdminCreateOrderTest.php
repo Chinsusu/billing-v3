@@ -50,7 +50,7 @@ class AdminCreateOrderTest extends TestCase
             ->assertSee('Draft Admin Product - Draft (activate before ordering)')
             ->assertSee('data-product-status="draft"', false)
             ->assertSee('disabled', false)
-            ->assertSee('Wallet will be debited immediately');
+            ->assertDontSee('Wallet will be debited immediately');
     }
 
     public function test_admin_can_create_paid_order_for_customer_wallet(): void

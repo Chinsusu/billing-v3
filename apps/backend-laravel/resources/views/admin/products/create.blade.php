@@ -2,7 +2,6 @@
 @section('content')
 <x-page-header
     title="Create Product"
-    subtitle="Define the customer-facing plan, pricing, lifecycle policy, and provisioning provider mapping."
     eyebrow="Resources"
 >
     <x-slot:actions>

@@ -7,7 +7,6 @@
 
 <x-page-header
     title="Admin Dashboard"
-    subtitle="Revenue, service health, provisioning queue, and support workload."
 >
     <x-slot:actions>
         @can('provisioning_jobs.view')
@@ -71,7 +70,6 @@
         <div class="panel-heading">
             <div>
                 <h2>Provisioning queue</h2>
-                <p class="page-subtitle">{{ $pendingProvisioningJobCount }} pending, {{ $processingProvisioningJobCount }} processing, {{ $failedProvisioningJobCount }} failed. Showing latest queue activity.</p>
             </div>
             @can('provisioning_jobs.view')
                 <a class="button secondary" href="/admin/provisioning-jobs">Review queue</a>
@@ -126,7 +124,6 @@
         <div class="panel-heading">
             <div>
                 <h2>Recent paid orders</h2>
-                <p class="page-subtitle">Newest revenue events from checkout and renewals.</p>
             </div>
             @can('orders.view')
                 <a class="button secondary" href="/admin/orders?status=paid">Open Orders</a>
@@ -154,7 +151,6 @@
         <div class="panel-heading">
             <div>
                 <h2>Financial exceptions</h2>
-                <p class="page-subtitle">Open invoices and bank events that need review.</p>
             </div>
             @can('payment_events.view')
                 <a class="button secondary" href="/admin/payment-events">Payment Events</a>
@@ -184,7 +180,6 @@
         <div class="panel-heading">
             <div>
                 <h2>Platform inventory</h2>
-                <p class="page-subtitle">{{ $activeProductCount }} active of {{ $productCount }} products.</p>
             </div>
             @can('products.view')
                 <a class="button secondary" href="/admin/products">Manage Products</a>
@@ -215,26 +210,26 @@
     <h2>Quick actions</h2>
     <div class="quick-action-grid">
         @can('bank_integrations.manage')
-            <a class="quick-action" href="/admin/bank-integrations"><strong>Bank integrations</strong><span>Configure private bank endpoints and tests.</span></a>
+            <a class="quick-action" href="/admin/bank-integrations"><strong>Bank integrations</strong></a>
         @endcan
         @can('provisioning_provider_accounts.manage')
-            <a class="quick-action" href="/admin/provisioning-provider-accounts"><strong>Provider accounts</strong><span>Manage endpoint/API key account routing.</span></a>
+            <a class="quick-action" href="/admin/provisioning-provider-accounts"><strong>Provider accounts</strong></a>
         @endcan
         @can('provisioning_jobs.view')
-            <a class="quick-action" href="/admin/provider-action-jobs"><strong>Provider actions</strong><span>Retry sync, cancellation, and recovery jobs.</span></a>
+            <a class="quick-action" href="/admin/provider-action-jobs"><strong>Provider actions</strong></a>
         @endcan
         @can('support_tickets.view')
-            <a class="quick-action" href="/admin/support-tickets"><strong>Support tickets</strong><span>Review customer support workflow.</span></a>
+            <a class="quick-action" href="/admin/support-tickets"><strong>Support tickets</strong></a>
         @endcan
         @can('notifications.manage')
-            <a class="quick-action" href="/admin/notification-events"><strong>Notification Events</strong><span>Inspect delivery and retry failures.</span></a>
-            <a class="quick-action" href="/admin/notification-templates"><strong>Notification Templates</strong><span>Edit notification copy and channels.</span></a>
+            <a class="quick-action" href="/admin/notification-events"><strong>Notification Events</strong></a>
+            <a class="quick-action" href="/admin/notification-templates"><strong>Notification Templates</strong></a>
         @endcan
         @can('audit_logs.view')
-            <a class="quick-action" href="/admin/audit-logs"><strong>Audit logs</strong><span>Trace operator changes and security events.</span></a>
+            <a class="quick-action" href="/admin/audit-logs"><strong>Audit logs</strong></a>
         @endcan
         @can('users.view')
-            <a class="quick-action" href="/admin/users"><strong>Users &amp; roles</strong><span>Manage operators and permissions.</span></a>
+            <a class="quick-action" href="/admin/users"><strong>Users &amp; roles</strong></a>
         @endcan
     </div>
 </div>

@@ -1003,15 +1003,16 @@
     }
 
     .quick-action {
-        align-items: flex-start;
+        align-items: center;
         background: var(--surface-subtle);
         border: 1px solid var(--border-subtle);
         border-radius: 8px;
         color: var(--text-heading);
         display: flex;
-        flex-direction: column;
+        flex-direction: row;
         gap: 4px;
-        padding: 14px;
+        min-height: 52px;
+        padding: 14px 32px 14px 14px;
         position: relative;
         text-decoration: none;
     }
@@ -1033,11 +1034,6 @@
         color: rgb(var(--primary));
         text-decoration: none;
         transform: translateY(-1px);
-    }
-
-    .quick-action span {
-        color: var(--text-muted);
-        font-size: 0.84rem;
     }
 
     .recent-grid {
@@ -1169,6 +1165,22 @@
         grid-template-columns: minmax(180px, 220px) minmax(260px, 1fr);
     }
 
+    .invoice-filter-fields.admin-filter-fields--1 {
+        grid-template-columns: minmax(260px, 1fr);
+    }
+
+    .invoice-filter-fields.admin-filter-fields--2 {
+        grid-template-columns: repeat(2, minmax(220px, 1fr));
+    }
+
+    .invoice-filter-fields.admin-filter-fields--3 {
+        grid-template-columns: repeat(3, minmax(190px, 1fr));
+    }
+
+    .invoice-filter-fields.admin-filter-fields--4 {
+        grid-template-columns: repeat(4, minmax(160px, 1fr));
+    }
+
     .invoice-filter-field {
         align-items: center;
         color: var(--text-heading);
@@ -1274,13 +1286,6 @@
         font-size: 1.05rem;
         line-height: 1.25;
         margin: 0 0 4px;
-    }
-
-    .product-form-section-copy {
-        color: var(--text-muted);
-        font-size: 0.9rem;
-        line-height: 1.45;
-        margin: 0;
     }
 
     .product-form-fields {
@@ -1437,7 +1442,7 @@
     }
 
     .product-form-toggle {
-        align-items: flex-start;
+        align-items: center;
         background: var(--surface-soft);
         border: 1px solid var(--border-subtle);
         border-radius: 8px;
@@ -1447,7 +1452,7 @@
         gap: 12px;
         line-height: 1.35;
         margin: 0;
-        min-height: 70px;
+        min-height: 54px;
         padding: 14px;
         text-transform: none;
     }
@@ -1470,12 +1475,6 @@
         color: var(--text-heading);
         font-size: 0.9rem;
         line-height: 1.25;
-    }
-
-    .product-form-toggle small {
-        color: var(--text-muted);
-        font-size: 0.82rem;
-        font-weight: 500;
     }
 
     .product-form-actions {
@@ -1719,6 +1718,13 @@
 
         .invoice-filter-form,
         .invoice-filter-fields {
+            grid-template-columns: 1fr;
+        }
+
+        .invoice-filter-fields.admin-filter-fields--1,
+        .invoice-filter-fields.admin-filter-fields--2,
+        .invoice-filter-fields.admin-filter-fields--3,
+        .invoice-filter-fields.admin-filter-fields--4 {
             grid-template-columns: 1fr;
         }
 

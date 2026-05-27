@@ -188,6 +188,7 @@ class AdminDashboardKpiTest extends TestCase
             ->assertSee('1 urgent')
             ->assertSee('Payment exceptions')
             ->assertSee('Provisioning queue')
+            ->assertDontSee('Showing latest queue activity.')
             ->assertSee('data-dashboard-section="provisioning-queue-preview"', false)
             ->assertSee('admin-dashboard-queue-scroll', false)
             ->assertSee('height: 360px;', false)
@@ -196,7 +197,10 @@ class AdminDashboardKpiTest extends TestCase
             ->assertSee('Provider timeout.')
             ->assertDontSee('Service mix')
             ->assertDontSee('By type')
-            ->assertDontSee('999,000 VND');
+            ->assertDontSee('999,000 VND')
+            ->assertDontSee('Newest revenue events from checkout and renewals.')
+            ->assertDontSee('Open invoices and bank events that need review.')
+            ->assertDontSee('Configure private bank endpoints and tests.');
     }
 
     public function test_admin_dashboard_queue_preview_is_fixed_and_recent_only_without_service_mix(): void

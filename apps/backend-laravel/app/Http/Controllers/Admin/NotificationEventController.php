@@ -28,6 +28,30 @@ class NotificationEventController extends Controller
         return view('admin.notification-events.index', [
             'notificationEvents' => $query->paginate(20)->withQueryString(),
             'filters' => $request->only(['status', 'type', 'recipient']),
+            'filterOptions' => [
+                'statuses' => NotificationEvent::query()
+                    ->whereNotNull('status')
+                    ->distinct()
+                    ->orderBy('status')
+                    ->limit(40)
+                    ->pluck('status')
+                    ->all(),
+                'types' => NotificationEvent::query()
+                    ->whereNotNull('type')
+                    ->distinct()
+                    ->orderBy('type')
+                    ->limit(80)
+                    ->pluck('type')
+                    ->all(),
+                'recipients' => NotificationEvent::query()
+                    ->whereNotNull('recipient_email')
+                    ->where('recipient_email', '!=', '')
+                    ->distinct()
+                    ->orderBy('recipient_email')
+                    ->limit(100)
+                    ->pluck('recipient_email')
+                    ->all(),
+            ],
         ]);
     }
 

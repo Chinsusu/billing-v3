@@ -1,9 +1,9 @@
 @extends('layouts.admin', ['title' => 'Renewal Reporting'])
 @section('content')
 @php($canManageRenewals = auth()->user()?->can('renewals.manage') ?? false)
+<x-page-header title="Renewal Reporting" eyebrow="Financials" />
+
 <div class="panel">
-    <p><a href="/admin">Back to Admin</a></p>
-    <h1>Renewal Reporting</h1>
     <div class="grid">
         <div class="panel"><strong>{{ $autoRenewEnabledCount }}</strong><br>Auto-renew enabled</div>
         <div class="panel"><strong>{{ $dueWithinPolicyCount }}</strong><br>Due within policy</div>
@@ -12,34 +12,41 @@
     </div>
 </div>
 
-<div class="panel">
-    <h2>Filters</h2>
-    <form method="GET" action="/admin/renewals">
-        <div class="grid">
-            <label>Status
-                <select name="status">
+<div class="panel invoice-filter-panel renewal-filter-panel">
+    <form class="invoice-filter-form" method="GET" action="/admin/renewals">
+        <div class="invoice-filter-fields admin-filter-fields--3">
+            <label class="invoice-filter-field" for="renewal-status">
+                <span>Status</span>
+                <select id="renewal-status" name="status">
                     <option value="">Any status</option>
                     @foreach (['processing', 'succeeded', 'failed', 'skipped'] as $status)
                         <option value="{{ $status }}" @selected($filters['status'] === $status)>{{ $status }}</option>
                     @endforeach
                 </select>
             </label>
-            <label>Product
-                <select name="product_id">
+            <label class="invoice-filter-field" for="renewal-product">
+                <span>Product</span>
+                <select id="renewal-product" name="product_id">
                     <option value="">Any product</option>
                     @foreach ($products as $product)
                         <option value="{{ $product->id }}" @selected($filters['product_id'] === $product->id)>{{ $product->name }} ({{ $product->code }})</option>
                     @endforeach
                 </select>
             </label>
-            <label>Customer Email
-                <input name="customer" value="{{ $filters['customer'] }}" placeholder="customer@example.test">
+            <label class="invoice-filter-field" for="renewal-customer">
+                <span>Customer</span>
+                <input id="renewal-customer" name="customer" value="{{ $filters['customer'] }}" placeholder="Search customer" list="renewal-customer-options" autocomplete="off">
             </label>
         </div>
-        <p>
-            <button type="submit">Apply Filters</button>
-            <a class="button secondary" href="/admin/renewals">Clear</a>
-        </p>
+        <div class="invoice-filter-actions">
+            <button type="submit">Filter</button>
+            <a class="button secondary button-soft" href="/admin/renewals">Clear</a>
+        </div>
+        <datalist id="renewal-customer-options">
+            @foreach ($customerOptions as $customerEmail)
+                <option value="{{ $customerEmail }}"></option>
+            @endforeach
+        </datalist>
     </form>
 </div>
 

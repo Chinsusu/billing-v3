@@ -36,6 +36,7 @@ class OrderController extends Controller
                 ->withQueryString(),
             'filters' => $filters,
             'statuses' => ['pending', 'paid', 'failed', 'cancelled'],
+            'customerOptions' => User::role('customer')->orderBy('email')->limit(100)->pluck('email')->all(),
         ]);
     }
 

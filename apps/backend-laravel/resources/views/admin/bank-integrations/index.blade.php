@@ -2,7 +2,6 @@
 @section('content')
 <x-page-header
     title="Bank Integrations"
-    subtitle="Configure private bank endpoints and test transaction sync connectivity."
 >
     <x-slot:actions>
         <a class="button" href="/admin/bank-integrations/create">Create Bank Integration</a>

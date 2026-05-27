@@ -34,9 +34,26 @@ class CustomerController extends Controller
             ->paginate(20)
             ->withQueryString();
 
+        $customerOptions = User::role('customer')
+            ->when($search !== '', function ($query) use ($search): void {
+                $query->where(function ($query) use ($search): void {
+                    $query->where('email', 'like', "%{$search}%")
+                        ->orWhere('name', 'like', "%{$search}%");
+                });
+            })
+            ->orderBy('email')
+            ->limit(120)
+            ->get(['email', 'name'])
+            ->map(fn (User $user): array => [
+                'value' => $user->email,
+                'label' => $user->name,
+            ])
+            ->all();
+
         return view('admin.customers.index', [
             'customers' => $customers,
             'search' => $search,
+            'customerOptions' => $customerOptions,
         ]);
     }
 

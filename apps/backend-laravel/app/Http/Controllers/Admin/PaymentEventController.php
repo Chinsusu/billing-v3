@@ -31,6 +31,14 @@ class PaymentEventController extends Controller
                 ->withQueryString(),
             'filters' => $filters,
             'statuses' => ['accepted', 'rejected', 'unmatched', 'expired', 'reconciled'],
+            'referenceOptions' => PaymentEvent::query()
+                ->whereNotNull('reference')
+                ->where('reference', '!=', '')
+                ->distinct()
+                ->orderBy('reference')
+                ->limit(100)
+                ->pluck('reference')
+                ->all(),
         ]);
     }
 

@@ -2,7 +2,6 @@
 @section('content')
 <x-page-header
     title="Invoices"
-    subtitle="Review invoice status, customer balances, and payment outcomes."
     eyebrow="Financials"
 >
     @can('invoices.create')

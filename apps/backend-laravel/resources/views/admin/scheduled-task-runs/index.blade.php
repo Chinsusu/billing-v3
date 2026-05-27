@@ -1,33 +1,34 @@
 @extends('layouts.admin', ['title' => 'Scheduled Task Runs'])
 @section('content')
-<div class="panel">
-    <h1>Scheduled Task Runs</h1>
-    <p><a class="button secondary" href="/admin/ops-health">Ops Health</a></p>
-    <form method="GET" action="/admin/scheduled-task-runs">
-        <div class="grid">
-            <div>
-                <label for="task">Task</label>
+<x-page-header title="Scheduled Task Runs" eyebrow="Queue & Ops" />
+
+<div class="panel invoice-filter-panel scheduled-task-filter-panel">
+    <form class="invoice-filter-form" method="GET" action="/admin/scheduled-task-runs">
+        <div class="invoice-filter-fields admin-filter-fields--2">
+            <label class="invoice-filter-field" for="task">
+                <span>Task</span>
                 <select id="task" name="task">
                     <option value="">All tasks</option>
                     @foreach ($tasks as $task)
                         <option value="{{ $task }}" @selected($filters['task'] === $task)>{{ $task }}</option>
                     @endforeach
                 </select>
-            </div>
-            <div>
-                <label for="status">Status</label>
+            </label>
+            <label class="invoice-filter-field" for="status">
+                <span>Status</span>
                 <select id="status" name="status">
                     <option value="">All statuses</option>
                     @foreach ($statuses as $status)
                         <option value="{{ $status }}" @selected($filters['status'] === $status)>{{ $status }}</option>
                     @endforeach
                 </select>
-            </div>
+            </label>
         </div>
-        <p>
+        <div class="invoice-filter-actions">
             <button type="submit">Filter</button>
-            <a class="button secondary" href="/admin/scheduled-task-runs">Reset</a>
-        </p>
+            <a class="button secondary button-soft" href="/admin/scheduled-task-runs">Reset</a>
+            <a class="button secondary button-soft" href="/admin/ops-health">Ops Health</a>
+        </div>
     </form>
 </div>
 

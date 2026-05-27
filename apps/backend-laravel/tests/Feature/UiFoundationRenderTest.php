@@ -135,7 +135,8 @@ class UiFoundationRenderTest extends TestCase
         $this->actingAs($admin)
             ->get('/admin/customers')
             ->assertOk()
-            ->assertSee('filter-bar', false)
+            ->assertSee('customer-filter-panel', false)
+            ->assertSee('admin-customer-search-options', false)
             ->assertSee('data-table', false);
 
         $this->actingAs($admin)
