@@ -633,10 +633,18 @@
         margin-bottom: 18px;
     }
 
+    .customer-detail-grid--compact {
+        align-items: stretch;
+        gap: 12px;
+        grid-template-columns: minmax(260px, 0.9fr) minmax(260px, 0.8fr) minmax(420px, 1.35fr);
+        margin-bottom: 0;
+    }
+
     .customer-detail-section {
         border: 1px solid var(--border-subtle);
         border-radius: 8px;
-        padding: 16px;
+        min-width: 0;
+        padding: 14px;
     }
 
     .customer-detail-section--full {
@@ -644,12 +652,13 @@
     }
 
     .customer-detail-section__heading {
-        margin-bottom: 14px;
+        margin-bottom: 10px;
     }
 
     .customer-detail-section__heading h4 {
         font-size: 0.98rem;
-        margin: 0 0 4px;
+        line-height: 1.25;
+        margin: 0;
     }
 
     .customer-detail-section__heading p {
@@ -662,14 +671,14 @@
 
     .customer-detail-form {
         display: grid;
-        gap: 8px;
-        margin-top: 18px;
+        gap: 6px;
+        margin-top: 12px;
     }
 
     .customer-detail-form-row {
         align-items: center;
         display: grid;
-        gap: 10px;
+        gap: 8px;
         grid-template-columns: minmax(0, 1fr) max-content;
     }
 
@@ -679,6 +688,11 @@
         grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
     }
 
+    .customer-adjustment-form--compact {
+        gap: 10px;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
     .customer-adjustment-form__wide {
         grid-column: 1 / -1;
     }
@@ -686,6 +700,15 @@
     .customer-adjustment-form__actions {
         align-items: end;
         display: flex;
+    }
+
+    .customer-adjustment-form--compact .customer-adjustment-form__actions {
+        grid-column: 1 / -1;
+        justify-content: flex-end;
+    }
+
+    .customer-adjustment-form--compact textarea {
+        min-height: 64px;
     }
 
     .customer-activity-panel {
@@ -767,6 +790,18 @@
 
     .customer-activity-panel__body .data-table {
         margin-top: 0;
+    }
+
+    .customer-detail-section .data-table th,
+    .customer-detail-section .data-table td {
+        padding-bottom: 9px;
+        padding-top: 9px;
+    }
+
+    @media (max-width: 1280px) {
+        .customer-detail-grid--compact {
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        }
     }
 
     .metric-list {

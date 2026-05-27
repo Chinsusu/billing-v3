@@ -26,7 +26,6 @@
     <div class="panel-heading">
         <div>
             <h2>Customer Workspace</h2>
-            <p class="muted">Account details, ledger, invoices, orders, and services are separated into tabs for faster review.</p>
         </div>
     </div>
 
@@ -93,16 +92,10 @@
     </div>
 
     <section class="customer-activity-panel__body" id="customer-details-panel" role="tabpanel" aria-labelledby="customer-details-tab">
-        <div class="customer-activity-panel__heading">
-            <h3>Customer Details</h3>
-            <span class="muted">Profile, wallet, and admin controls</span>
-        </div>
-
-        <div class="customer-detail-grid">
+        <div class="customer-detail-grid customer-detail-grid--compact">
             <section class="customer-detail-section">
                 <div class="customer-detail-section__heading">
                     <h4>Account owner</h4>
-                    <p class="muted">Current assignment and reseller routing.</p>
                 </div>
                 <div class="metric-list metric-list--compact">
                     <div class="metric-row">
@@ -132,7 +125,6 @@
             <section class="customer-detail-section">
                 <div class="customer-detail-section__heading">
                     <h4>Wallets</h4>
-                    <p class="muted">Available balances by currency.</p>
                 </div>
                 <div class="data-table data-table--compact">
                     <table>
@@ -150,32 +142,31 @@
                     </table>
                 </div>
             </section>
-        </div>
 
-        @can('wallets.adjust')
-            <section class="customer-detail-section customer-detail-section--full">
-                <div class="customer-detail-section__heading">
-                    <h4>Manual Adjustment</h4>
-                    <p class="muted">Credit or debit the customer wallet with an audited ledger entry.</p>
-                </div>
-                <form method="POST" action="/admin/customers/{{ $customer->id }}/wallet-adjustments" class="customer-adjustment-form">
-                    @csrf
-                    <label>Direction
-                        <select name="direction">
-                            <option value="credit">credit</option>
-                            <option value="debit">debit</option>
-                        </select>
-                    </label>
-                    <label>Amount<input name="amount" type="number" min="1" required></label>
-                    <label>Currency<input name="currency" value="VND" maxlength="3" required></label>
-                    <label class="customer-adjustment-form__wide">Reason<textarea name="reason" rows="3" required></textarea></label>
-                    <label>Reference<input name="reference" placeholder="Optional idempotency reference"></label>
-                    <div class="customer-adjustment-form__actions">
-                        <button type="submit">Record Adjustment</button>
+            @can('wallets.adjust')
+                <section class="customer-detail-section">
+                    <div class="customer-detail-section__heading">
+                        <h4>Manual Adjustment</h4>
                     </div>
-                </form>
-            </section>
-        @endcan
+                    <form method="POST" action="/admin/customers/{{ $customer->id }}/wallet-adjustments" class="customer-adjustment-form customer-adjustment-form--compact">
+                        @csrf
+                        <label>Direction
+                            <select name="direction">
+                                <option value="credit">credit</option>
+                                <option value="debit">debit</option>
+                            </select>
+                        </label>
+                        <label>Amount<input name="amount" type="number" min="1" required></label>
+                        <label>Currency<input name="currency" value="VND" maxlength="3" required></label>
+                        <label>Reference<input name="reference" placeholder="Optional idempotency reference"></label>
+                        <label class="customer-adjustment-form__wide">Reason<textarea name="reason" rows="2" required></textarea></label>
+                        <div class="customer-adjustment-form__actions">
+                            <button type="submit">Record Adjustment</button>
+                        </div>
+                    </form>
+                </section>
+            @endcan
+        </div>
     </section>
 
     <section class="customer-activity-panel__body" id="customer-ledger-panel" role="tabpanel" aria-labelledby="customer-ledger-tab" hidden>
