@@ -2,31 +2,30 @@
 @section('content')
 <x-page-header
     title="Audit Logs"
-    subtitle="Review operator changes, security events, and system mutations."
     eyebrow="Security"
 />
 
 <div class="panel invoice-filter-panel audit-log-filter-panel">
-    <form class="invoice-filter-form" method="GET" action="/admin/audit-logs">
-        <div class="invoice-filter-fields">
-            <label class="invoice-filter-field" for="actor">
+    <form class="invoice-filter-form audit-log-filter-form" method="GET" action="/admin/audit-logs">
+        <div class="invoice-filter-fields audit-log-filter-fields">
+            <label class="invoice-filter-field audit-log-filter-field" for="actor">
                 <span>Actor</span>
                 <input id="actor" name="actor" value="{{ $filters['actor'] ?? '' }}" placeholder="admin@example.test">
             </label>
-            <label class="invoice-filter-field" for="action">
+            <label class="invoice-filter-field audit-log-filter-field" for="action">
                 <span>Action</span>
                 <input id="action" name="action" value="{{ $filters['action'] ?? '' }}" placeholder="updated">
             </label>
-            <label class="invoice-filter-field" for="auditable_type">
+            <label class="invoice-filter-field audit-log-filter-field" for="auditable_type">
                 <span>Subject Type</span>
                 <input id="auditable_type" name="auditable_type" value="{{ $filters['auditable_type'] ?? '' }}" placeholder="Product">
             </label>
-            <label class="invoice-filter-field" for="auditable_id">
+            <label class="invoice-filter-field audit-log-filter-field" for="auditable_id">
                 <span>Subject ID</span>
                 <input id="auditable_id" name="auditable_id" value="{{ $filters['auditable_id'] ?? '' }}">
             </label>
         </div>
-        <div class="invoice-filter-actions">
+        <div class="invoice-filter-actions audit-log-filter-actions">
             <button type="submit">Filter</button>
             <a class="button secondary button-soft" href="/admin/audit-logs">Clear</a>
         </div>

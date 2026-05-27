@@ -874,7 +874,37 @@
     }
 
     .audit-log-filter-panel {
-        padding: 16px;
+        padding: 12px 14px;
+    }
+
+    .invoice-filter-form.audit-log-filter-form {
+        align-items: center;
+        gap: 12px;
+        grid-template-columns: minmax(0, 1fr) auto;
+    }
+
+    .invoice-filter-fields.audit-log-filter-fields {
+        align-items: center;
+        gap: 12px;
+        grid-template-columns:
+            minmax(180px, 1.2fr)
+            minmax(160px, 0.85fr)
+            minmax(180px, 0.9fr)
+            minmax(150px, 0.8fr);
+    }
+
+    .invoice-filter-field.audit-log-filter-field {
+        gap: 8px;
+        grid-template-columns: max-content minmax(0, 1fr);
+    }
+
+    .invoice-filter-field.audit-log-filter-field input {
+        width: 100%;
+    }
+
+    .invoice-filter-actions.audit-log-filter-actions {
+        align-self: center;
+        flex-wrap: nowrap;
     }
 
     .audit-log-row__action {
