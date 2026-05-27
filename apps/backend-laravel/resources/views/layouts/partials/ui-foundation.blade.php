@@ -880,6 +880,17 @@
         text-transform: none;
     }
 
+    .product-form-field > label,
+    .product-form-field > span {
+        color: inherit;
+        display: block;
+        font: inherit;
+        letter-spacing: 0;
+        line-height: inherit;
+        margin: 0;
+        text-transform: none;
+    }
+
     .product-form-field--wide {
         grid-column: 1 / -1;
     }

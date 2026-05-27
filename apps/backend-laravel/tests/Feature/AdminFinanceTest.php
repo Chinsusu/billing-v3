@@ -36,6 +36,7 @@ class AdminFinanceTest extends TestCase
             ->assertSee('data-customer-search', false)
             ->assertSee('data-customer-option', false)
             ->assertSee('Total amount')
+            ->assertSee('placeholder="Nạp Tiền"', false)
             ->assertSee('Description');
     }
 
