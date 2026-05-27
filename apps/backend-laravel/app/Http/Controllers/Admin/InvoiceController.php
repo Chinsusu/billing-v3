@@ -41,6 +41,9 @@ class InvoiceController extends Controller
                 ->withQueryString(),
             'filters' => $filters,
             'statuses' => ['open', 'paid', 'void'],
+            'customers' => User::role('customer')
+                ->orderBy('email')
+                ->get(['id', 'name', 'email']),
         ]);
     }
 

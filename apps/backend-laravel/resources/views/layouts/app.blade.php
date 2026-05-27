@@ -703,6 +703,8 @@
     </div>
 </div>
 
+@include('layouts.partials.realtime-search-script')
+
 <script>
     // Theme Toggle Handler
     const themeToggleBtn = document.getElementById('theme-toggle');

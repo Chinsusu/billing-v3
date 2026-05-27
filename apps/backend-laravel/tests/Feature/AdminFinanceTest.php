@@ -32,9 +32,10 @@ class AdminFinanceTest extends TestCase
             ->assertSee('invoice-create-customer@example.test')
             ->assertSee('Customer email')
             ->assertSee('Search customers')
-            ->assertSee('data-customer-picker', false)
-            ->assertSee('data-customer-search', false)
-            ->assertSee('data-customer-option', false)
+            ->assertSee('data-realtime-search', false)
+            ->assertSee('data-realtime-search-input', false)
+            ->assertSee('data-realtime-search-option', false)
+            ->assertDontSee('data-customer-picker', false)
             ->assertSee('Total amount')
             ->assertSee('placeholder="Nạp Tiền"', false)
             ->assertSee('Description');
@@ -109,6 +110,7 @@ class AdminFinanceTest extends TestCase
     public function test_admin_invoice_index_uses_compact_filters_and_toast_status(): void
     {
         $admin = $this->adminUser();
+        User::factory()->create(['email' => 'invoice-filter-customer@example.test'])->assignRole('customer');
 
         $this->actingAs($admin)
             ->withSession(['status' => 'Invoice created.'])
@@ -116,6 +118,12 @@ class AdminFinanceTest extends TestCase
             ->assertOk()
             ->assertSee('class="panel invoice-filter-panel"', false)
             ->assertSee('class="invoice-filter-form"', false)
+            ->assertSee('Customer email')
+            ->assertSee('Search customer email')
+            ->assertSee('invoice-filter-customer@example.test')
+            ->assertSee('data-realtime-search', false)
+            ->assertSee('data-realtime-search-input', false)
+            ->assertSee('data-realtime-search-option', false)
             ->assertSee('data-flash-toast', false)
             ->assertSee('data-toast-dismiss-ms="1200"', false);
     }

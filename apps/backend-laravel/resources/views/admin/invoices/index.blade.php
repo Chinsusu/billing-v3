@@ -15,6 +15,17 @@
     @endcan
 </x-page-header>
 
+@php
+    $customerOptions = $customers
+        ->map(fn ($customer) => [
+            'value' => $customer->email,
+            'label' => $customer->email,
+            'meta' => $customer->name,
+            'search' => $customer->email.' '.$customer->name,
+        ])
+        ->all();
+@endphp
+
 <div class="panel invoice-filter-panel">
     <form class="invoice-filter-form" method="GET" action="/admin/invoices">
         <div class="invoice-filter-fields">
@@ -27,10 +38,18 @@
                     @endforeach
                 </select>
             </label>
-            <label class="invoice-filter-field invoice-filter-field--grow" for="customer">
-                <span>Customer email</span>
-                <input id="customer" name="customer" value="{{ $filters['customer'] }}" placeholder="customer@example.test">
-            </label>
+            <x-realtime-search
+                id="invoice-filter-customer"
+                name="customer"
+                label="Customer email"
+                placeholder="Search customer email"
+                :value="$filters['customer']"
+                :options="$customerOptions"
+                empty-text="No matching customers."
+                no-options-text="No customer accounts yet."
+                class="invoice-filter-field invoice-filter-field--grow"
+                :allow-free-text="true"
+            />
         </div>
         <div class="invoice-filter-actions">
             <button type="submit">Filter</button>
