@@ -401,7 +401,7 @@
 
         const header = document.createElement('div');
         header.className = 'provider-account-server__groups-row provider-account-server__groups-row--head';
-        ['Kind', 'Name', 'Billing Group ID', 'Capacity', 'State', 'Provider ID'].forEach((label) => {
+        ['Kind', 'Name', 'Stable Billing Group ID', 'Capacity', 'State', 'Server Group ID'].forEach((label) => {
             const cell = document.createElement('div');
             cell.textContent = label;
             header.appendChild(cell);

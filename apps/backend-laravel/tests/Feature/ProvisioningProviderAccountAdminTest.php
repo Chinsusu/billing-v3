@@ -214,6 +214,8 @@ class ProvisioningProviderAccountAdminTest extends TestCase
             ->assertSee('Add Cloudmini Server')
             ->assertSee('Load Groups')
             ->assertSee("/admin/provisioning-provider-accounts/{$cloudminiOne}/inventory/groups")
+            ->assertSee('Stable Billing Group ID')
+            ->assertSee('Server Group ID')
             ->assertSee('Base URL (Server)')
             ->assertDontSee('secret-1234')
             ->assertDontSee('secret-5678');
