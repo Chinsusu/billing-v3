@@ -131,6 +131,95 @@
         white-space: nowrap;
     }
 
+    .provider-account-server__groups {
+        background: rgba(var(--primary-rgb), 0.025);
+        border: 1px solid var(--border-color);
+        border-radius: 8px;
+        grid-column: 1 / -1;
+        overflow: hidden;
+    }
+
+    .provider-account-server__groups-header {
+        align-items: center;
+        border-bottom: 1px solid var(--border-color);
+        color: var(--text-muted);
+        display: flex;
+        font-size: 0.82rem;
+        justify-content: space-between;
+        padding: 10px 12px;
+    }
+
+    .provider-account-server__groups-table {
+        display: grid;
+        max-height: 260px;
+        overflow: auto;
+    }
+
+    .provider-account-server__groups-row {
+        display: grid;
+        gap: 12px;
+        grid-template-columns: 110px minmax(180px, 1.2fr) minmax(180px, 1fr) 110px 110px minmax(220px, 1fr);
+        padding: 11px 12px;
+    }
+
+    .provider-account-server__groups-row + .provider-account-server__groups-row {
+        border-top: 1px solid var(--border-color);
+    }
+
+    .provider-account-server__groups-row--head {
+        background: rgba(var(--primary-rgb), 0.06);
+        color: var(--text-muted);
+        font-size: 0.74rem;
+        font-weight: 700;
+        letter-spacing: 0;
+        text-transform: uppercase;
+    }
+
+    .provider-account-server__groups-cell {
+        color: var(--text-heading);
+        font-size: 0.84rem;
+        min-width: 0;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+    .provider-account-server__groups-cell--mono {
+        font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+    }
+
+    .provider-account-server__groups-state {
+        border-radius: 999px;
+        display: inline-flex;
+        font-size: 0.76rem;
+        font-weight: 700;
+        line-height: 1;
+        padding: 6px 8px;
+        width: fit-content;
+    }
+
+    .provider-account-server__groups-state--sellable {
+        background: rgba(var(--success), 0.14);
+        color: rgb(var(--success));
+    }
+
+    .provider-account-server__groups-state--limited {
+        background: rgba(var(--warning), 0.16);
+        color: rgb(var(--warning));
+    }
+
+    .provider-account-server__groups-state--exhausted {
+        background: rgba(var(--danger), 0.14);
+        color: rgb(var(--danger));
+    }
+
+    .provider-account-server__groups-empty {
+        color: var(--text-muted);
+        font-size: 0.86rem;
+        padding: 18px 12px;
+        text-align: center;
+    }
+
     @media (max-width: 1280px) {
         .provider-account-server {
             grid-template-columns: 1fr 1fr;
@@ -200,12 +289,34 @@
                             </div>
 
                             <div class="provider-account-server__actions">
+                                @if ($driver === 'cloudmini_v3')
+                                    <button
+                                        type="button"
+                                        class="secondary button-soft"
+                                        data-cloudmini-groups-button
+                                        data-groups-url="/admin/provisioning-provider-accounts/{{ $account->id }}/inventory/groups"
+                                        aria-controls="cloudmini-groups-{{ $account->id }}"
+                                        aria-expanded="false"
+                                    >
+                                        Load Groups
+                                    </button>
+                                @endif
                                 <a class="button secondary" href="/admin/provisioning-provider-accounts/{{ $account->id }}/edit">Edit</a>
                                 <form method="POST" action="/admin/provisioning-provider-accounts/{{ $account->id }}/test">
                                     @csrf
                                     <button type="submit">Test</button>
                                 </form>
                             </div>
+
+                            @if ($driver === 'cloudmini_v3')
+                                <div class="provider-account-server__groups" id="cloudmini-groups-{{ $account->id }}" data-cloudmini-groups-panel hidden>
+                                    <div class="provider-account-server__groups-header">
+                                        <span>Inventory groups for this server</span>
+                                        <span data-cloudmini-groups-status>Not loaded</span>
+                                    </div>
+                                    <div data-cloudmini-groups-output></div>
+                                </div>
+                            @endif
                         </article>
                     @endforeach
                 </div>
@@ -213,4 +324,126 @@
         @endforeach
     </div>
 @endif
+
+<script>
+    document.querySelectorAll('[data-cloudmini-groups-button]').forEach((button) => {
+        const panel = document.getElementById(button.getAttribute('aria-controls'));
+        const status = panel?.querySelector('[data-cloudmini-groups-status]');
+        const output = panel?.querySelector('[data-cloudmini-groups-output]');
+
+        if (!panel || !status || !output) {
+            return;
+        }
+
+        const setPanelVisibility = (visible) => {
+            panel.hidden = !visible;
+            button.setAttribute('aria-expanded', visible ? 'true' : 'false');
+        };
+
+        button.addEventListener('click', async () => {
+            if (button.dataset.loaded === 'true') {
+                const nextVisible = panel.hidden;
+                setPanelVisibility(nextVisible);
+                button.textContent = nextVisible ? 'Hide Groups' : 'Show Groups';
+                return;
+            }
+
+            setPanelVisibility(true);
+            button.disabled = true;
+            button.textContent = 'Loading...';
+            status.textContent = 'Loading';
+            output.innerHTML = '<div class="provider-account-server__groups-empty">Loading inventory groups...</div>';
+
+            try {
+                const response = await fetch(button.dataset.groupsUrl, {
+                    headers: {
+                        Accept: 'application/json',
+                        'X-Requested-With': 'XMLHttpRequest',
+                    },
+                });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}`);
+                }
+
+                const payload = await response.json();
+                const groups = Array.isArray(payload.groups) ? payload.groups : [];
+                renderCloudminiGroups(output, groups);
+                status.textContent = `${groups.length} groups`;
+                button.dataset.loaded = 'true';
+                button.textContent = 'Hide Groups';
+            } catch (error) {
+                status.textContent = 'Load failed';
+                output.innerHTML = '<div class="provider-account-server__groups-empty">Could not load groups from this server.</div>';
+                button.textContent = 'Retry Groups';
+            } finally {
+                button.disabled = false;
+            }
+        });
+    });
+
+    function cloudminiText(value) {
+        if (value === null || value === undefined || value === '') {
+            return '-';
+        }
+
+        return String(value);
+    }
+
+    function renderCloudminiGroups(container, groups) {
+        if (groups.length === 0) {
+            container.innerHTML = '<div class="provider-account-server__groups-empty">No inventory groups returned.</div>';
+            return;
+        }
+
+        const table = document.createElement('div');
+        table.className = 'provider-account-server__groups-table';
+
+        const header = document.createElement('div');
+        header.className = 'provider-account-server__groups-row provider-account-server__groups-row--head';
+        ['Kind', 'Name', 'Billing Group ID', 'Capacity', 'State', 'Provider ID'].forEach((label) => {
+            const cell = document.createElement('div');
+            cell.textContent = label;
+            header.appendChild(cell);
+        });
+        table.appendChild(header);
+
+        groups.forEach((group) => {
+            const row = document.createElement('div');
+            row.className = 'provider-account-server__groups-row';
+            const capacity = group.allocatable_units ?? group.free_ip_count ?? '-';
+            const state = cloudminiText(group.sell_state);
+            const cells = [
+                [group.kind, true],
+                [group.name, false],
+                [group.billing_group_id, true],
+                [capacity, true],
+                [state, false, state],
+                [group.id, true],
+            ];
+
+            cells.forEach(([value, mono, stateValue]) => {
+                const cell = document.createElement('div');
+                cell.className = `provider-account-server__groups-cell${mono ? ' provider-account-server__groups-cell--mono' : ''}`;
+                cell.title = cloudminiText(value);
+
+                if (stateValue) {
+                    const badge = document.createElement('span');
+                    const stateClass = cloudminiText(stateValue).toLowerCase().replace(/[^a-z0-9_-]/g, '-');
+                    badge.className = `provider-account-server__groups-state provider-account-server__groups-state--${stateClass}`;
+                    badge.textContent = cloudminiText(value);
+                    cell.appendChild(badge);
+                } else {
+                    cell.textContent = cloudminiText(value);
+                }
+
+                row.appendChild(cell);
+            });
+
+            table.appendChild(row);
+        });
+
+        container.replaceChildren(table);
+    }
+</script>
 @endsection

@@ -6,6 +6,7 @@ use App\Models\User;
 use Database\Seeders\RolesAndPermissionsSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Str;
 use Tests\TestCase;
 
@@ -211,9 +212,78 @@ class ProvisioningProviderAccountAdminTest extends TestCase
                 'Provider A Main',
             ])
             ->assertSee('Add Cloudmini Server')
+            ->assertSee('Load Groups')
+            ->assertSee("/admin/provisioning-provider-accounts/{$cloudminiOne}/inventory/groups")
             ->assertSee('Base URL (Server)')
             ->assertDontSee('secret-1234')
             ->assertDontSee('secret-5678');
+    }
+
+    public function test_admin_can_fetch_cloudmini_inventory_groups_for_provider_account(): void
+    {
+        $admin = $this->adminUser();
+        $accountId = (string) Str::uuid();
+        DB::table('provisioning_provider_accounts')->insert([
+            'id' => $accountId,
+            'slug' => 'cloudmini-prod-1',
+            'name' => 'Cloudmini Prod 1',
+            'driver' => 'cloudmini_v3',
+            'base_url' => 'https://cloudmini-prod-1.example.test',
+            'provision_path' => null,
+            'auth_type' => 'header',
+            'auth_header_name' => 'X-API-Key',
+            'api_key' => app('encrypter')->encrypt('cloudmini-secret-1234', false),
+            'api_key_last_four' => '1234',
+            'enabled' => true,
+            'timeout_seconds' => 15,
+            'request_template' => '{}',
+            'response_external_id_path' => 'resource_snapshot.id',
+            'response_status_path' => 'state',
+            'response_config_path' => 'resource_snapshot',
+            'created_by_id' => $admin->id,
+            'updated_by_id' => $admin->id,
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
+
+        Http::fake([
+            'https://cloudmini-prod-1.example.test/api/v3/inventory/groups?kind=ipv4_dc' => Http::response([
+                'data' => [
+                    [
+                        'id' => 'group-uuid-1',
+                        'name' => 'VN Datacenter',
+                        'billing_group_id' => 'vn-dc',
+                        'sell_state' => 'sellable',
+                        'allocatable_units' => 12,
+                    ],
+                ],
+            ]),
+            'https://cloudmini-prod-1.example.test/api/v3/inventory/groups?kind=residential' => Http::response([
+                'data' => [
+                    [
+                        'id' => 'group-uuid-2',
+                        'name' => 'VN Residential',
+                        'billing_group_id' => 'vn-residential',
+                        'sell_state' => 'limited',
+                        'free_ip_count' => 4,
+                    ],
+                ],
+            ]),
+        ]);
+
+        $this->actingAs($admin)
+            ->getJson("/admin/provisioning-provider-accounts/{$accountId}/inventory/groups")
+            ->assertOk()
+            ->assertJsonPath('account.slug', 'cloudmini-prod-1')
+            ->assertJsonPath('groups.0.kind', 'ipv4_dc')
+            ->assertJsonPath('groups.0.billing_group_id', 'vn-dc')
+            ->assertJsonPath('groups.1.kind', 'residential')
+            ->assertJsonPath('groups.1.billing_group_id', 'vn-residential');
+
+        Http::assertSent(fn ($request): bool => $request->url() === 'https://cloudmini-prod-1.example.test/api/v3/inventory/groups?kind=ipv4_dc'
+            && $request->hasHeader('X-API-Key', 'cloudmini-secret-1234'));
+        Http::assertSent(fn ($request): bool => $request->url() === 'https://cloudmini-prod-1.example.test/api/v3/inventory/groups?kind=residential'
+            && $request->hasHeader('X-API-Key', 'cloudmini-secret-1234'));
     }
 
     public function test_admin_can_create_cloudmini_provider_account_without_generic_mapping_fields(): void

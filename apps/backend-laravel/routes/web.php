@@ -5,6 +5,7 @@ use App\Http\Controllers\Admin\AdminDashboardController;
 use App\Http\Controllers\Admin\BankIntegrationController;
 use App\Http\Controllers\Admin\BankIntegrationTestController;
 use App\Http\Controllers\Admin\BillingReportController;
+use App\Http\Controllers\Admin\CloudminiProviderInventoryGroupController;
 use App\Http\Controllers\Admin\CustomerController;
 use App\Http\Controllers\Admin\CustomerImpersonationController;
 use App\Http\Controllers\Admin\CustomerResellerController;
@@ -200,6 +201,7 @@ Route::middleware('auth')->group(function (): void {
                     Route::get('/provisioning-provider-accounts', [ProvisioningProviderAccountController::class, 'index'])->middleware('permission:provisioning_provider_accounts.manage')->name('provisioning-provider-accounts.index');
                     Route::get('/provisioning-provider-accounts/create', [ProvisioningProviderAccountController::class, 'create'])->middleware('permission:provisioning_provider_accounts.manage')->name('provisioning-provider-accounts.create');
                     Route::post('/provisioning-provider-accounts', [ProvisioningProviderAccountController::class, 'store'])->middleware('permission:provisioning_provider_accounts.manage')->name('provisioning-provider-accounts.store');
+                    Route::get('/provisioning-provider-accounts/{provisioningProviderAccount}/inventory/groups', CloudminiProviderInventoryGroupController::class)->middleware('permission:provisioning_provider_accounts.manage')->name('provisioning-provider-accounts.inventory-groups');
                     Route::get('/provisioning-provider-accounts/{provisioningProviderAccount}/edit', [ProvisioningProviderAccountController::class, 'edit'])->middleware('permission:provisioning_provider_accounts.manage')->name('provisioning-provider-accounts.edit');
                     Route::put('/provisioning-provider-accounts/{provisioningProviderAccount}', [ProvisioningProviderAccountController::class, 'update'])->middleware('permission:provisioning_provider_accounts.manage')->name('provisioning-provider-accounts.update');
                     Route::post('/provisioning-provider-accounts/{provisioningProviderAccount}/test', ProvisioningProviderAccountTestController::class)->middleware('permission:provisioning_provider_accounts.manage')->name('provisioning-provider-accounts.test');
