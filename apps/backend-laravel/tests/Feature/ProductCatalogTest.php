@@ -299,7 +299,9 @@ class ProductCatalogTest extends TestCase
             ->assertOk()
             ->assertSee('Cloudmini Kind')
             ->assertSee('Reserve Capacity')
-            ->assertSee('Cloudmini Route 1');
+            ->assertSee('Cloudmini Route 1')
+            ->assertSee('Location')
+            ->assertSee("/admin/provisioning-provider-accounts/{$primaryAccountId}/inventory/groups");
 
         $this->actingAs($admin)->post('/admin/products', [
             'code' => 'cloudmini-res-30d',
@@ -326,7 +328,7 @@ class ProductCatalogTest extends TestCase
                     'enabled' => '1',
                     'priority' => '10',
                     'weight' => '100',
-                    'billing_group_id' => 'vn-residential',
+                    'locations' => ['vn-residential', 'vn-fpt'],
                     'node_selector_type' => 'auto',
                     'node_name' => '',
                     'options' => '{"note":"primary"}',
@@ -356,6 +358,13 @@ class ProductCatalogTest extends TestCase
             'provider_account_id' => $primaryAccountId,
             'priority' => 10,
             'billing_group_id' => 'vn-residential',
+            'node_selector_type' => 'auto',
+        ]);
+        $this->assertDatabaseHas('product_provider_routes', [
+            'product_id' => $product->id,
+            'provider_account_id' => $primaryAccountId,
+            'priority' => 10,
+            'billing_group_id' => 'vn-fpt',
             'node_selector_type' => 'auto',
         ]);
         $this->assertDatabaseHas('product_provider_routes', [

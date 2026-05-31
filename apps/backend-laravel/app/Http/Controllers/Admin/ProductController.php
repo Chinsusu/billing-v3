@@ -118,17 +118,30 @@ class ProductController extends Controller
     private function routesForSave(array $routes): array
     {
         return collect($routes)
-            ->map(function (array $route): array {
-                return [
+            ->flatMap(function (array $route): array {
+                $locations = collect($route['locations'] ?? [])
+                    ->map(fn (mixed $location): ?string => $this->nullableString($location))
+                    ->filter()
+                    ->unique()
+                    ->values();
+
+                if ($locations->isEmpty() && $this->nullableString($route['billing_group_id'] ?? null) !== null) {
+                    $locations = collect([$this->nullableString($route['billing_group_id'])]);
+                }
+
+                $baseRoute = [
                     'provider_account_id' => $this->nullableString($route['provider_account_id'] ?? null),
                     'enabled' => (bool) ($route['enabled'] ?? false),
                     'priority' => max(1, (int) ($route['priority'] ?? 100)),
                     'weight' => max(1, (int) ($route['weight'] ?? 100)),
-                    'billing_group_id' => $this->nullableString($route['billing_group_id'] ?? null),
                     'node_selector_type' => $route['node_selector_type'] ?? 'auto',
                     'node_name' => $this->nullableString($route['node_name'] ?? null),
                     'options' => $this->jsonObject($route['options'] ?? null),
                 ];
+
+                return $locations
+                    ->map(fn (string $location): array => $baseRoute + ['billing_group_id' => $location])
+                    ->all();
             })
             ->filter(fn (array $route): bool => $route['provider_account_id'] !== null && $route['billing_group_id'] !== null)
             ->values()

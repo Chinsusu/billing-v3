@@ -231,23 +231,55 @@
             </label>
 
             @foreach ($providerRoutes as $index => $route)
-                <div class="product-form-field product-form-field--wide" data-product-provider-cloudmini-field>
+                @php
+                    $selectedLocations = collect($route['locations'] ?? [])
+                        ->map(fn ($location) => is_string($location) ? trim($location) : $location)
+                        ->filter()
+                        ->values();
+                    if ($selectedLocations->isEmpty() && ($route['billing_group_id'] ?? '') !== '') {
+                        $selectedLocations = collect([$route['billing_group_id']]);
+                    }
+                @endphp
+                <div class="product-form-field product-form-field--wide" data-product-provider-cloudmini-field data-cloudmini-route>
                     <span>Cloudmini Route {{ $index + 1 }}</span>
                     <div class="product-form-fields product-form-fields--three">
                         <label class="product-form-field" for="product-provider-route-account-{{ $index }}">
                             <span>Cloudmini Account</span>
-                            <select id="product-provider-route-account-{{ $index }}" name="provider_routes[{{ $index }}][provider_account_id]">
+                            <select id="product-provider-route-account-{{ $index }}" name="provider_routes[{{ $index }}][provider_account_id]" data-cloudmini-route-account>
                                 <option value="">No route</option>
                                 @foreach ($providerAccounts->where('driver', 'cloudmini_v3') as $account)
-                                    <option value="{{ $account->id }}" @selected(($route['provider_account_id'] ?? '') === $account->id)>{{ $account->name }} ({{ $account->slug }})</option>
+                                    <option
+                                        value="{{ $account->id }}"
+                                        data-groups-url="/admin/provisioning-provider-accounts/{{ $account->id }}/inventory/groups"
+                                        @selected(($route['provider_account_id'] ?? '') === $account->id)
+                                    >
+                                        {{ $account->name }} ({{ $account->slug }})
+                                    </option>
                                 @endforeach
                             </select>
                         </label>
 
-                        <label class="product-form-field" for="product-provider-route-group-{{ $index }}">
-                            <span>Billing Group ID</span>
-                            <input id="product-provider-route-group-{{ $index }}" name="provider_routes[{{ $index }}][billing_group_id]" value="{{ $route['billing_group_id'] ?? '' }}" placeholder="vn-residential">
-                        </label>
+                        <div
+                            class="product-form-field product-form-field--wide cloudmini-location-field"
+                            data-cloudmini-location-field
+                            data-selected-locations='@json($selectedLocations->all())'
+                        >
+                            <span>Location</span>
+                            <input id="product-provider-route-group-{{ $index }}" type="hidden" name="provider_routes[{{ $index }}][billing_group_id]" value="{{ $route['billing_group_id'] ?? '' }}" data-cloudmini-route-group-input>
+                            <div class="cloudmini-location-list" data-cloudmini-location-list>
+                                @forelse ($selectedLocations as $location)
+                                    <label class="cloudmini-location-option">
+                                        <input type="checkbox" name="provider_routes[{{ $index }}][locations][]" value="{{ $location }}" checked>
+                                        <span>
+                                            <strong>{{ $location }}</strong>
+                                            <small>Selected location</small>
+                                        </span>
+                                    </label>
+                                @empty
+                                    <div class="cloudmini-location-empty">Select a Cloudmini account to load locations.</div>
+                                @endforelse
+                            </div>
+                        </div>
 
                         <label class="product-form-field" for="product-provider-route-enabled-{{ $index }}">
                             <span>Enabled</span>
@@ -392,6 +424,9 @@
             const providerCloudminiFields = Array.from(form.querySelectorAll('[data-product-provider-cloudmini-field]'));
             const providerCloudminiControls = Array.from(form.querySelectorAll('[data-product-provider-cloudmini-control]'));
             const providerLifecycleResponseSection = form.querySelector('[data-product-provider-lifecycle-response-section]');
+            const cloudminiKindSelect = form.querySelector('#product-cloudmini-kind');
+            const cloudminiRouteRows = Array.from(form.querySelectorAll('[data-cloudmini-route]'));
+            const cloudminiGroupCache = new Map();
 
             if (!sourceSelect || !unitSelect || !durationField || !durationInput) {
                 return;
@@ -432,6 +467,142 @@
             };
 
             [sourceField, unitField, countField, durationField, ...providerResponseFields, ...providerLookupFields, ...providerLegacyFields, ...providerCloudminiFields].forEach(rememberRequiredState);
+
+            const selectedLocationsFor = (row) => {
+                const checked = Array.from(row.querySelectorAll('[data-cloudmini-location-list] input[type="checkbox"]:checked'))
+                    .map((input) => input.value)
+                    .filter(Boolean);
+
+                if (checked.length > 0) {
+                    return new Set(checked);
+                }
+
+                const field = row.querySelector('[data-cloudmini-location-field]');
+
+                try {
+                    return new Set(JSON.parse(field?.dataset.selectedLocations || '[]'));
+                } catch (error) {
+                    return new Set();
+                }
+            };
+
+            const syncRouteGroupInput = (row) => {
+                const groupInput = row.querySelector('[data-cloudmini-route-group-input]');
+                const firstSelected = row.querySelector('[data-cloudmini-location-list] input[type="checkbox"]:checked');
+
+                if (groupInput) {
+                    groupInput.value = firstSelected?.value || '';
+                }
+            };
+
+            const locationInputNameFor = (row) => {
+                const accountSelect = row.querySelector('[data-cloudmini-route-account]');
+
+                return (accountSelect?.name || 'provider_routes[0][provider_account_id]').replace('[provider_account_id]', '[locations][]');
+            };
+
+            const setLocationEmpty = (row, message) => {
+                const list = row.querySelector('[data-cloudmini-location-list]');
+                if (!list) {
+                    return;
+                }
+
+                const empty = document.createElement('div');
+                empty.className = 'cloudmini-location-empty';
+                empty.textContent = message;
+                list.replaceChildren(empty);
+                syncRouteGroupInput(row);
+            };
+
+            const renderLocationOptions = (row, groups) => {
+                const list = row.querySelector('[data-cloudmini-location-list]');
+                if (!list) {
+                    return;
+                }
+
+                const selected = selectedLocationsFor(row);
+                const currentKind = cloudminiKindSelect?.value || 'ipv4_dc';
+                const locations = Array.from(groups
+                    .filter((group) => group && group.kind === currentKind && group.billing_group_id)
+                    .reduce((map, group) => map.set(group.billing_group_id, group), new Map())
+                    .values());
+
+                if (locations.length === 0) {
+                    setLocationEmpty(row, 'No locations returned for this kind.');
+                    return;
+                }
+
+                const inputName = locationInputNameFor(row);
+                const nodes = locations.map((group) => {
+                    const label = document.createElement('label');
+                    label.className = 'cloudmini-location-option';
+
+                    const input = document.createElement('input');
+                    input.type = 'checkbox';
+                    input.name = inputName;
+                    input.value = group.billing_group_id;
+                    input.checked = selected.has(group.billing_group_id);
+                    input.addEventListener('change', () => syncRouteGroupInput(row));
+
+                    const text = document.createElement('span');
+                    const title = document.createElement('strong');
+                    const meta = document.createElement('small');
+                    const capacity = group.allocatable_units ?? group.free_ip_count ?? '-';
+
+                    title.textContent = group.name || group.billing_group_id;
+                    meta.textContent = `${group.billing_group_id} / ${group.sell_state || 'unknown'} / capacity ${capacity}`;
+                    text.append(title, meta);
+                    label.append(input, text);
+
+                    return label;
+                });
+
+                list.replaceChildren(...nodes);
+                syncRouteGroupInput(row);
+            };
+
+            const loadCloudminiLocations = async (row) => {
+                const accountSelect = row.querySelector('[data-cloudmini-route-account]');
+                const groupsUrl = accountSelect?.selectedOptions?.[0]?.dataset.groupsUrl;
+
+                if (!groupsUrl) {
+                    setLocationEmpty(row, 'Select a Cloudmini account to load locations.');
+                    return;
+                }
+
+                setLocationEmpty(row, 'Loading locations...');
+
+                try {
+                    if (!cloudminiGroupCache.has(groupsUrl)) {
+                        cloudminiGroupCache.set(groupsUrl, fetch(groupsUrl, {
+                            headers: {
+                                Accept: 'application/json',
+                                'X-Requested-With': 'XMLHttpRequest',
+                            },
+                        }).then((response) => {
+                            if (!response.ok) {
+                                throw new Error(`HTTP ${response.status}`);
+                            }
+
+                            return response.json();
+                        }));
+                    }
+
+                    const payload = await cloudminiGroupCache.get(groupsUrl);
+                    renderLocationOptions(row, Array.isArray(payload.groups) ? payload.groups : []);
+                } catch (error) {
+                    cloudminiGroupCache.delete(groupsUrl);
+                    setLocationEmpty(row, 'Could not load locations for this account.');
+                }
+            };
+
+            const refreshCloudminiLocations = () => {
+                if (providerModeSelect?.value !== 'cloudmini_v3') {
+                    return;
+                }
+
+                cloudminiRouteRows.forEach((row) => loadCloudminiLocations(row));
+            };
 
             const syncLifecycleControls = () => {
                 const usesCloudmini = providerModeSelect?.value === 'cloudmini_v3';
@@ -479,6 +650,10 @@
                 setFieldsHiddenAndDisabled(providerCloudminiFields, mode !== 'cloudmini_v3');
                 setControlsDisabled(providerCloudminiControls, mode !== 'cloudmini_v3');
                 syncLifecycleControls();
+
+                if (mode === 'cloudmini_v3') {
+                    refreshCloudminiLocations();
+                }
             };
 
             unitSelect.addEventListener('change', () => {
@@ -490,6 +665,10 @@
             });
             sourceSelect.addEventListener('change', syncLifecycleControls);
             providerModeSelect?.addEventListener('change', syncProviderModeControls);
+            cloudminiKindSelect?.addEventListener('change', refreshCloudminiLocations);
+            cloudminiRouteRows.forEach((row) => {
+                row.querySelector('[data-cloudmini-route-account]')?.addEventListener('change', () => loadCloudminiLocations(row));
+            });
             durationInput.addEventListener('input', syncLifecycleControls);
             countInput?.addEventListener('input', syncLifecycleControls);
             syncProviderModeControls();

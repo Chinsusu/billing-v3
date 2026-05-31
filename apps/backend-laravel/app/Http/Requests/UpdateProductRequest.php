@@ -87,6 +87,8 @@ class UpdateProductRequest extends FormRequest
             'provider_routes.*.priority' => ['nullable', 'integer', 'min:1', 'max:1000000'],
             'provider_routes.*.weight' => ['nullable', 'integer', 'min:1', 'max:1000000'],
             'provider_routes.*.billing_group_id' => ['nullable', 'string', 'max:160'],
+            'provider_routes.*.locations' => ['nullable', 'array'],
+            'provider_routes.*.locations.*' => ['nullable', 'string', 'max:160'],
             'provider_routes.*.node_selector_type' => ['nullable', Rule::in(['auto', 'node_name'])],
             'provider_routes.*.node_name' => ['nullable', 'string', 'max:160'],
             'provider_routes.*.options' => ['nullable', 'json'],

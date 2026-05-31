@@ -1313,6 +1313,11 @@
         text-transform: none;
     }
 
+    .product-form-field[hidden],
+    .product-form-section[hidden] {
+        display: none !important;
+    }
+
     .product-form-field > label,
     .product-form-field > span {
         color: inherit;
@@ -1364,6 +1369,68 @@
         font-weight: 500;
         line-height: 1.45;
         margin-top: 0;
+    }
+
+    .cloudmini-location-list {
+        border: 1px solid var(--border-subtle);
+        border-radius: 8px;
+        display: grid;
+        gap: 8px;
+        max-height: 230px;
+        overflow: auto;
+        padding: 10px;
+    }
+
+    .cloudmini-location-option {
+        align-items: center;
+        background: var(--surface-elevated);
+        border: 1px solid var(--border-subtle);
+        border-radius: 8px;
+        cursor: pointer;
+        display: grid;
+        gap: 10px;
+        grid-template-columns: auto minmax(0, 1fr);
+        min-height: 48px;
+        padding: 9px 10px;
+    }
+
+    .cloudmini-location-option input {
+        min-height: 0;
+    }
+
+    .cloudmini-location-option strong,
+    .cloudmini-location-option small {
+        display: block;
+        letter-spacing: 0;
+        line-height: 1.3;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+    .cloudmini-location-option strong {
+        color: var(--text-heading);
+        font-size: 0.88rem;
+    }
+
+    .cloudmini-location-option small {
+        color: var(--text-muted);
+        font-size: 0.78rem;
+        font-weight: 600;
+        margin-top: 2px;
+    }
+
+    .cloudmini-location-option:has(input:checked) {
+        background: rgba(var(--primary-rgb), 0.08);
+        border-color: rgba(var(--primary-rgb), 0.35);
+    }
+
+    .cloudmini-location-empty {
+        color: var(--text-muted);
+        font-size: 0.84rem;
+        font-weight: 600;
+        padding: 12px;
+        text-align: center;
     }
 
     .realtime-search {
