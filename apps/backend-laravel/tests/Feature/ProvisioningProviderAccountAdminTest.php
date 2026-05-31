@@ -152,6 +152,31 @@ class ProvisioningProviderAccountAdminTest extends TestCase
             ->assertDontSee('cloudmini-secret-1234');
     }
 
+    public function test_admin_can_create_cloudmini_provider_account_without_generic_mapping_fields(): void
+    {
+        $admin = $this->adminUser();
+
+        $this->actingAs($admin)->post('/admin/provisioning-provider-accounts', [
+            'slug' => 'cloudmini-prod-2',
+            'name' => 'Cloudmini Prod 2',
+            'driver' => 'cloudmini_v3',
+            'base_url' => 'https://cloudmini-prod-2.example.test',
+            'auth_type' => 'header',
+            'auth_header_name' => 'X-API-Key',
+            'api_key' => 'cloudmini-secret-5678',
+            'enabled' => '1',
+            'timeout_seconds' => 15,
+        ])->assertRedirect('/admin/provisioning-provider-accounts');
+
+        $account = DB::table('provisioning_provider_accounts')->where('slug', 'cloudmini-prod-2')->first();
+        $this->assertSame('cloudmini_v3', $account->driver);
+        $this->assertNull($account->provision_path);
+        $this->assertSame([], json_decode($account->request_template, true));
+        $this->assertSame('resource_snapshot.id', $account->response_external_id_path);
+        $this->assertSame('state', $account->response_status_path);
+        $this->assertSame('resource_snapshot', $account->response_config_path);
+    }
+
     public function test_admin_can_update_public_provider_config_without_overwriting_blank_secret(): void
     {
         $admin = $this->adminUser();
