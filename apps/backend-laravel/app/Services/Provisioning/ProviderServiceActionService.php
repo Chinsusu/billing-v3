@@ -32,6 +32,16 @@ class ProviderServiceActionService
 
         $provider = $this->providerSnapshot($service);
         $path = $provider[self::PATH_KEYS[$action]] ?? null;
+
+        if (($provider['driver'] ?? null) === 'cloudmini_v3') {
+            $account = $this->providerAccount($provider);
+            if (! $account instanceof ProvisioningProviderAccount) {
+                throw new RuntimeException('Provider account is not configured for this service.');
+            }
+
+            return $this->executeCloudmini($account, $service, $action, $idempotencyKey);
+        }
+
         if (! is_string($path) || trim($path) === '') {
             return null;
         }
@@ -108,8 +118,125 @@ class ProviderServiceActionService
 
         $provider = $this->providerSnapshot($service);
         $path = $provider[self::PATH_KEYS[$action]] ?? null;
+        if (($provider['driver'] ?? null) === 'cloudmini_v3') {
+            return in_array($action, ['suspend', 'cancel', 'sync'], true);
+        }
 
         return is_string($path) && trim($path) !== '';
+    }
+
+    private function executeCloudmini(ProvisioningProviderAccount $account, Service $service, string $action, string $idempotencyKey): ProviderServiceActionResult
+    {
+        if (empty($service->external_id)) {
+            throw new RuntimeException('Provider service external id is missing.');
+        }
+
+        if ($action === 'sync') {
+            $url = $this->cloudminiEndpoint($account, "/api/v3/proxies/{$service->external_id}");
+            $log = $this->recorder->startForService($service, $account, 'provider_service_sync', $account->driver, $url, []);
+            $startedAt = microtime(true);
+            $response = $this->pendingRequest($account)->get($url);
+            $durationMs = $this->recorder->durationSince($startedAt);
+            $data = $this->cloudminiData($response->json());
+
+            if (! $response->successful()) {
+                $message = "Provider {$action} action returned HTTP {$response->status()}.";
+                $this->recorder->failure($log, $durationMs, 'provider_action_http_error', $message, $response->status(), $data);
+
+                throw new RuntimeException($message);
+            }
+
+            $this->recorder->success($log, $durationMs, $response->status(), $data);
+
+            return new ProviderServiceActionResult(
+                status: $this->cloudminiStatusFromProxy($data),
+                expiresAt: null,
+                response: $data,
+            );
+        }
+
+        $method = $action === 'cancel' ? 'delete' : 'post';
+        $path = $action === 'cancel'
+            ? "/api/v3/proxies/{$service->external_id}"
+            : "/api/v3/proxies/{$service->external_id}/actions/stop";
+        $url = $this->cloudminiEndpoint($account, $path);
+        $payload = ['action' => $action, 'service_id' => $service->id, 'external_id' => $service->external_id];
+        $log = $this->recorder->startForService($service, $account, "provider_service_{$action}", $account->driver, $url, $payload);
+        $startedAt = microtime(true);
+        $response = $this->pendingRequest($account)
+            ->withHeaders(['Idempotency-Key' => $idempotencyKey])
+            ->{$method}($url, $method === 'post' ? $payload : []);
+        $durationMs = $this->recorder->durationSince($startedAt);
+        $data = $this->cloudminiData($response->json());
+
+        if (! $response->successful()) {
+            $message = "Provider {$action} action returned HTTP {$response->status()}.";
+            $this->recorder->failure($log, $durationMs, 'provider_action_http_error', $message, $response->status(), $data);
+
+            throw new RuntimeException($message);
+        }
+
+        $operationId = data_get($data, 'operation.id');
+        if (is_string($operationId) && $operationId !== '') {
+            $this->pollCloudminiOperation($account, $operationId);
+        }
+
+        $this->recorder->success($log, $durationMs, $response->status(), $data);
+
+        return new ProviderServiceActionResult(
+            status: $action === 'cancel' ? 'cancelled' : 'expired',
+            expiresAt: null,
+            response: $data,
+        );
+    }
+
+    private function pollCloudminiOperation(ProvisioningProviderAccount $account, string $operationId): array
+    {
+        for ($i = 0; $i < 5; $i++) {
+            $response = $this->pendingRequest($account)->get($this->cloudminiEndpoint($account, "/api/v3/operations/{$operationId}"));
+            $data = $this->cloudminiData($response->json());
+            $state = (string) ($data['state'] ?? '');
+
+            if (! $response->successful()) {
+                throw new RuntimeException("Provider operation poll returned HTTP {$response->status()}.");
+            }
+
+            if ($state === 'succeeded') {
+                return $data;
+            }
+
+            if (in_array($state, ['failed', 'timed_out', 'cancelled'], true)) {
+                throw new RuntimeException("Provider operation {$state}.");
+            }
+        }
+
+        throw new RuntimeException('Provider operation did not finish.');
+    }
+
+    private function cloudminiEndpoint(ProvisioningProviderAccount $account, string $path): string
+    {
+        return rtrim((string) $account->base_url, '/').'/'.ltrim($path, '/');
+    }
+
+    private function cloudminiData(mixed $json): array
+    {
+        if (! is_array($json)) {
+            return [];
+        }
+
+        $data = $json['data'] ?? $json;
+
+        return is_array($data) ? $data : [];
+    }
+
+    private function cloudminiStatusFromProxy(array $data): ?string
+    {
+        return match (strtolower((string) ($data['status'] ?? ''))) {
+            'running', 'active' => 'active',
+            'stopped', 'suspended', 'expired' => 'expired',
+            'deleted', 'deleting', 'cancelled', 'canceled' => 'cancelled',
+            default => null,
+        };
     }
 
     private function pendingRequest(ProvisioningProviderAccount $account): PendingRequest

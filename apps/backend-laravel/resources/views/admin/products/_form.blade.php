@@ -1,9 +1,26 @@
 @php
-    $providerOptions = old('provider_options', json_encode($product->provider_options ?? [], JSON_PRETTY_PRINT));
+    $providerOptionsArray = is_array($product->provider_options ?? null) ? $product->provider_options : [];
+    $providerOptions = old('provider_options', json_encode($providerOptionsArray, JSON_PRETTY_PRINT));
     $statusValue = old('status', $product->status ?: 'draft');
     $typeValue = old('type', $product->type ?: 'proxy');
     $lifecycleSourceValue = old('lifecycle_source', $product->lifecycle_source ?: 'local_policy');
     $lifecycleUnitValue = old('lifecycle_unit', $product->lifecycle_unit ?: 'day');
+    $providerRoutes = old('provider_routes');
+    if ($providerRoutes === null) {
+        $providerRoutes = $product->providerRoutes?->map(fn ($route) => [
+            'provider_account_id' => $route->provider_account_id,
+            'enabled' => $route->enabled ? '1' : '0',
+            'priority' => $route->priority,
+            'weight' => $route->weight,
+            'billing_group_id' => $route->billing_group_id,
+            'node_selector_type' => $route->node_selector_type,
+            'node_name' => $route->node_name,
+            'options' => json_encode($route->options ?? [], JSON_PRETTY_PRINT),
+        ])->values()->all() ?? [];
+    }
+    if ($providerRoutes === []) {
+        $providerRoutes = [[]];
+    }
 @endphp
 
 @csrf
@@ -156,10 +173,106 @@
                 <input id="product-provider-sync-path" name="provider_sync_path" value="{{ old('provider_sync_path', $product->provider_sync_path) }}" placeholder="/api/services/{external_id}">
             </label>
 
+            <label class="product-form-field" for="product-cloudmini-kind">
+                <span>Cloudmini Kind</span>
+                <select id="product-cloudmini-kind" name="cloudmini_options[kind]">
+                    @foreach (['ipv4_dc' => 'IPv4 Datacenter', 'residential' => 'Residential'] as $value => $label)
+                        <option value="{{ $value }}" @selected(old('cloudmini_options.kind', $providerOptionsArray['kind'] ?? 'ipv4_dc') === $value)>{{ $label }}</option>
+                    @endforeach
+                </select>
+            </label>
+
+            <label class="product-form-field" for="product-cloudmini-protocol">
+                <span>Cloudmini Protocol</span>
+                <input id="product-cloudmini-protocol" name="cloudmini_options[protocol]" value="{{ old('cloudmini_options.protocol', $providerOptionsArray['protocol'] ?? 'default') }}" placeholder="default">
+            </label>
+
+            <label class="product-form-field" for="product-cloudmini-speed">
+                <span>Speed Limit Mbps</span>
+                <input id="product-cloudmini-speed" type="number" name="cloudmini_options[speed_limit_mbps]" value="{{ old('cloudmini_options.speed_limit_mbps', $providerOptionsArray['speed_limit_mbps'] ?? '') }}" min="1">
+            </label>
+
+            <label class="product-form-field" for="product-cloudmini-bandwidth">
+                <span>Bandwidth Limit MB</span>
+                <input id="product-cloudmini-bandwidth" type="number" name="cloudmini_options[bandwidth_limit_mb]" value="{{ old('cloudmini_options.bandwidth_limit_mb', $providerOptionsArray['bandwidth_limit_mb'] ?? '') }}" min="0">
+            </label>
+
+            <label class="product-form-field" for="product-cloudmini-outbound-ip">
+                <span>Preferred Outbound IP</span>
+                <input id="product-cloudmini-outbound-ip" name="cloudmini_options[preferred_outbound_ip]" value="{{ old('cloudmini_options.preferred_outbound_ip', $providerOptionsArray['preferred_outbound_ip'] ?? '') }}">
+            </label>
+
+            <input type="hidden" name="cloudmini_options[reserve_capacity]" value="0">
+            <label class="product-form-toggle" for="product-cloudmini-reserve-capacity">
+                <input id="product-cloudmini-reserve-capacity" type="checkbox" name="cloudmini_options[reserve_capacity]" value="1" @checked(old('cloudmini_options.reserve_capacity', $providerOptionsArray['reserve_capacity'] ?? false))>
+                <span>
+                    <strong>Reserve Capacity</strong>
+                </span>
+            </label>
+
             <label class="product-form-field product-form-field--wide" for="product-provider-options">
-                <span>Provider Options</span>
+                <span>Advanced Provider Options</span>
                 <textarea id="product-provider-options" name="provider_options" rows="6">{{ $providerOptions }}</textarea>
             </label>
+
+            @foreach ($providerRoutes as $index => $route)
+                <div class="product-form-field product-form-field--wide">
+                    <span>Cloudmini Route {{ $index + 1 }}</span>
+                    <div class="product-form-fields product-form-fields--three">
+                        <label class="product-form-field" for="product-provider-route-account-{{ $index }}">
+                            <span>Cloudmini Account</span>
+                            <select id="product-provider-route-account-{{ $index }}" name="provider_routes[{{ $index }}][provider_account_id]">
+                                <option value="">No route</option>
+                                @foreach ($providerAccounts->where('driver', 'cloudmini_v3') as $account)
+                                    <option value="{{ $account->id }}" @selected(($route['provider_account_id'] ?? '') === $account->id)>{{ $account->name }} ({{ $account->slug }})</option>
+                                @endforeach
+                            </select>
+                        </label>
+
+                        <label class="product-form-field" for="product-provider-route-group-{{ $index }}">
+                            <span>Billing Group ID</span>
+                            <input id="product-provider-route-group-{{ $index }}" name="provider_routes[{{ $index }}][billing_group_id]" value="{{ $route['billing_group_id'] ?? '' }}" placeholder="vn-residential">
+                        </label>
+
+                        <label class="product-form-field" for="product-provider-route-enabled-{{ $index }}">
+                            <span>Enabled</span>
+                            <select id="product-provider-route-enabled-{{ $index }}" name="provider_routes[{{ $index }}][enabled]">
+                                <option value="1" @selected(($route['enabled'] ?? '1') === '1')>Enabled</option>
+                                <option value="0" @selected(($route['enabled'] ?? '1') === '0')>Disabled</option>
+                            </select>
+                        </label>
+
+                        <label class="product-form-field" for="product-provider-route-priority-{{ $index }}">
+                            <span>Priority</span>
+                            <input id="product-provider-route-priority-{{ $index }}" type="number" name="provider_routes[{{ $index }}][priority]" value="{{ $route['priority'] ?? 100 }}" min="1">
+                        </label>
+
+                        <label class="product-form-field" for="product-provider-route-weight-{{ $index }}">
+                            <span>Weight</span>
+                            <input id="product-provider-route-weight-{{ $index }}" type="number" name="provider_routes[{{ $index }}][weight]" value="{{ $route['weight'] ?? 100 }}" min="1">
+                        </label>
+
+                        <label class="product-form-field" for="product-provider-route-node-selector-{{ $index }}">
+                            <span>Node Selector</span>
+                            <select id="product-provider-route-node-selector-{{ $index }}" name="provider_routes[{{ $index }}][node_selector_type]">
+                                @foreach (['auto' => 'Auto', 'node_name' => 'Node Name'] as $value => $label)
+                                    <option value="{{ $value }}" @selected(($route['node_selector_type'] ?? 'auto') === $value)>{{ $label }}</option>
+                                @endforeach
+                            </select>
+                        </label>
+
+                        <label class="product-form-field" for="product-provider-route-node-name-{{ $index }}">
+                            <span>Node Name</span>
+                            <input id="product-provider-route-node-name-{{ $index }}" name="provider_routes[{{ $index }}][node_name]" value="{{ $route['node_name'] ?? '' }}" placeholder="node-hcm-01">
+                        </label>
+
+                        <label class="product-form-field product-form-field--wide" for="product-provider-route-options-{{ $index }}">
+                            <span>Route Options</span>
+                            <textarea id="product-provider-route-options-{{ $index }}" name="provider_routes[{{ $index }}][options]" rows="4">{{ $route['options'] ?? '' }}</textarea>
+                        </label>
+                    </div>
+                </div>
+            @endforeach
         </div>
     </section>
 

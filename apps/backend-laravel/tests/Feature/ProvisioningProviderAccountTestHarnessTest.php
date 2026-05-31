@@ -69,6 +69,48 @@ class ProvisioningProviderAccountTestHarnessTest extends TestCase
         $this->assertStringNotContainsString('provider-secret-1234', $this->payloadString($log->request_payload));
     }
 
+    public function test_admin_can_test_cloudmini_provider_capabilities_endpoint(): void
+    {
+        $admin = $this->adminUser();
+        $account = ProvisioningProviderAccount::create([
+            'slug' => 'cloudmini-prod-1',
+            'name' => 'Cloudmini Prod 1',
+            'driver' => 'cloudmini_v3',
+            'base_url' => 'https://cloudmini-prod-1.example.test',
+            'auth_type' => 'header',
+            'auth_header_name' => 'X-API-Key',
+            'api_key' => 'cloudmini-secret-1234',
+            'api_key_last_four' => '1234',
+            'enabled' => true,
+            'timeout_seconds' => 15,
+            'request_template' => [],
+            'response_external_id_path' => 'resource_snapshot.id',
+            'response_status_path' => 'state',
+        ]);
+
+        Http::fake([
+            'https://cloudmini-prod-1.example.test/api/v3/capabilities' => Http::response([
+                'success' => true,
+                'data' => ['features' => ['reservations' => true]],
+            ]),
+        ]);
+
+        $this->actingAs($admin)
+            ->post("/admin/provisioning-provider-accounts/{$account->id}/test")
+            ->assertRedirect('/admin/provisioning-provider-accounts');
+
+        Http::assertSent(fn ($request): bool => $request->method() === 'GET'
+            && $request->url() === 'https://cloudmini-prod-1.example.test/api/v3/capabilities'
+            && $request->hasHeader('X-API-Key', 'cloudmini-secret-1234'));
+
+        $account->refresh();
+        $this->assertSame('passed', $account->last_test_status);
+        $log = DB::table('provisioning_execution_logs')->where('provider_account_id', $account->id)->first();
+        $this->assertSame('provider_account_test', $log->action);
+        $this->assertSame('success', $log->status);
+        $this->assertStringNotContainsString('cloudmini-secret-1234', $this->payloadString($log->request_payload));
+    }
+
     private function providerAccount(): ProvisioningProviderAccount
     {
         return ProvisioningProviderAccount::create([

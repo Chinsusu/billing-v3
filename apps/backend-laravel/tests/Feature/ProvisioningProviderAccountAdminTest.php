@@ -112,6 +112,46 @@ class ProvisioningProviderAccountAdminTest extends TestCase
             ->assertDontSee('provider-secret-1234');
     }
 
+    public function test_admin_can_create_cloudmini_provider_account_with_encrypted_secret(): void
+    {
+        $admin = $this->adminUser();
+
+        $this->actingAs($admin)->post('/admin/provisioning-provider-accounts', [
+            'slug' => 'cloudmini-prod-1',
+            'name' => 'Cloudmini Prod 1',
+            'driver' => 'cloudmini_v3',
+            'base_url' => 'https://cloudmini-prod-1.example.test',
+            'provision_path' => '',
+            'auth_type' => 'header',
+            'auth_header_name' => 'X-API-Key',
+            'api_key' => 'cloudmini-secret-1234',
+            'enabled' => '1',
+            'timeout_seconds' => 15,
+            'request_template' => '',
+            'response_external_id_path' => 'resource_snapshot.id',
+            'response_status_path' => 'state',
+            'response_config_path' => 'resource_snapshot',
+            'callback_event_id_path' => 'event_id',
+            'callback_external_id_path' => 'external_id',
+            'callback_action_path' => 'action',
+            'callback_status_path' => 'status',
+        ])->assertRedirect('/admin/provisioning-provider-accounts');
+
+        $account = DB::table('provisioning_provider_accounts')->where('slug', 'cloudmini-prod-1')->first();
+        $this->assertSame('cloudmini_v3', $account->driver);
+        $this->assertSame('1234', $account->api_key_last_four);
+        $this->assertStringNotContainsString('cloudmini-secret-1234', $account->api_key);
+        $this->assertSame('cloudmini-secret-1234', app('encrypter')->decrypt($account->api_key, false));
+
+        $this->actingAs($admin)
+            ->get('/admin/provisioning-provider-accounts')
+            ->assertOk()
+            ->assertSee('Cloudmini Prod 1')
+            ->assertSee('cloudmini_v3')
+            ->assertSee('Configured ...1234')
+            ->assertDontSee('cloudmini-secret-1234');
+    }
+
     public function test_admin_can_update_public_provider_config_without_overwriting_blank_secret(): void
     {
         $admin = $this->adminUser();

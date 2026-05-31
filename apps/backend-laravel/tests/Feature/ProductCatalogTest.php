@@ -255,6 +255,113 @@ class ProductCatalogTest extends TestCase
         $this->assertSame(['size' => 'small', 'tags' => ['billing']], $product->provider_options);
     }
 
+    public function test_admin_can_store_cloudmini_product_routes(): void
+    {
+        $this->seed(RolesAndPermissionsSeeder::class);
+        $admin = User::factory()->create();
+        $admin->assignRole('super_admin');
+        $primaryAccountId = (string) Str::uuid();
+        $fallbackAccountId = (string) Str::uuid();
+
+        foreach ([[$primaryAccountId, 'cloudmini-prod-1'], [$fallbackAccountId, 'cloudmini-prod-2']] as [$id, $slug]) {
+            DB::table('provisioning_provider_accounts')->insert([
+                'id' => $id,
+                'slug' => $slug,
+                'name' => Str::title(str_replace('-', ' ', $slug)),
+                'driver' => 'cloudmini_v3',
+                'base_url' => "https://{$slug}.example.test",
+                'provision_path' => null,
+                'auth_type' => 'header',
+                'auth_header_name' => 'X-API-Key',
+                'api_key' => app('encrypter')->encrypt('cloudmini-secret-1234', false),
+                'api_key_last_four' => '1234',
+                'enabled' => true,
+                'timeout_seconds' => 15,
+                'request_template' => '{}',
+                'response_external_id_path' => 'resource_snapshot.id',
+                'response_status_path' => 'state',
+                'response_config_path' => 'resource_snapshot',
+                'created_by_id' => $admin->id,
+                'updated_by_id' => $admin->id,
+                'created_at' => now(),
+                'updated_at' => now(),
+            ]);
+        }
+
+        $this->actingAs($admin)
+            ->get('/admin/products/create')
+            ->assertOk()
+            ->assertSee('Cloudmini Kind')
+            ->assertSee('Reserve Capacity')
+            ->assertSee('Cloudmini Route 1');
+
+        $this->actingAs($admin)->post('/admin/products', [
+            'code' => 'cloudmini-res-30d',
+            'name' => 'Cloudmini Residential 30 Days',
+            'type' => 'proxy',
+            'status' => 'active',
+            'price_amount' => 149000,
+            'currency' => 'VND',
+            'duration_days' => 30,
+            'description' => 'Cloudmini multi-server plan',
+            'provider_options' => json_encode([
+                'preferred_outbound_ip' => '103.28.32.78',
+            ]),
+            'cloudmini_options' => [
+                'kind' => 'residential',
+                'protocol' => 'socks5',
+                'speed_limit_mbps' => '20',
+                'bandwidth_limit_mb' => '0',
+                'reserve_capacity' => '1',
+            ],
+            'provider_routes' => [
+                [
+                    'provider_account_id' => $primaryAccountId,
+                    'enabled' => '1',
+                    'priority' => '10',
+                    'weight' => '100',
+                    'billing_group_id' => 'vn-residential',
+                    'node_selector_type' => 'auto',
+                    'node_name' => '',
+                    'options' => '{"note":"primary"}',
+                ],
+                [
+                    'provider_account_id' => $fallbackAccountId,
+                    'enabled' => '1',
+                    'priority' => '20',
+                    'weight' => '100',
+                    'billing_group_id' => 'vn-residential',
+                    'node_selector_type' => 'node_name',
+                    'node_name' => 'node-hcm-01',
+                    'options' => '',
+                ],
+            ],
+        ])->assertRedirect('/admin/products');
+
+        $product = Product::where('code', 'cloudmini-res-30d')->firstOrFail();
+        $this->assertSame('residential', $product->provider_options['kind']);
+        $this->assertSame('socks5', $product->provider_options['protocol']);
+        $this->assertSame(20, $product->provider_options['speed_limit_mbps']);
+        $this->assertSame(0, $product->provider_options['bandwidth_limit_mb']);
+        $this->assertTrue($product->provider_options['reserve_capacity']);
+        $this->assertSame('103.28.32.78', $product->provider_options['preferred_outbound_ip']);
+        $this->assertDatabaseHas('product_provider_routes', [
+            'product_id' => $product->id,
+            'provider_account_id' => $primaryAccountId,
+            'priority' => 10,
+            'billing_group_id' => 'vn-residential',
+            'node_selector_type' => 'auto',
+        ]);
+        $this->assertDatabaseHas('product_provider_routes', [
+            'product_id' => $product->id,
+            'provider_account_id' => $fallbackAccountId,
+            'priority' => 20,
+            'billing_group_id' => 'vn-residential',
+            'node_selector_type' => 'node_name',
+            'node_name' => 'node-hcm-01',
+        ]);
+    }
+
     public function test_customer_cannot_access_admin_product_pages(): void
     {
         $this->seed(RolesAndPermissionsSeeder::class);

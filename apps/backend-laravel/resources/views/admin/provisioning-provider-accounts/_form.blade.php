@@ -29,7 +29,7 @@
             <label class="product-form-field" for="provider-account-driver">
                 <span>Driver</span>
                 <select id="provider-account-driver" name="driver" required data-provider-driver-select>
-                    @foreach (['sandbox' => 'Sandbox', 'generic_http' => 'Generic HTTP'] as $value => $label)
+                    @foreach (['sandbox' => 'Sandbox', 'generic_http' => 'Generic HTTP', 'cloudmini_v3' => 'Cloudmini V3'] as $value => $label)
                         <option value="{{ $value }}" @selected($driverValue === $value)>{{ $label }}</option>
                     @endforeach
                 </select>
@@ -101,7 +101,7 @@
         </div>
     </section>
 
-    <section class="product-form-section product-form-section--provider-mapping product-form-section--wide" aria-labelledby="provider-account-mapping-title">
+    <section class="product-form-section product-form-section--provider-mapping product-form-section--wide" aria-labelledby="provider-account-mapping-title" data-provider-generic-mapping-section>
         <div class="product-form-section-header">
             <span class="product-form-section-index">04</span>
             <div>
@@ -183,6 +183,7 @@
             const driverSelect = form.querySelector('[data-provider-driver-select]');
             const authSelect = form.querySelector('[data-provider-auth-select]');
             const driverFields = Array.from(form.querySelectorAll('[data-provider-driver-field]'));
+            const genericMappingSection = form.querySelector('[data-provider-generic-mapping-section]');
             const authHeaderField = form.querySelector('[data-provider-auth-header-field]');
             const apiKeyField = form.querySelector('[data-provider-api-key-field]');
 
@@ -211,19 +212,48 @@
                 });
             };
 
-            [...driverFields, authHeaderField, apiKeyField].forEach(rememberRequiredState);
+            [...driverFields, genericMappingSection, authHeaderField, apiKeyField].forEach(rememberRequiredState);
 
             const syncProviderAccountControls = () => {
                 const usesGenericHttp = driverSelect.value === 'generic_http';
+                const usesCloudmini = driverSelect.value === 'cloudmini_v3';
                 const usesCustomHeader = authSelect.value === 'header';
                 const usesSecretAuth = authSelect.value !== 'none';
 
+                if (genericMappingSection) {
+                    genericMappingSection.hidden = usesCloudmini;
+                    if (usesCloudmini) {
+                        setFieldDisabled(genericMappingSection, true);
+                    } else {
+                        genericMappingSection.classList.remove('is-disabled');
+                        genericMappingSection.setAttribute('aria-disabled', 'false');
+                        controlsIn(genericMappingSection).forEach((control) => {
+                            control.disabled = false;
+                            control.required = control.hasAttribute('data-required-when-enabled');
+                        });
+                    }
+                }
                 driverFields.forEach((field) => setFieldDisabled(field, !usesGenericHttp));
+                form.querySelectorAll('#provider-account-base-url').forEach((control) => {
+                    control.closest('[data-provider-driver-field]')?.classList.toggle('is-disabled', !(usesGenericHttp || usesCloudmini));
+                    control.disabled = !(usesGenericHttp || usesCloudmini);
+                    control.required = usesGenericHttp || usesCloudmini;
+                });
                 setFieldDisabled(authHeaderField, !usesCustomHeader);
                 setFieldDisabled(apiKeyField, !usesSecretAuth);
             };
 
-            driverSelect.addEventListener('change', syncProviderAccountControls);
+            driverSelect.addEventListener('change', () => {
+                if (driverSelect.value === 'cloudmini_v3' && authSelect.value === 'none') {
+                    authSelect.value = 'header';
+                    const headerName = form.querySelector('#provider-account-auth-header-name');
+                    if (headerName && headerName.value.trim() === '') {
+                        headerName.value = 'X-API-Key';
+                    }
+                }
+
+                syncProviderAccountControls();
+            });
             authSelect.addEventListener('change', syncProviderAccountControls);
             syncProviderAccountControls();
         });

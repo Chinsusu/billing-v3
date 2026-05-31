@@ -70,6 +70,22 @@ class StoreProductRequest extends FormRequest
             'provider_suspend_path' => ['nullable', 'string', 'max:255', 'starts_with:/'],
             'provider_cancel_path' => ['nullable', 'string', 'max:255', 'starts_with:/'],
             'provider_sync_path' => ['nullable', 'string', 'max:255', 'starts_with:/'],
+            'cloudmini_options' => ['nullable', 'array'],
+            'cloudmini_options.kind' => ['nullable', Rule::in(['ipv4_dc', 'residential'])],
+            'cloudmini_options.protocol' => ['nullable', 'string', 'max:40'],
+            'cloudmini_options.speed_limit_mbps' => ['nullable', 'integer', 'min:1', 'max:1000000'],
+            'cloudmini_options.bandwidth_limit_mb' => ['nullable', 'integer', 'min:0', 'max:1000000000'],
+            'cloudmini_options.preferred_outbound_ip' => ['nullable', 'string', 'max:120'],
+            'cloudmini_options.reserve_capacity' => ['nullable', 'boolean'],
+            'provider_routes' => ['nullable', 'array'],
+            'provider_routes.*.provider_account_id' => ['nullable', 'uuid', 'exists:provisioning_provider_accounts,id'],
+            'provider_routes.*.enabled' => ['nullable', 'boolean'],
+            'provider_routes.*.priority' => ['nullable', 'integer', 'min:1', 'max:1000000'],
+            'provider_routes.*.weight' => ['nullable', 'integer', 'min:1', 'max:1000000'],
+            'provider_routes.*.billing_group_id' => ['nullable', 'string', 'max:160'],
+            'provider_routes.*.node_selector_type' => ['nullable', Rule::in(['auto', 'node_name'])],
+            'provider_routes.*.node_name' => ['nullable', 'string', 'max:160'],
+            'provider_routes.*.options' => ['nullable', 'json'],
         ];
     }
 }

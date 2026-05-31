@@ -166,6 +166,68 @@ class ProviderActionJobQueueTest extends TestCase
         $this->assertSame('processed', $job->refresh()->status);
     }
 
+    public function test_work_command_processes_cloudmini_cancel_with_delete_operation_polling(): void
+    {
+        $this->travelTo(Carbon::parse('2026-05-24 09:00:00'));
+        [, $service] = $this->cloudminiService();
+        $job = app(ProviderActionJobDispatcher::class)->enqueue($service, 'cancel', "service-cancel:{$service->id}:manual", [
+            'cancelled_at' => now()->toISOString(),
+        ]);
+        Http::fake([
+            'https://cloudmini-prod-1.example.test/api/v3/proxies/proxy-123' => Http::response([
+                'success' => true,
+                'data' => [
+                    'resource' => ['id' => 'proxy-123', 'status' => 'deleting'],
+                    'operation' => ['id' => 'operation-delete-123', 'state' => 'accepted'],
+                ],
+            ], 202),
+            'https://cloudmini-prod-1.example.test/api/v3/operations/operation-delete-123' => Http::response([
+                'success' => true,
+                'data' => ['id' => 'operation-delete-123', 'state' => 'succeeded', 'resource_id' => 'proxy-123'],
+            ]),
+        ]);
+
+        $this->artisan('provider-actions:work --once')
+            ->expectsOutput('Provider action jobs processed=1 failed=0.')
+            ->assertExitCode(0);
+
+        $this->assertSame('cancelled', $service->refresh()->status);
+        $this->assertSame('processed', $job->refresh()->status);
+        Http::assertSent(fn ($request): bool => $request->method() === 'DELETE'
+            && $request->url() === 'https://cloudmini-prod-1.example.test/api/v3/proxies/proxy-123'
+            && $request->hasHeader('X-API-Key', 'cloudmini-secret-1234')
+            && $request->hasHeader('Idempotency-Key', "service-cancel:{$service->id}:manual"));
+    }
+
+    public function test_work_command_processes_cloudmini_sync_from_proxy_snapshot(): void
+    {
+        $this->travelTo(Carbon::parse('2026-05-24 09:00:00'));
+        [, $service] = $this->cloudminiService(['status' => 'expired']);
+        $job = app(ProviderActionJobDispatcher::class)->enqueue($service, 'sync', "service-sync:{$service->id}:manual");
+        Http::fake([
+            'https://cloudmini-prod-1.example.test/api/v3/proxies/proxy-123' => Http::response([
+                'success' => true,
+                'data' => [
+                    'id' => 'proxy-123',
+                    'status' => 'running',
+                    'host' => '103.28.32.78',
+                    'port_socks' => 14496,
+                ],
+            ]),
+        ]);
+
+        $this->artisan('provider-actions:work --once')
+            ->expectsOutput('Provider action jobs processed=1 failed=0.')
+            ->assertExitCode(0);
+
+        $service->refresh();
+        $this->assertSame('active', $service->status);
+        $this->assertSame('processed', $job->refresh()->status);
+        Http::assertSent(fn ($request): bool => $request->method() === 'GET'
+            && $request->url() === 'https://cloudmini-prod-1.example.test/api/v3/proxies/proxy-123'
+            && $request->hasHeader('X-API-Key', 'cloudmini-secret-1234'));
+    }
+
     public function test_recover_stuck_command_requeues_stale_processing_jobs_below_max_attempts(): void
     {
         $this->travelTo(Carbon::parse('2026-05-24 09:00:00'));
@@ -284,6 +346,73 @@ class ProviderActionJobQueueTest extends TestCase
                     'provider_lifecycle_path' => null,
                     'ordered_at_path' => null,
                     'expires_at_path' => 'data.expires_at',
+                    'date_format' => 'iso8601',
+                    'timezone' => 'UTC',
+                ],
+            ],
+        ]);
+
+        return [$account, $service];
+    }
+
+    private function cloudminiService(array $serviceOverrides = []): array
+    {
+        $customer = User::factory()->create();
+        $account = ProvisioningProviderAccount::create([
+            'slug' => 'cloudmini-prod-1',
+            'name' => 'Cloudmini Prod 1',
+            'driver' => 'cloudmini_v3',
+            'base_url' => 'https://cloudmini-prod-1.example.test',
+            'auth_type' => 'header',
+            'auth_header_name' => 'X-API-Key',
+            'api_key' => 'cloudmini-secret-1234',
+            'api_key_last_four' => '1234',
+            'enabled' => true,
+            'timeout_seconds' => 15,
+            'request_template' => [],
+            'response_external_id_path' => 'resource_snapshot.id',
+            'response_status_path' => 'state',
+            'response_config_path' => 'resource_snapshot',
+        ]);
+        $product = Product::factory()->create([
+            'code' => 'cloudmini-res-30d',
+            'name' => 'Cloudmini Residential 30 Days',
+            'type' => 'proxy',
+            'status' => 'active',
+        ]);
+        $order = Order::factory()->for($customer)->create();
+        $item = OrderItem::factory()->for($order)->for($product)->create([
+            'product_code' => $product->code,
+            'product_name' => $product->name,
+            'product_type' => $product->type,
+        ]);
+        $service = Service::factory()->for($customer)->for($order)->for($item, 'orderItem')->for($product)->create($serviceOverrides + [
+            'product_code' => $product->code,
+            'product_name' => $product->name,
+            'product_type' => $product->type,
+            'status' => 'active',
+            'external_id' => 'proxy-123',
+            'expires_at' => now()->addDays(10),
+            'meta' => [
+                'duration_days' => 30,
+                'provider' => [
+                    'account_id' => $account->id,
+                    'account_slug' => $account->slug,
+                    'driver' => 'cloudmini_v3',
+                    'options' => ['kind' => 'residential', 'protocol' => 'socks5'],
+                    'resolved' => [
+                        'billing_group_id' => 'vn-residential',
+                        'group_id' => '00000000-0000-4000-8000-000000000001',
+                        'node_id' => '00000000-0000-4000-8000-000000000101',
+                    ],
+                ],
+                'lifecycle_policy' => [
+                    'source' => 'local_policy',
+                    'unit' => 'day',
+                    'count' => 30,
+                    'provider_lifecycle_path' => null,
+                    'ordered_at_path' => null,
+                    'expires_at_path' => null,
                     'date_format' => 'iso8601',
                     'timezone' => 'UTC',
                 ],

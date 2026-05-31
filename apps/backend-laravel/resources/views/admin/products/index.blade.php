@@ -13,7 +13,13 @@
                 <td>{{ $product->type }}</td>
                 <td>{{ $product->status }}</td>
                 <td>{{ number_format($product->price_amount) }} {{ $product->currency }}</td>
-                <td>{{ $product->providerAccount?->slug ?? 'sandbox' }}{{ $product->provider_plan_code ? ' / '.$product->provider_plan_code : '' }}</td>
+                <td>
+                    @if (($product->provider_routes_count ?? 0) > 0)
+                        {{ $product->provider_routes_count }} Cloudmini routes
+                    @else
+                        {{ $product->providerAccount?->slug ?? 'sandbox' }}{{ $product->provider_plan_code ? ' / '.$product->provider_plan_code : '' }}
+                    @endif
+                </td>
                 <td>
                     <a class="button secondary" href="/admin/products/{{ $product->id }}/edit">Edit</a>
                     <form method="POST" action="/admin/products/{{ $product->id }}" style="display:inline">@csrf @method('DELETE')<button class="button danger" type="submit">Archive</button></form>
