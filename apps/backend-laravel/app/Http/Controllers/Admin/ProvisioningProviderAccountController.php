@@ -18,7 +18,10 @@ class ProvisioningProviderAccountController extends Controller
     public function index(): View
     {
         return view('admin.provisioning-provider-accounts.index', [
-            'providerAccounts' => ProvisioningProviderAccount::latest()->paginate(20),
+            'providerAccounts' => ProvisioningProviderAccount::query()
+                ->orderBy('driver')
+                ->orderBy('name')
+                ->get(),
         ]);
     }
 

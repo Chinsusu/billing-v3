@@ -112,8 +112,8 @@ class ProvisioningProviderAccountAdminTest extends TestCase
             ->get('/admin/provisioning-provider-accounts')
             ->assertOk()
             ->assertSee('Provider A Main')
-            ->assertSee('generic_http')
-            ->assertSee('Configured ...1234')
+            ->assertSee('Generic HTTP')
+            ->assertSee('API key ...1234')
             ->assertDontSee('provider-secret-1234');
     }
 
@@ -152,9 +152,68 @@ class ProvisioningProviderAccountAdminTest extends TestCase
             ->get('/admin/provisioning-provider-accounts')
             ->assertOk()
             ->assertSee('Cloudmini Prod 1')
-            ->assertSee('cloudmini_v3')
-            ->assertSee('Configured ...1234')
+            ->assertSee('Cloudmini V3')
+            ->assertSee('Base URL (Server)')
+            ->assertSee('https://cloudmini-prod-1.example.test')
+            ->assertSee('API key ...1234')
             ->assertDontSee('cloudmini-secret-1234');
+    }
+
+    public function test_provider_account_index_groups_cloudmini_servers_by_driver(): void
+    {
+        $admin = $this->adminUser();
+        $cloudminiOne = (string) Str::uuid();
+        $cloudminiTwo = (string) Str::uuid();
+        $generic = (string) Str::uuid();
+
+        foreach ([
+            [$cloudminiOne, 'cloudmini-prod-1', 'Cloudmini Prod 1', 'cloudmini_v3', 'https://cloudmini-prod-1.example.test', null, 'header', 'X-API-Key', '1234'],
+            [$cloudminiTwo, 'cloudmini-prod-2', 'Cloudmini Prod 2', 'cloudmini_v3', 'https://cloudmini-prod-2.example.test', null, 'header', 'X-API-Key', '5678'],
+            [$generic, 'provider-a-main', 'Provider A Main', 'generic_http', 'https://provider-a.example.test', '/api/provision', 'bearer', null, '9999'],
+        ] as [$id, $slug, $name, $driver, $baseUrl, $provisionPath, $authType, $authHeaderName, $lastFour]) {
+            DB::table('provisioning_provider_accounts')->insert([
+                'id' => $id,
+                'slug' => $slug,
+                'name' => $name,
+                'driver' => $driver,
+                'base_url' => $baseUrl,
+                'provision_path' => $provisionPath,
+                'auth_type' => $authType,
+                'auth_header_name' => $authHeaderName,
+                'api_key' => app('encrypter')->encrypt("secret-{$lastFour}", false),
+                'api_key_last_four' => $lastFour,
+                'enabled' => true,
+                'timeout_seconds' => 15,
+                'request_template' => '{}',
+                'response_external_id_path' => $driver === 'cloudmini_v3' ? 'resource_snapshot.id' : 'external_id',
+                'response_status_path' => $driver === 'cloudmini_v3' ? 'state' : 'status',
+                'response_config_path' => $driver === 'cloudmini_v3' ? 'resource_snapshot' : null,
+                'created_by_id' => $admin->id,
+                'updated_by_id' => $admin->id,
+                'created_at' => now(),
+                'updated_at' => now(),
+            ]);
+        }
+
+        $this->actingAs($admin)
+            ->get('/admin/provisioning-provider-accounts')
+            ->assertOk()
+            ->assertSeeInOrder([
+                'Cloudmini V3',
+                '2 servers',
+                'Cloudmini Prod 1',
+                'https://cloudmini-prod-1.example.test',
+                'API key ...1234',
+                'Cloudmini Prod 2',
+                'https://cloudmini-prod-2.example.test',
+                'API key ...5678',
+                'Generic HTTP',
+                'Provider A Main',
+            ])
+            ->assertSee('Add Cloudmini Server')
+            ->assertSee('Base URL (Server)')
+            ->assertDontSee('secret-1234')
+            ->assertDontSee('secret-5678');
     }
 
     public function test_admin_can_create_cloudmini_provider_account_without_generic_mapping_fields(): void
