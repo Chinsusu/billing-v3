@@ -54,12 +54,12 @@
         </div>
 
         <div class="product-form-fields">
-            <label class="product-form-field product-form-field--wide" for="provider-account-base-url" data-provider-driver-field>
+            <label class="product-form-field product-form-field--wide" for="provider-account-base-url" data-provider-base-url-field>
                 <span>Base URL</span>
                 <input id="provider-account-base-url" name="base_url" value="{{ old('base_url', $providerAccount->base_url) }}" placeholder="https://provider.example.test" data-required-when-enabled="true">
             </label>
 
-            <label class="product-form-field" for="provider-account-provision-path" data-provider-driver-field>
+            <label class="product-form-field" for="provider-account-provision-path" data-provider-generic-http-field>
                 <span>Provision Path</span>
                 <input id="provider-account-provision-path" name="provision_path" value="{{ old('provision_path', $providerAccount->provision_path) }}" placeholder="/api/provision" data-required-when-enabled="true">
             </label>
@@ -80,7 +80,7 @@
         </div>
 
         <div class="product-form-fields">
-            <label class="product-form-field" for="provider-account-auth-type">
+            <label class="product-form-field" for="provider-account-auth-type" data-provider-auth-type-field>
                 <span>Auth Type</span>
                 <select id="provider-account-auth-type" name="auth_type" required data-provider-auth-select>
                     @foreach (['none' => 'None', 'bearer' => 'Bearer', 'header' => 'Custom Header'] as $value => $label)
@@ -88,6 +88,7 @@
                     @endforeach
                 </select>
             </label>
+            <input type="hidden" name="auth_type" value="header" disabled data-provider-cloudmini-auth-type>
 
             <label class="product-form-field" for="provider-account-auth-header-name" data-provider-auth-header-field>
                 <span>Auth Header Name</span>
@@ -110,7 +111,7 @@
         </div>
 
         <div class="product-form-fields product-form-fields--three">
-            <label class="product-form-field product-form-field--wide" for="provider-account-request-template" data-provider-driver-field>
+            <label class="product-form-field product-form-field--wide" for="provider-account-request-template" data-provider-generic-http-field>
                 <span>Request Template</span>
                 <textarea id="provider-account-request-template" name="request_template" rows="6">{{ $requestTemplate }}</textarea>
             </label>
@@ -132,7 +133,7 @@
         </div>
     </section>
 
-    <section class="product-form-section product-form-section--provider-callbacks product-form-section--wide" aria-labelledby="provider-account-callback-title">
+    <section class="product-form-section product-form-section--provider-callbacks product-form-section--wide" aria-labelledby="provider-account-callback-title" data-provider-callback-section>
         <div class="product-form-section-header">
             <span class="product-form-section-index">05</span>
             <div>
@@ -182,8 +183,12 @@
         document.querySelectorAll('.provider-account-form').forEach((form) => {
             const driverSelect = form.querySelector('[data-provider-driver-select]');
             const authSelect = form.querySelector('[data-provider-auth-select]');
-            const driverFields = Array.from(form.querySelectorAll('[data-provider-driver-field]'));
+            const baseUrlField = form.querySelector('[data-provider-base-url-field]');
+            const genericHttpFields = Array.from(form.querySelectorAll('[data-provider-generic-http-field]'));
             const genericMappingSection = form.querySelector('[data-provider-generic-mapping-section]');
+            const callbackSection = form.querySelector('[data-provider-callback-section]');
+            const authTypeField = form.querySelector('[data-provider-auth-type-field]');
+            const cloudminiAuthTypeInput = form.querySelector('[data-provider-cloudmini-auth-type]');
             const authHeaderField = form.querySelector('[data-provider-auth-header-field]');
             const apiKeyField = form.querySelector('[data-provider-api-key-field]');
 
@@ -212,18 +217,53 @@
                 });
             };
 
-            [...driverFields, genericMappingSection, authHeaderField, apiKeyField].forEach(rememberRequiredState);
+            const setSectionDisabled = (section, disabled) => {
+                if (!section) {
+                    return;
+                }
+
+                section.setAttribute('aria-disabled', disabled ? 'true' : 'false');
+                controlsIn(section).forEach((control) => {
+                    control.disabled = disabled;
+                    control.required = disabled ? false : control.hasAttribute('data-required-when-enabled');
+                });
+            };
+
+            [...genericHttpFields, baseUrlField, genericMappingSection, callbackSection, authTypeField, authHeaderField, apiKeyField].forEach(rememberRequiredState);
 
             const syncProviderAccountControls = () => {
                 const usesGenericHttp = driverSelect.value === 'generic_http';
                 const usesCloudmini = driverSelect.value === 'cloudmini_v3';
+                const usesNetworkProvider = usesGenericHttp || usesCloudmini;
                 const usesCustomHeader = authSelect.value === 'header';
                 const usesSecretAuth = authSelect.value !== 'none';
 
+                if (usesCloudmini) {
+                    authSelect.value = 'header';
+                    const headerName = form.querySelector('#provider-account-auth-header-name');
+                    if (headerName && headerName.value.trim() === '') {
+                        headerName.value = 'X-API-Key';
+                    }
+                }
+
+                if (cloudminiAuthTypeInput) {
+                    cloudminiAuthTypeInput.disabled = !usesCloudmini;
+                }
+                setFieldDisabled(authTypeField, usesCloudmini);
+                if (authTypeField) {
+                    authTypeField.hidden = usesCloudmini;
+                }
+
+                setFieldDisabled(baseUrlField, !usesNetworkProvider);
+                genericHttpFields.forEach((field) => {
+                    field.hidden = !usesGenericHttp;
+                    setFieldDisabled(field, !usesGenericHttp);
+                });
+
                 if (genericMappingSection) {
-                    genericMappingSection.hidden = usesCloudmini;
-                    if (usesCloudmini) {
-                        setFieldDisabled(genericMappingSection, true);
+                    genericMappingSection.hidden = !usesGenericHttp;
+                    if (!usesGenericHttp) {
+                        setSectionDisabled(genericMappingSection, true);
                     } else {
                         genericMappingSection.classList.remove('is-disabled');
                         genericMappingSection.setAttribute('aria-disabled', 'false');
@@ -233,15 +273,12 @@
                         });
                     }
                 }
-                driverFields.forEach((field) => setFieldDisabled(field, !usesGenericHttp));
-                form.querySelectorAll('#provider-account-base-url').forEach((control) => {
-                    const baseUrlField = control.closest('[data-provider-driver-field]');
-                    const baseUrlDisabled = !(usesGenericHttp || usesCloudmini);
-                    baseUrlField?.classList.toggle('is-disabled', baseUrlDisabled);
-                    baseUrlField?.setAttribute('aria-disabled', baseUrlDisabled ? 'true' : 'false');
-                    control.disabled = baseUrlDisabled;
-                    control.required = ! baseUrlDisabled;
-                });
+
+                if (callbackSection) {
+                    callbackSection.hidden = usesCloudmini;
+                    setSectionDisabled(callbackSection, usesCloudmini);
+                }
+
                 setFieldDisabled(authHeaderField, !usesCustomHeader);
                 setFieldDisabled(apiKeyField, !usesSecretAuth);
             };
