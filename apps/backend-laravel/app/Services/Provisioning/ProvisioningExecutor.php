@@ -20,8 +20,9 @@ class ProvisioningExecutor
     public function execute(ProvisioningJob $job): ProvisioningResult
     {
         $provider = data_get($job->payload, 'product.provider', []);
+        $declaredDriver = $provider['driver'] ?? null;
         $account = $this->providerAccount($provider);
-        $driver = $account?->driver ?? (string) ($provider['driver'] ?? 'sandbox');
+        $driver = (string) ($declaredDriver ?? $account?->driver ?? 'sandbox');
 
         if ($account !== null && ! $account->enabled) {
             throw new RuntimeException("Provider account {$account->slug} is disabled.");
@@ -43,6 +44,10 @@ class ProvisioningExecutor
 
         if (! empty($provider['account_slug'])) {
             return ProvisioningProviderAccount::where('slug', $provider['account_slug'])->first();
+        }
+
+        if (array_key_exists('driver', $provider)) {
+            return null;
         }
 
         return ProvisioningProviderAccount::where('slug', 'sandbox')->first();

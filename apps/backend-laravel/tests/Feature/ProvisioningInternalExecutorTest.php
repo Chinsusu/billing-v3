@@ -175,6 +175,17 @@ class ProvisioningInternalExecutorTest extends TestCase
     {
         config(['services.internal_provisioning.token' => 'secret-token']);
         $user = User::factory()->create();
+        ProvisioningProviderAccount::create([
+            'slug' => 'sandbox',
+            'name' => 'Sandbox Provisioning',
+            'driver' => 'sandbox',
+            'auth_type' => 'none',
+            'enabled' => true,
+            'timeout_seconds' => 15,
+            'request_template' => [],
+            'response_external_id_path' => 'external_id',
+            'response_status_path' => 'status',
+        ]);
         $primaryAccount = ProvisioningProviderAccount::create([
             'slug' => 'cloudmini-prod-1',
             'name' => 'Cloudmini Prod 1',
