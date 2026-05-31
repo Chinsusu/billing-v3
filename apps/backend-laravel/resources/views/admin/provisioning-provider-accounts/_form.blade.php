@@ -235,9 +235,12 @@
                 }
                 driverFields.forEach((field) => setFieldDisabled(field, !usesGenericHttp));
                 form.querySelectorAll('#provider-account-base-url').forEach((control) => {
-                    control.closest('[data-provider-driver-field]')?.classList.toggle('is-disabled', !(usesGenericHttp || usesCloudmini));
-                    control.disabled = !(usesGenericHttp || usesCloudmini);
-                    control.required = usesGenericHttp || usesCloudmini;
+                    const baseUrlField = control.closest('[data-provider-driver-field]');
+                    const baseUrlDisabled = !(usesGenericHttp || usesCloudmini);
+                    baseUrlField?.classList.toggle('is-disabled', baseUrlDisabled);
+                    baseUrlField?.setAttribute('aria-disabled', baseUrlDisabled ? 'true' : 'false');
+                    control.disabled = baseUrlDisabled;
+                    control.required = ! baseUrlDisabled;
                 });
                 setFieldDisabled(authHeaderField, !usesCustomHeader);
                 setFieldDisabled(apiKeyField, !usesSecretAuth);
