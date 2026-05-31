@@ -24,6 +24,39 @@ class ProviderAccountTester
             return;
         }
 
+        if ($account->driver === 'cloudmini_v3') {
+            $endpoint = rtrim((string) $account->base_url, '/').'/api/v3/capabilities';
+            $log = $this->recorder->startForProviderAccount($account, 'provider_account_test', $endpoint, [
+                'action' => 'cloudmini_capabilities',
+                'provider_account' => $account->slug,
+            ]);
+            $startedAt = microtime(true);
+
+            try {
+                $response = $this->pendingRequest($account)->get($endpoint);
+                $payload = $response->json();
+                $payload = is_array($payload) ? $payload : [];
+                $durationMs = $this->recorder->durationSince($startedAt);
+
+                if (! $response->successful()) {
+                    $message = "Provider test returned HTTP {$response->status()}.";
+                    $this->recorder->failure($log, $durationMs, 'provider_http_error', $message, $response->status(), $payload);
+                    $this->markFailed($account, $message);
+
+                    return;
+                }
+
+                $this->recorder->success($log, $durationMs, $response->status(), $payload);
+                $this->markPassed($account);
+            } catch (Throwable $exception) {
+                $message = 'Provider test failed: '.$exception->getMessage();
+                $this->recorder->failure($log, $this->recorder->durationSince($startedAt), 'provider_request_failed', $message);
+                $this->markFailed($account, $message);
+            }
+
+            return;
+        }
+
         $endpoint = $account->endpointUrl();
         $payload = [
             'action' => 'provider_account_test',

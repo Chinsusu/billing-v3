@@ -18,7 +18,10 @@ class ProvisioningProviderAccountController extends Controller
     public function index(): View
     {
         return view('admin.provisioning-provider-accounts.index', [
-            'providerAccounts' => ProvisioningProviderAccount::latest()->paginate(20),
+            'providerAccounts' => ProvisioningProviderAccount::query()
+                ->orderBy('driver')
+                ->orderBy('name')
+                ->get(),
         ]);
     }
 
@@ -81,6 +84,8 @@ class ProvisioningProviderAccountController extends Controller
         $callbackSecret = (string) ($attributes['callback_secret'] ?? '');
         $requestTemplate = (string) ($attributes['request_template'] ?? '');
 
+        $usesCloudmini = $attributes['driver'] === 'cloudmini_v3';
+
         $data = [
             'slug' => $attributes['slug'],
             'name' => $attributes['name'],
@@ -92,13 +97,13 @@ class ProvisioningProviderAccountController extends Controller
             'enabled' => (bool) ($attributes['enabled'] ?? false),
             'timeout_seconds' => (int) $attributes['timeout_seconds'],
             'request_template' => $requestTemplate !== '' ? json_decode($requestTemplate, true) : [],
-            'response_external_id_path' => $attributes['response_external_id_path'],
-            'response_status_path' => $attributes['response_status_path'],
-            'response_config_path' => $attributes['response_config_path'] ?? null,
-            'callback_event_id_path' => $attributes['callback_event_id_path'],
-            'callback_external_id_path' => $attributes['callback_external_id_path'],
-            'callback_action_path' => $attributes['callback_action_path'],
-            'callback_status_path' => $attributes['callback_status_path'],
+            'response_external_id_path' => $attributes['response_external_id_path'] ?? ($usesCloudmini ? 'resource_snapshot.id' : 'external_id'),
+            'response_status_path' => $attributes['response_status_path'] ?? ($usesCloudmini ? 'state' : 'status'),
+            'response_config_path' => $attributes['response_config_path'] ?? ($usesCloudmini ? 'resource_snapshot' : null),
+            'callback_event_id_path' => $attributes['callback_event_id_path'] ?? 'event_id',
+            'callback_external_id_path' => $attributes['callback_external_id_path'] ?? 'external_id',
+            'callback_action_path' => $attributes['callback_action_path'] ?? 'action',
+            'callback_status_path' => $attributes['callback_status_path'] ?? 'status',
             'updated_by_id' => $actor->id,
         ];
 

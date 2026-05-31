@@ -1,8 +1,26 @@
 @extends('layouts.admin', ['title' => 'Payment Event'])
 @section('content')
+<x-page-header
+    title="Payment Event"
+    eyebrow="Financials"
+>
+    <x-slot:actions>
+        @can('payment_events.update')
+            @if ($event->provider === 'manual_admin')
+                <a href="/admin/payment-events/{{ $event->id }}/edit" class="button">
+                    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m14.06 9.02.92.92L5.92 19H5v-.92l9.06-9.06ZM17.66 3c-.25 0-.51.1-.7.29l-1.83 1.83 3.75 3.75 1.83-1.83a.996.996 0 0 0 0-1.41l-2.34-2.34c-.2-.2-.45-.29-.71-.29Zm-3.6 3.19L3 17.25V21h3.75L17.81 9.94l-3.75-3.75Z"/></svg>
+                    <span>Edit Transaction</span>
+                </a>
+            @endif
+        @endcan
+        <a href="/admin/payment-events" class="button secondary button-soft">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.42-1.41L7.83 13H20v-2Z"/></svg>
+            <span>Back to Payment Events</span>
+        </a>
+    </x-slot:actions>
+</x-page-header>
+
 <div class="panel">
-    <p><a href="/admin/payment-events">Back to Payment Events</a></p>
-    <h1>Payment Event</h1>
     <table>
         <tbody>
             <tr><th>ID</th><td>{{ $event->id }}</td></tr>

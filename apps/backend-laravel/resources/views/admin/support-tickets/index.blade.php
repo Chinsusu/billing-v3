@@ -1,17 +1,23 @@
 @extends('layouts.admin', ['title' => 'Admin Support Tickets'])
 @section('content')
-<div class="panel">
-    <h1>Support Tickets</h1>
-    <form method="GET" action="/admin/support-tickets">
-        <label>Status
-            <select name="status">
-                <option value="">All</option>
-                @foreach (['open', 'pending', 'resolved', 'closed'] as $option)
-                    <option value="{{ $option }}" @selected($status === $option)>{{ $option }}</option>
-                @endforeach
-            </select>
-        </label>
-        <p><button type="submit">Filter</button></p>
+<x-page-header title="Support Tickets" eyebrow="Security" />
+
+<div class="panel invoice-filter-panel support-ticket-filter-panel">
+    <form class="invoice-filter-form" method="GET" action="/admin/support-tickets">
+        <div class="invoice-filter-fields admin-filter-fields--1">
+            <label class="invoice-filter-field" for="ticket-status">
+                <span>Status</span>
+                <select id="ticket-status" name="status">
+                    <option value="">All statuses</option>
+                    @foreach (['open', 'pending', 'resolved', 'closed'] as $option)
+                        <option value="{{ $option }}" @selected($status === $option)>{{ $option }}</option>
+                    @endforeach
+                </select>
+            </label>
+        </div>
+        <div class="invoice-filter-actions">
+            <button type="submit">Filter</button>
+        </div>
     </form>
 </div>
 <div class="panel">

@@ -21,11 +21,14 @@ class RolesAndPermissionsSeeder extends Seeder
             'products.delete',
             'invoices.view',
             'invoices.create',
+            'invoices.update',
             'payment_events.view',
+            'payment_events.update',
             'bank_integrations.manage',
             'customers.view',
             'provisioning_provider_accounts.manage',
             'orders.view',
+            'orders.create',
             'services.view',
             'renewals.view',
             'renewals.manage',
@@ -47,9 +50,9 @@ class RolesAndPermissionsSeeder extends Seeder
         $superAdmin = Role::findOrCreate('super_admin');
         $superAdmin->syncPermissions($permissions);
 
-        Role::findOrCreate('ops_admin')->syncPermissions(['admin.access', 'products.view', 'products.create', 'products.update', 'invoices.view', 'invoices.create', 'payment_events.view', 'provisioning_provider_accounts.manage', 'orders.view', 'services.view', 'renewals.view', 'renewals.manage', 'provisioning_jobs.view', 'notifications.manage', 'support_tickets.view', 'support_tickets.manage']);
+        Role::findOrCreate('ops_admin')->syncPermissions(['admin.access', 'products.view', 'products.create', 'products.update', 'invoices.view', 'invoices.create', 'invoices.update', 'payment_events.view', 'payment_events.update', 'provisioning_provider_accounts.manage', 'orders.view', 'services.view', 'renewals.view', 'renewals.manage', 'provisioning_jobs.view', 'notifications.manage', 'support_tickets.view', 'support_tickets.manage']);
         Role::findOrCreate('support')->syncPermissions(['admin.access', 'products.view', 'customers.view', 'support_tickets.view', 'support_tickets.manage']);
-        Role::findOrCreate('finance')->syncPermissions(['admin.access', 'invoices.view', 'invoices.create', 'payment_events.view', 'bank_integrations.manage', 'customers.view', 'wallets.adjust', 'orders.view']);
+        Role::findOrCreate('finance')->syncPermissions(['admin.access', 'invoices.view', 'invoices.create', 'invoices.update', 'payment_events.view', 'payment_events.update', 'bank_integrations.manage', 'customers.view', 'wallets.adjust', 'orders.view', 'orders.create']);
         Role::findOrCreate('customer');
         Role::findOrCreate('reseller');
     }

@@ -1,23 +1,37 @@
 @extends('layouts.app', ['title' => 'Products'])
 @section('content')
-<div class="panel">
-    <h1>Products</h1>
-    @forelse ($products as $product)
-        <div class="panel">
+<x-page-header
+    title="Products"
+    subtitle="Choose an active service package and start checkout from your wallet."
+/>
+
+@if ($products->isEmpty())
+    <div class="panel">
+        <x-empty-state title="No active products." message="Products will appear here when an operator enables them." />
+    </div>
+@else
+    <div class="product-grid">
+    @foreach ($products as $product)
+        <article class="product-card">
             <h2>{{ $product->name }}</h2>
-            <p class="muted">{{ strtoupper($product->type) }} · {{ number_format($product->price_amount) }} {{ $product->currency }} · {{ $product->duration_days }} days</p>
+            <div class="product-card__meta">
+                <x-status-badge tone="primary">{{ strtoupper($product->type) }}</x-status-badge>
+                <span>{{ $product->duration_days }} days</span>
+            </div>
+            <div class="product-card__price">{{ number_format($product->price_amount) }} {{ $product->currency }}</div>
             <p>{{ $product->description }}</p>
+            <div class="product-card__actions">
             @auth
                 <form method="POST" action="/products/{{ $product->id }}/order">
                     @csrf
                     <button type="submit">Order with wallet</button>
                 </form>
             @else
-                <p><a class="button" href="/login">Login to order</a></p>
+                <a class="button" href="/login">Login to order</a>
             @endauth
-        </div>
-    @empty
-        <p>No active products.</p>
-    @endforelse
-</div>
+            </div>
+        </article>
+    @endforeach
+    </div>
+@endif
 @endsection

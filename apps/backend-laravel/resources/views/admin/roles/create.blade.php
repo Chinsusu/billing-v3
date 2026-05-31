@@ -6,7 +6,6 @@
     <form method="POST" action="/admin/roles">
         @csrf
         <label>Role Name<input name="name" value="{{ old('name') }}" placeholder="renewal_operator" required></label>
-        <p class="muted">Use lowercase letters, digits, dot, underscore, or hyphen.</p>
 
         <h2>Permissions</h2>
         <div class="grid">

@@ -146,6 +146,84 @@ class OrderCheckoutFlowTest extends TestCase
         $this->assertSame($expectedProvider, $job->payload['product']['provider']);
     }
 
+    public function test_checkout_snapshots_cloudmini_routes_into_provisioning_job(): void
+    {
+        $customer = $this->customerUser();
+        Wallet::factory()->for($customer)->create(['balance_amount' => 300000]);
+        $accountId = (string) Str::uuid();
+        DB::table('provisioning_provider_accounts')->insert([
+            'id' => $accountId,
+            'slug' => 'cloudmini-prod-1',
+            'name' => 'Cloudmini Prod 1',
+            'driver' => 'cloudmini_v3',
+            'base_url' => 'https://cloudmini-prod-1.example.test',
+            'provision_path' => null,
+            'auth_type' => 'header',
+            'auth_header_name' => 'X-API-Key',
+            'api_key' => app('encrypter')->encrypt('cloudmini-secret-1234', false),
+            'api_key_last_four' => '1234',
+            'enabled' => true,
+            'timeout_seconds' => 15,
+            'request_template' => '{}',
+            'response_external_id_path' => 'resource_snapshot.id',
+            'response_status_path' => 'state',
+            'response_config_path' => 'resource_snapshot',
+            'created_by_id' => null,
+            'updated_by_id' => null,
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
+        $product = Product::factory()->create([
+            'name' => 'Cloudmini Residential 30 Days',
+            'code' => 'cloudmini-res-30d',
+            'type' => 'proxy',
+            'status' => 'active',
+            'price_amount' => 149000,
+            'currency' => 'VND',
+            'duration_days' => 30,
+            'provider_options' => [
+                'kind' => 'residential',
+                'protocol' => 'socks5',
+                'speed_limit_mbps' => 20,
+                'bandwidth_limit_mb' => 0,
+                'reserve_capacity' => false,
+            ],
+        ]);
+        DB::table('product_provider_routes')->insert([
+            'id' => (string) Str::uuid(),
+            'product_id' => $product->id,
+            'provider_account_id' => $accountId,
+            'enabled' => true,
+            'priority' => 10,
+            'weight' => 100,
+            'billing_group_id' => 'vn-residential',
+            'node_selector_type' => 'auto',
+            'node_name' => null,
+            'options' => json_encode(['pool' => 'primary']),
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
+
+        $this->actingAs($customer)->post("/products/{$product->id}/order");
+
+        $provider = ProvisioningJob::firstOrFail()->payload['product']['provider'];
+        $this->assertSame('cloudmini_v3', $provider['driver']);
+        $this->assertSame('residential', $provider['options']['kind']);
+        $this->assertSame([
+            [
+                'provider_account_id' => $accountId,
+                'account_slug' => 'cloudmini-prod-1',
+                'priority' => 10,
+                'weight' => 100,
+                'billing_group_id' => 'vn-residential',
+                'node_selector_type' => 'auto',
+                'node_name' => null,
+                'options' => ['pool' => 'primary'],
+            ],
+        ], $provider['routes']);
+        $this->assertSame($provider, Service::firstOrFail()->meta['provider']);
+    }
+
     public function test_checkout_snapshots_lifecycle_policy_and_uses_calendar_month_no_overflow(): void
     {
         $this->travelTo('2026-01-31 09:00:00');

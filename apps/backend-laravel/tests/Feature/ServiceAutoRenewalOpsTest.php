@@ -429,7 +429,7 @@ class ServiceAutoRenewalOpsTest extends TestCase
         $this->actingAs($admin)
             ->get("/admin/services/{$service->id}")
             ->assertOk()
-            ->assertSee('Service Runbook')
+            ->assertSee('Service Detail')
             ->assertDontSee('Admin Auto-renew Control')
             ->assertDontSee('Disable Auto-renew');
     }

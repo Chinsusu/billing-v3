@@ -37,13 +37,13 @@
             --shadow: 0px 4px 18px 0px rgba(75, 70, 92, 0.1);
             
             /* Spatie/Laravel variables mapped to Vuexy theme HSL style */
-            --primary: 234, 84, 85;         /* Red Danger for Admin #EA5455 to separate from customer! */
+            --primary: 115, 103, 240;      /* #7367F0 */
             --secondary: 128, 131, 144;    /* #808390 */
             --success: 40, 199, 111;       /* #28C76F */
             --info: 0, 207, 232;           /* #00CFE8 */
             --warning: 255, 159, 67;       /* #FF9F43 */
             --danger: 234, 84, 85;         /* #EA5455 */
-            --primary-rgb: 234, 84, 85;
+            --primary-rgb: 115, 103, 240;
         }
 
         [data-theme="dark"] {
@@ -121,7 +121,7 @@
         .sidebar-title {
             font-weight: 700;
             font-size: 1.25rem;
-            letter-spacing: 0.5px;
+            letter-spacing: 0;
             color: #fff;
         }
 
@@ -132,7 +132,7 @@
             border-radius: 4px;
             font-size: 0.65rem;
             font-weight: 600;
-            letter-spacing: 0.5px;
+            letter-spacing: 0;
             text-transform: uppercase;
         }
 
@@ -148,7 +148,7 @@
             font-weight: 600;
             color: #7983bb;
             margin: 18px 0 8px 10px;
-            letter-spacing: 1px;
+            letter-spacing: 0;
         }
 
         .sidebar-menu-item {
@@ -165,13 +165,25 @@
             transition: all 0.15s ease-in-out;
         }
 
-        .sidebar-menu-item svg {
-            width: 18px;
+        .sidebar-menu-icon {
+            align-items: center;
+            color: currentColor;
+            display: inline-flex;
+            flex: 0 0 20px;
+            height: 20px;
+            justify-content: center;
+            opacity: 0.88;
+            width: 20px;
+        }
+
+        .sidebar-menu-icon svg {
+            fill: none;
             height: 18px;
-            fill: currentColor;
-            opacity: 0.85;
+            stroke: currentColor;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+            width: 18px;
             transition: transform 0.15s ease-in-out;
-            flex-shrink: 0;
         }
 
         .sidebar-menu-item:hover {
@@ -179,7 +191,7 @@
             color: #fff;
         }
 
-        .sidebar-menu-item:hover svg {
+        .sidebar-menu-item:hover .sidebar-menu-icon svg {
             transform: translateX(2px);
         }
 
@@ -335,7 +347,7 @@
             color: var(--text-heading);
             font-weight: 600;
             margin-bottom: 16px;
-            letter-spacing: -0.5px;
+            letter-spacing: 0;
         }
 
         h1 { font-size: 1.75rem; }
@@ -373,7 +385,7 @@
             margin-top: 16px;
             margin-bottom: 6px;
             text-transform: uppercase;
-            letter-spacing: 0.5px;
+            letter-spacing: 0;
         }
 
         input, select, textarea {
@@ -469,7 +481,7 @@
             font-weight: 600;
             font-size: 0.8rem;
             text-transform: uppercase;
-            letter-spacing: 0.5px;
+            letter-spacing: 0;
             border-bottom: 2px solid var(--border-color);
             padding: 12px 16px;
             text-align: left;
@@ -540,119 +552,124 @@
             }
         }
     </style>
+    @include('layouts.partials.ui-foundation')
+    @include('layouts.partials.ui-desktop-admin')
 </head>
-<body>
+<body class="app-shell app-shell--admin app-shell--vuexy">
 <div class="app-wrapper">
     <!-- Vuexy-like Vertical Sidebar (Admin) -->
     <aside class="sidebar" id="sidebar">
         <div class="sidebar-brand">
-            <div class="sidebar-logo">A</div>
-            <div class="sidebar-title">Billing Admin</div>
-            <span class="sidebar-badge">Portal</span>
+            <div class="sidebar-brand-mark">B3</div>
+            <div class="sidebar-brand-copy">
+                <div class="sidebar-kicker">Control Plane</div>
+                <div class="sidebar-title">Billing v3</div>
+            </div>
+            <span class="sidebar-badge">Admin</span>
         </div>
         <div class="sidebar-menu">
             <a href="/admin" class="sidebar-menu-item {{ Request::is('admin') ? 'active' : '' }}">
-                <svg viewBox="0 0 24 24"><path d="M19 3H5c-1.103 0-2 .897-2 2v14c0 1.103.897 2 2 2h14c1.103 0 2-.897 2-2V5c0-1.103-.897-2-2-2zm-1 16H6v-1h12v1zm0-3H6v-1h12v1zm0-3H6V8h12v5z"/></svg>
+                <x-sidebar-icon name="overview" />
                 <span>Admin Overview</span>
+            </a>
+
+            <div class="sidebar-section-header">Resources</div>
+            <a href="/admin/products" class="sidebar-menu-item {{ Request::is('admin/products*') ? 'active' : '' }}">
+                <x-sidebar-icon name="products" />
+                <span>Products</span>
+            </a>
+            <a href="/admin/orders" class="sidebar-menu-item {{ Request::is('admin/orders*') ? 'active' : '' }}">
+                <x-sidebar-icon name="orders" />
+                <span>Orders</span>
+            </a>
+            <a href="/admin/services" class="sidebar-menu-item {{ Request::is('admin/services*') ? 'active' : '' }}">
+                <x-sidebar-icon name="services" />
+                <span>Services</span>
             </a>
 
             <div class="sidebar-section-header">Financials</div>
             <a href="/admin/invoices" class="sidebar-menu-item {{ Request::is('admin/invoices*') ? 'active' : '' }}">
-                <svg viewBox="0 0 24 24"><path d="M19 3H5c-1.103 0-2 .897-2 2v14c0 1.103.897 2 2 2h14c1.103 0 2-.897 2-2V5c0-1.103-.897-2-2-2zm0 16H5V5h14v14zM7 7h10v2H7zm0 4h10v2H7zm0 4h7v2H7z"/></svg>
+                <x-sidebar-icon name="invoices" />
                 <span>Invoices</span>
             </a>
             <a href="/admin/payment-events" class="sidebar-menu-item {{ Request::is('admin/payment-events*') ? 'active' : '' }}">
-                <svg viewBox="0 0 24 24"><path d="M12 2C6.486 2 2 6.486 2 12s4.486 10 10 10 10-4.486 10-10S17.514 2 12 2zm0 18c-4.411 0-8-3.589-8-8s3.589-8 8-8 8 3.589 8 8-3.589 8-8 8zm1-13h-2v6h6v-2h-4V7z"/></svg>
+                <x-sidebar-icon name="payment-events" />
                 <span>Payment Events</span>
             </a>
             @can('renewals.view')
                 <a href="/admin/renewals" class="sidebar-menu-item {{ Request::is('admin/renewals*') ? 'active' : '' }}">
-                    <svg viewBox="0 0 24 24"><path d="M19 12h-2v3h-3v2h5v-5zM7 9h3V7H5v5h2V9z"/><path d="M20 2H4c-1.103 0-2 .897-2 2v16c0 1.103.897 2 2 2h16c1.103 0 2-.897 2-2V4c0-1.103-.897-2-2-2zm0 18H4V4h16v16z"/></svg>
+                    <x-sidebar-icon name="renewals" />
                     <span>Renewals</span>
                 </a>
             @endcan
             @can('wallets.adjust')
                 <a href="/admin/reports/billing" class="sidebar-menu-item {{ Request::is('admin/reports*') ? 'active' : '' }}">
-                    <svg viewBox="0 0 24 24"><path d="M19 3H5c-1.103 0-2 .897-2 2v14c0 1.103.897 2 2 2h14c1.103 0 2-.897 2-2V5c0-1.103-.897-2-2-2zm-1 16H6V6h12v13z"/><path d="M8 8h3v2H8zm0 4h5v2H8zm0 3h8v2H8z"/></svg>
+                    <x-sidebar-icon name="reports" />
                     <span>Billing Reports</span>
                 </a>
             @endcan
 
-            <div class="sidebar-section-header">Resources</div>
-            <a href="/admin/products" class="sidebar-menu-item {{ Request::is('admin/products*') ? 'active' : '' }}">
-                <svg viewBox="0 0 24 24"><path d="M12 2.02422L1.75 6.00022L12 9.97622L22.25 6.00022L12 2.02422ZM3.75 6.00022L12 2.78122L20.25 6.00022L12 9.21922L3.75 6.00022ZM1.75 8.00022V16.0002L12 19.9762L22.25 16.0002V8.00022L20.25 8.78122V15.2192L12 18.4382L3.75 15.2192V8.78122L1.75 8.00022Z"/></svg>
-                <span>Products</span>
-            </a>
-            <a href="/admin/orders" class="sidebar-menu-item {{ Request::is('admin/orders*') ? 'active' : '' }}">
-                <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/></svg>
-                <span>Orders</span>
-            </a>
-            <a href="/admin/services" class="sidebar-menu-item {{ Request::is('admin/services*') ? 'active' : '' }}">
-                <svg viewBox="0 0 24 24"><path d="M19.14 12.94c.04-.3.06-.61.06-.94 0-.32-.02-.64-.07-.94l2.03-1.58c.18-.14.23-.41.12-.61l-1.92-3.32c-.12-.22-.37-.29-.59-.22l-2.39.96c-.5-.38-1.03-.7-1.62-.94l-.36-2.54c-.04-.24-.24-.41-.48-.41h-3.84c-.24 0-.43.17-.47.41l-.36 2.54c-.59.24-1.13.57-1.62.94l-2.39-.96c-.22-.08-.47 0-.59.22L2.74 8.87c-.12.21-.08.47.12.61l2.03 1.58c-.05.3-.09.63-.09.94s.02.64.07.94l-2.03 1.58c-.18.14-.23.41-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.24.41.48.41h3.84c.24 0 .44-.17.47-.41l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32c.12-.22.07-.47-.12-.61l-2.01-1.58zM12 15.6c-1.98 0-3.6-1.62-3.6-3.6s1.62-3.6 3.6-3.6 3.6 1.62 3.6 3.6-1.62 3.6-3.6 3.6z"/></svg>
-                <span>Services</span>
-            </a>
-
             <div class="sidebar-section-header">Integrations</div>
             <a href="/admin/bank-integrations" class="sidebar-menu-item {{ Request::is('admin/bank-integrations*') ? 'active' : '' }}">
-                <svg viewBox="0 0 24 24"><path d="M21 19h-1V9a1 1 0 0 0-1-1H5a1 1 0 0 0-1 1v10H3a1 1 0 0 0-1 1v2h20v-2a1 1 0 0 0-1-1zM6 19v-9h12v9H6zm14 2H4v-1h16v1z"/></svg>
+                <x-sidebar-icon name="bank-integrations" />
                 <span>Bank Integrations</span>
             </a>
             <a href="/admin/provisioning-provider-accounts" class="sidebar-menu-item {{ Request::is('admin/provisioning-provider-accounts*') ? 'active' : '' }}">
-                <svg viewBox="0 0 24 24"><path d="M12 2C6.486 2 2 6.486 2 12s4.486 10 10 10 10-4.486 10-10S17.514 2 12 2zm0 18c-4.411 0-8-3.589-8-8s3.589-8 8-8 8 3.589 8 8-3.589 8-8 8zm-1-13h2v6h-2zm0 8h2v2h-2z"/></svg>
+                <x-sidebar-icon name="provider-accounts" />
                 <span>Provider Accounts</span>
             </a>
 
             <div class="sidebar-section-header">Queue &amp; Ops</div>
             <a href="/admin/provisioning-jobs" class="sidebar-menu-item {{ Request::is('admin/provisioning-jobs*') ? 'active' : '' }}">
-                <svg viewBox="0 0 24 24"><path d="M19.14 12.94c.04-.3.06-.61.06-.94 0-.32-.02-.64-.07-.94l2.03-1.58c.18-.14.23-.41.12-.61l-1.92-3.32c-.12-.22-.37-.29-.59-.22l-2.39.96c-.5-.38-1.03-.7-1.62-.94l-.36-2.54c-.04-.24-.24-.41-.48-.41h-3.84c-.24 0-.43.17-.47.41l-.36 2.54c-.59.24-1.13.57-1.62.94l-2.39-.96c-.22-.08-.47 0-.59.22L2.74 8.87c-.12.21-.08.47.12.61l2.03 1.58c-.05.3-.09.63-.09.94s.02.64.07.94l-2.03 1.58c-.18.14-.23.41-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.24.41.48.41h3.84c.24 0 .44-.17.47-.41l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32c.12-.22.07-.47-.12-.61l-2.01-1.58zM12 15.6c-1.98 0-3.6-1.62-3.6-3.6s1.62-3.6 3.6-3.6 3.6 1.62 3.6 3.6-1.62 3.6-3.6 3.6z"/></svg>
+                <x-sidebar-icon name="provisioning-jobs" />
                 <span>Provisioning Jobs</span>
             </a>
             <a href="/admin/provider-action-jobs" class="sidebar-menu-item {{ Request::is('admin/provider-action-jobs*') ? 'active' : '' }}">
-                <svg viewBox="0 0 24 24"><path d="M19 3H5c-1.103 0-2 .897-2 2v14c0 1.103.897 2 2 2h14c1.103 0 2-.897 2-2V5c0-1.103-.897-2-2-2zm-1 16H6V6h12v13z"/><path d="M8 8h3v2H8zm0 4h5v2H8zm0 3h8v2H8z"/></svg>
+                <x-sidebar-icon name="provider-action-jobs" />
                 <span>Provider Action Jobs</span>
             </a>
             <a href="/admin/ops-health" class="sidebar-menu-item {{ Request::is('admin/ops-health*') ? 'active' : '' }}">
-                <svg viewBox="0 0 24 24"><path d="M12 2C6.486 2 2 6.486 2 12s4.486 10 10 10 10-4.486 10-10S17.514 2 12 2zm1 16h-2v-2h2v2zm0-4h-2V7h2v7z"/></svg>
+                <x-sidebar-icon name="ops-health" />
                 <span>Ops Health</span>
             </a>
             <a href="/admin/ops-alert-events" class="sidebar-menu-item {{ Request::is('admin/ops-alert-events*') ? 'active' : '' }}">
-                <svg viewBox="0 0 24 24"><path d="M12 2C6.486 2 2 6.486 2 12s4.486 10 10 10 10-4.486 10-10S17.514 2 12 2zm1 16h-2v-2h2v2zm0-4h-2V7h2v7z"/></svg>
+                <x-sidebar-icon name="ops-alerts" />
                 <span>Ops Alerts</span>
             </a>
             <a href="/admin/scheduled-task-runs" class="sidebar-menu-item {{ Request::is('admin/scheduled-task-runs*') ? 'active' : '' }}">
-                <svg viewBox="0 0 24 24"><path d="M12 2C6.486 2 2 6.486 2 12s4.486 10 10 10 10-4.486 10-10S17.514 2 12 2zm1 16h-2v-2h2v2zm0-4h-2V7h2v7z"/></svg>
+                <x-sidebar-icon name="task-runs" />
                 <span>Task Runs</span>
             </a>
 
             <div class="sidebar-section-header">Security &amp; Support</div>
             <a href="/admin/customers" class="sidebar-menu-item {{ Request::is('admin/customers*') ? 'active' : '' }}">
-                <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 17h-2v-2h2v2zm0-4h-2V7h2v8z"/></svg>
-                <span>Customer Base</span>
+                <x-sidebar-icon name="customers" />
+                <span>Customers</span>
             </a>
             @can('users.view')
                 <a href="/admin/users" class="sidebar-menu-item {{ Request::is('admin/users*') ? 'active' : '' }}">
-                    <svg viewBox="0 0 24 24"><path d="M12 2C6.486 2 2 6.486 2 12s4.486 10 10 10 10-4.486 10-10S17.514 2 12 2zm0 18c-4.411 0-8-3.589-8-8s3.589-8 8-8 8 3.589 8 8-3.589 8-8 8z"/><path d="M12 6c-1.93 0-3.5 1.57-3.5 3.5S10.07 13 12 13s3.5-1.57 3.5-3.5S13.93 6 12 6zm0 5c-.827 0-1.5-.673-1.5-1.5S11.173 8 12 8s1.5.673 1.5 1.5S12.827 11 12 11zm0 3c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4zm-6 4c.22-1.35 4-2 6-2s5.78.65 6 2H6z"/></svg>
+                    <x-sidebar-icon name="users-roles" />
                     <span>Users &amp; Roles</span>
                 </a>
             @endcan
             @can('audit_logs.view')
                 <a href="/admin/audit-logs" class="sidebar-menu-item {{ Request::is('admin/audit-logs*') ? 'active' : '' }}">
-                    <svg viewBox="0 0 24 24"><path d="M12 2C6.486 2 2 6.486 2 12s4.486 10 10 10 10-4.486 10-10S17.514 2 12 2zm0 18c-4.411 0-8-3.589-8-8s3.589-8 8-8 8 3.589 8 8-3.589 8-8 8z"/><path d="M13 7h-2v6h6v-2h-4z"/></svg>
+                    <x-sidebar-icon name="audit-logs" />
                     <span>Audit Logs</span>
                 </a>
             @endcan
             @can('notifications.manage')
                 <a href="/admin/notification-events" class="sidebar-menu-item {{ Request::is('admin/notification-events*') ? 'active' : '' }}">
-                    <svg viewBox="0 0 24 24"><path d="M19 3H5c-1.103 0-2 .897-2 2v14c0 1.103.897 2 2 2h14c1.103 0 2-.897 2-2V5c0-1.103-.897-2-2-2zm0 16H5V5h14v14zM7 7h10v2H7zm0 4h10v2H7zm0 4h7v2H7z"/></svg>
+                    <x-sidebar-icon name="notification-logs" />
                     <span>Notification Logs</span>
                 </a>
                 <a href="/admin/notification-templates" class="sidebar-menu-item {{ Request::is('admin/notification-templates*') ? 'active' : '' }}">
-                    <svg viewBox="0 0 24 24"><path d="M19 3H5c-1.103 0-2 .897-2 2v14c0 1.103.897 2 2 2h14c1.103 0 2-.897 2-2V5c0-1.103-.897-2-2-2zm0 16H5V5h14v14zM7 7h10v2H7zm0 4h10v2H7zm0 4h7v2H7z"/></svg>
+                    <x-sidebar-icon name="templates" />
                     <span>Templates</span>
                 </a>
             @endcan
             <a href="/admin/support-tickets" class="sidebar-menu-item {{ Request::is('admin/support-tickets*') ? 'active' : '' }}">
-                <svg viewBox="0 0 24 24"><path d="M20 2H4c-1.103 0-2 .897-2 2v18l4-4h14c1.103 0 2-.897 2-2V4c0-1.103-.897-2-2-2zm0 14H5.172L4 17.172V4h16v12zm-9-3h2v2h-2zm0-8h2v6h-2z"/></svg>
+                <x-sidebar-icon name="support-tickets" />
                 <span>Support Tickets</span>
             </a>
         </div>
@@ -661,26 +678,30 @@
     <!-- Page Content Container -->
     <div class="main-container">
         <!-- Top Navbar -->
-        <header class="navbar">
+        <header class="navbar layout-navbar-floating">
             <div class="navbar-left">
                 <button class="navbar-toggle-btn" id="sidebar-toggle" aria-label="Toggle Sidebar">
                     <svg viewBox="0 0 24 24"><path d="M4 6h16v2H4zm0 5h16v2H4zm0 5h16v2H4z"/></svg>
                 </button>
-                <div class="navbar-page-title">
-                    <span>Admin Controls</span>
-                    <span class="sidebar-badge" style="background: rgb(var(--primary)); font-size: 0.75rem;">{{ $title ?? '' }}</span>
+                <div class="navbar-title-stack">
+                    <span class="navbar-page-kicker">Admin Workspace</span>
+                    <span class="navbar-page-title">{{ $title ?? 'Admin Controls' }}</span>
                 </div>
+                <form class="navbar-search" method="GET" action="/admin/customers" role="search">
+                    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9.5 3a6.5 6.5 0 0 1 5.18 10.43l4.45 4.44-1.41 1.42-4.45-4.45A6.5 6.5 0 1 1 9.5 3zm0 2a4.5 4.5 0 1 0 0 9 4.5 4.5 0 0 0 0-9z"/></svg>
+                    <input type="search" name="search" value="{{ Request::is('admin/customers*') ? request('search') : '' }}" placeholder="Search customers" aria-label="Search customers">
+                </form>
             </div>
             
             <div class="navbar-right">
                 <!-- Return to Customer Dashboard -->
-                <a href="/dashboard" class="button secondary" style="padding: 6px 12px; font-size: 0.8rem; display: inline-flex; align-items: center; gap: 6px;">
-                    <svg viewBox="0 0 24 24" style="width: 14px; height: 14px; fill: currentColor;"><path d="M12 2C6.486 2 2 6.486 2 12s4.486 10 10 10 10-4.486 10-10S17.514 2 12 2zm0 18c-4.411 0-8-3.589-8-8s3.589-8 8-8 8 3.589 8 8-3.589 8-8 8zm1-13h-2v6h6v-2h-4V7z"/></svg>
-                    <span>Exit Admin</span>
+                <a href="/dashboard" class="button secondary button-compact button-soft topbar-action portal-switch">
+                    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg>
+                    <span>Client</span>
                 </a>
 
                 <!-- Theme Toggler -->
-                <button class="theme-toggle-btn" id="theme-toggle" title="Toggle Light/Dark Theme">
+                <button class="theme-toggle-btn icon-button topbar-action" id="theme-toggle" title="Toggle Light/Dark Theme" aria-label="Toggle Light/Dark Theme">
                     <!-- Sun Icon (visible in dark mode) -->
                     <svg id="theme-sun-icon" viewBox="0 0 24 24" style="display: none;"><path d="M6.993 12c0 2.761 2.246 5.007 5.007 5.007s5.007-2.246 5.007-5.007S14.761 6.993 12 6.993 6.993 9.239 6.993 12zM12 8.993c1.658 0 3.007 1.349 3.007 3.007s-1.349 3.007-3.007 3.007S8.993 13.658 8.993 12s1.349-3.007 3.007-3.007zm0-6.993c-.553 0-1 .447-1 1v2c0 .553.447 1 1 1s1-.447 1-1v-2c0-.553-.447-1-1-1zm0 16c-.553 0-1 .447-1 1v2c0 .553.447 1 1 1s1-.447 1-1v-2c0-.553-.447-1-1-1zM3 11H1c-.553 0-1 .447-1 1s.447 1 1 1h2c.553 0 1-.447 1-1s-.447-1-1-1zm16 0h-2c-.553 0-1 .447-1 1s.447 1 1 1h2c.553 0 1-.447 1-1s-.447-1-1-1zM5.222 5.222c-.391-.391-1.024-.391-1.414 0s-.391 1.024 0 1.414l1.414 1.414c.391.391 1.024.391 1.414 0s.391-1.024 0-1.414L5.222 5.222zm12.164 12.164c-.391-.391-1.024-.391-1.414 0s-.391 1.024 0 1.414l1.414 1.414c.391.391 1.024.391 1.414 0s.391-1.024 0-1.414l-1.414-1.414zm0-12.164-1.414 1.414c-.391.391-.391 1.024 0 1.414s1.024.391 1.414 0l1.414-1.414c.391-.391.391-1.024 0-1.414s-1.024-.391-1.414 0zm-12.164 12.164-1.414 1.414c-.391.391-.391 1.024 0 1.414s1.024.391 1.414 0l1.414-1.414c.391-.391.391-1.024 0-1.414s-1.024-.391-1.414 0z"/></svg>
                     <!-- Moon Icon (visible in light mode) -->
@@ -688,10 +709,16 @@
                 </button>
 
                 @auth
-                    <span style="font-weight: 500; font-size: 0.9rem;">{{ auth()->user()->email }}</span>
+                    <div class="user-avatar" title="{{ auth()->user()->email }}">
+                        <span class="user-avatar__initial">{{ strtoupper(substr(auth()->user()->email, 0, 1)) }}</span>
+                        <span class="user-avatar__copy">
+                            <strong>Admin</strong>
+                            <small>{{ auth()->user()->email }}</small>
+                        </span>
+                    </div>
                     <form method="POST" action="/logout" style="display:inline">
                         @csrf
-                        <button type="submit" class="button secondary" style="padding: 6px 12px; font-size: 0.8rem;">Logout</button>
+                        <button type="submit" class="button secondary button-compact topbar-action">Logout</button>
                     </form>
                 @endauth
             </div>
@@ -714,7 +741,7 @@
 
             <!-- Success/Status Banner -->
             @if (session('status'))
-                <div class="flash-status">
+                <div class="flash-status" role="status" aria-live="polite" data-flash-toast data-toast-dismiss-ms="1200">
                     {{ session('status') }}
                 </div>
             @endif
@@ -741,6 +768,8 @@
         </footer>
     </div>
 </div>
+
+@include('layouts.partials.realtime-search-script')
 
 <script>
     // Theme Toggle Handler
@@ -790,6 +819,17 @@
             }
         });
     }
+
+    document.querySelectorAll('[data-flash-toast]').forEach((toast) => {
+        const delay = Number(toast.dataset.toastDismissMs || 1200);
+        const hide = () => {
+            toast.classList.add('is-hiding');
+            window.setTimeout(() => toast.remove(), 220);
+        };
+
+        window.setTimeout(hide, delay);
+        toast.addEventListener('click', hide);
+    });
 </script>
 </body>
 </html>

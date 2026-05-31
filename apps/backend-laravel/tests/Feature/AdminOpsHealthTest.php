@@ -76,14 +76,17 @@ class AdminOpsHealthTest extends TestCase
             ->assertSee('Provisioning Queue')
             ->assertSee('failed: 1')
             ->assertSee('Provider Action Queue')
-            ->assertSee('pending: 1');
+            ->assertSee('pending: 1')
+            ->assertSee('Overdue Active Services')
+            ->assertSee('Enabled Bank Integrations')
+            ->assertSee('stat-card', false);
 
         $this->assertMatchesRegularExpression(
-            '/<strong>\s*1\s*<\/strong>\s*<br>\s*Overdue Active Services/',
+            '/stat-card__value">\s*1\s*<\/span>\s*<span class="stat-card__label">\s*Overdue Active Services/',
             $response->getContent()
         );
         $this->assertMatchesRegularExpression(
-            '/<strong>\s*1\s*<\/strong>\s*<br>\s*Enabled Bank Integrations/',
+            '/stat-card__value">\s*1\s*<\/span>\s*<span class="stat-card__label">\s*Enabled Bank Integrations/',
             $response->getContent()
         );
     }

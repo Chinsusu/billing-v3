@@ -73,6 +73,141 @@ class ProductCatalogTest extends TestCase
         ]);
     }
 
+    public function test_admin_create_product_page_uses_scannable_form_sections(): void
+    {
+        $this->seed(RolesAndPermissionsSeeder::class);
+        $admin = User::factory()->create();
+        $admin->assignRole('super_admin');
+
+        $this->actingAs($admin)
+            ->get('/admin/products/create')
+            ->assertOk()
+            ->assertSee('product-form-shell', false)
+            ->assertSee('product-form-grid', false)
+            ->assertSee('product-form-section--identity', false)
+            ->assertSee('product-form-actions', false)
+            ->assertSee('data-lifecycle-source-select', false)
+            ->assertSee('data-lifecycle-source-field', false)
+            ->assertSee('data-lifecycle-unit-select', false)
+            ->assertSee('data-lifecycle-unit-field', false)
+            ->assertSee('data-lifecycle-count-field', false)
+            ->assertSee('data-lifecycle-count-input', false)
+            ->assertSee('data-lifecycle-duration-field', false)
+            ->assertSee('data-provider-response-field', false)
+            ->assertSee('data-provider-lookup-field', false)
+            ->assertSee('data-product-provider-mode-select', false)
+            ->assertSee('data-product-provider-legacy-field', false)
+            ->assertSee('data-product-provider-cloudmini-field', false)
+            ->assertSee('data-product-provider-cloudmini-control', false)
+            ->assertSee('data-product-provider-lifecycle-response-section', false)
+            ->assertDontSee('Stable SKU used by API, orders, and reports.')
+            ->assertDontSee('Only active products appear in the customer catalog.')
+            ->assertDontSee('Fallback duration for reports and local day-based products.')
+            ->assertDontSee('Use provider lookup when dates must be fetched after external_id exists.')
+            ->assertDontSee('Keep this concise; it is shown to customers before purchase.')
+            ->assertDontSee('--product-form-help-min-height', false)
+            ->assertDontSee('.product-form-field:not(:has(.field-help))::after', false)
+            ->assertSeeInOrder([
+                'Product identity',
+                'Pricing & lifecycle',
+                'Provisioning provider',
+                'Auto-renew Policy',
+                'Provider lifecycle response',
+            ]);
+    }
+
+    public function test_admin_can_save_calendar_month_product_without_choosing_duration_days(): void
+    {
+        $this->seed(RolesAndPermissionsSeeder::class);
+        $admin = User::factory()->create();
+        $admin->assignRole('super_admin');
+
+        $this->actingAs($admin)->post('/admin/products', [
+            'code' => 'vps-calendar-monthly',
+            'name' => 'Calendar Monthly VPS',
+            'type' => 'vps',
+            'status' => 'active',
+            'price_amount' => 199000,
+            'currency' => 'VND',
+            'description' => 'Calendar monthly plan',
+            'lifecycle_source' => 'local_policy',
+            'lifecycle_unit' => 'calendar_month',
+            'lifecycle_count' => 1,
+        ])->assertRedirect('/admin/products');
+
+        $product = Product::where('code', 'vps-calendar-monthly')->firstOrFail();
+        $this->assertSame('calendar_month', $product->lifecycle_unit);
+        $this->assertSame(1, $product->lifecycle_count);
+        $this->assertSame(30, $product->duration_days);
+
+        $this->actingAs($admin)->put("/admin/products/{$product->id}", [
+            'code' => 'vps-calendar-monthly',
+            'name' => 'Calendar Monthly VPS Updated',
+            'type' => 'vps',
+            'status' => 'active',
+            'price_amount' => 219000,
+            'currency' => 'VND',
+            'description' => 'Two calendar month plan',
+            'lifecycle_source' => 'local_policy',
+            'lifecycle_unit' => 'calendar_month',
+            'lifecycle_count' => 2,
+        ])->assertRedirect('/admin/products');
+
+        $product->refresh();
+        $this->assertSame(2, $product->lifecycle_count);
+        $this->assertSame(60, $product->duration_days);
+    }
+
+    public function test_admin_can_save_provider_lifecycle_product_without_local_policy_inputs(): void
+    {
+        $this->seed(RolesAndPermissionsSeeder::class);
+        $admin = User::factory()->create();
+        $admin->assignRole('super_admin');
+
+        $this->actingAs($admin)->post('/admin/products', [
+            'code' => 'provider-response-plan',
+            'name' => 'Provider Response Plan',
+            'type' => 'proxy',
+            'status' => 'active',
+            'price_amount' => 99000,
+            'currency' => 'VND',
+            'description' => 'Dates are returned in the provider response.',
+            'lifecycle_source' => 'provider_response',
+            'provider_lifecycle_ordered_at_path' => 'data.ordered_at',
+            'provider_lifecycle_expires_at_path' => 'data.expires_at',
+            'provider_lifecycle_date_format' => 'iso8601',
+            'provider_lifecycle_timezone' => 'UTC',
+        ])->assertRedirect('/admin/products');
+
+        $product = Product::where('code', 'provider-response-plan')->firstOrFail();
+        $this->assertSame('provider_response', $product->lifecycle_source);
+        $this->assertSame('day', $product->lifecycle_unit);
+        $this->assertSame(30, $product->lifecycle_count);
+        $this->assertSame(30, $product->duration_days);
+        $this->assertNull($product->provider_lifecycle_path);
+
+        $this->actingAs($admin)->put("/admin/products/{$product->id}", [
+            'code' => 'provider-response-plan',
+            'name' => 'Provider Lookup Plan',
+            'type' => 'proxy',
+            'status' => 'active',
+            'price_amount' => 109000,
+            'currency' => 'VND',
+            'description' => 'Dates are fetched after external_id exists.',
+            'lifecycle_source' => 'provider_lookup',
+            'provider_lifecycle_path' => '/api/services/{external_id}',
+            'provider_lifecycle_ordered_at_path' => 'data.ordered_at',
+            'provider_lifecycle_expires_at_path' => 'data.expires_at',
+            'provider_lifecycle_date_format' => 'iso8601',
+            'provider_lifecycle_timezone' => 'UTC',
+        ])->assertRedirect('/admin/products');
+
+        $product->refresh();
+        $this->assertSame('provider_lookup', $product->lifecycle_source);
+        $this->assertSame('/api/services/{external_id}', $product->provider_lifecycle_path);
+        $this->assertSame(30, $product->duration_days);
+    }
+
     public function test_admin_can_store_provider_mapping_on_product(): void
     {
         $this->seed(RolesAndPermissionsSeeder::class);
@@ -124,6 +259,122 @@ class ProductCatalogTest extends TestCase
         $this->assertSame('sgp1', $product->provider_region);
         $this->assertSame('/api/accounts/main/provision', $product->provider_provision_path);
         $this->assertSame(['size' => 'small', 'tags' => ['billing']], $product->provider_options);
+    }
+
+    public function test_admin_can_store_cloudmini_product_routes(): void
+    {
+        $this->seed(RolesAndPermissionsSeeder::class);
+        $admin = User::factory()->create();
+        $admin->assignRole('super_admin');
+        $primaryAccountId = (string) Str::uuid();
+        $fallbackAccountId = (string) Str::uuid();
+
+        foreach ([[$primaryAccountId, 'cloudmini-prod-1'], [$fallbackAccountId, 'cloudmini-prod-2']] as [$id, $slug]) {
+            DB::table('provisioning_provider_accounts')->insert([
+                'id' => $id,
+                'slug' => $slug,
+                'name' => Str::title(str_replace('-', ' ', $slug)),
+                'driver' => 'cloudmini_v3',
+                'base_url' => "https://{$slug}.example.test",
+                'provision_path' => null,
+                'auth_type' => 'header',
+                'auth_header_name' => 'X-API-Key',
+                'api_key' => app('encrypter')->encrypt('cloudmini-secret-1234', false),
+                'api_key_last_four' => '1234',
+                'enabled' => true,
+                'timeout_seconds' => 15,
+                'request_template' => '{}',
+                'response_external_id_path' => 'resource_snapshot.id',
+                'response_status_path' => 'state',
+                'response_config_path' => 'resource_snapshot',
+                'created_by_id' => $admin->id,
+                'updated_by_id' => $admin->id,
+                'created_at' => now(),
+                'updated_at' => now(),
+            ]);
+        }
+
+        $this->actingAs($admin)
+            ->get('/admin/products/create')
+            ->assertOk()
+            ->assertSee('Cloudmini Kind')
+            ->assertSee('Reserve Capacity')
+            ->assertSee('Cloudmini Route 1')
+            ->assertSee('Location')
+            ->assertSee("/admin/provisioning-provider-accounts/{$primaryAccountId}/inventory/groups");
+
+        $this->actingAs($admin)->post('/admin/products', [
+            'code' => 'cloudmini-res-30d',
+            'name' => 'Cloudmini Residential 30 Days',
+            'type' => 'proxy',
+            'status' => 'active',
+            'price_amount' => 149000,
+            'currency' => 'VND',
+            'duration_days' => 30,
+            'description' => 'Cloudmini multi-server plan',
+            'provider_options' => json_encode([
+                'preferred_outbound_ip' => '103.28.32.78',
+            ]),
+            'cloudmini_options' => [
+                'kind' => 'residential',
+                'protocol' => 'socks5',
+                'speed_limit_mbps' => '20',
+                'bandwidth_limit_mb' => '0',
+                'reserve_capacity' => '1',
+            ],
+            'provider_routes' => [
+                [
+                    'provider_account_id' => $primaryAccountId,
+                    'enabled' => '1',
+                    'priority' => '10',
+                    'weight' => '100',
+                    'locations' => ['vn-residential', 'vn-fpt'],
+                    'node_selector_type' => 'auto',
+                    'node_name' => '',
+                    'options' => '{"note":"primary"}',
+                ],
+                [
+                    'provider_account_id' => $fallbackAccountId,
+                    'enabled' => '1',
+                    'priority' => '20',
+                    'weight' => '100',
+                    'billing_group_id' => 'vn-residential',
+                    'node_selector_type' => 'node_name',
+                    'node_name' => 'node-hcm-01',
+                    'options' => '',
+                ],
+            ],
+        ])->assertRedirect('/admin/products');
+
+        $product = Product::where('code', 'cloudmini-res-30d')->firstOrFail();
+        $this->assertSame('residential', $product->provider_options['kind']);
+        $this->assertSame('socks5', $product->provider_options['protocol']);
+        $this->assertSame(20, $product->provider_options['speed_limit_mbps']);
+        $this->assertSame(0, $product->provider_options['bandwidth_limit_mb']);
+        $this->assertTrue($product->provider_options['reserve_capacity']);
+        $this->assertSame('103.28.32.78', $product->provider_options['preferred_outbound_ip']);
+        $this->assertDatabaseHas('product_provider_routes', [
+            'product_id' => $product->id,
+            'provider_account_id' => $primaryAccountId,
+            'priority' => 10,
+            'billing_group_id' => 'vn-residential',
+            'node_selector_type' => 'auto',
+        ]);
+        $this->assertDatabaseHas('product_provider_routes', [
+            'product_id' => $product->id,
+            'provider_account_id' => $primaryAccountId,
+            'priority' => 10,
+            'billing_group_id' => 'vn-fpt',
+            'node_selector_type' => 'auto',
+        ]);
+        $this->assertDatabaseHas('product_provider_routes', [
+            'product_id' => $product->id,
+            'provider_account_id' => $fallbackAccountId,
+            'priority' => 20,
+            'billing_group_id' => 'vn-residential',
+            'node_selector_type' => 'node_name',
+            'node_name' => 'node-hcm-01',
+        ]);
     }
 
     public function test_customer_cannot_access_admin_product_pages(): void

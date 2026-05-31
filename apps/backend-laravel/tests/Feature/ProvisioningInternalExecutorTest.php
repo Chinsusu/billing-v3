@@ -12,6 +12,7 @@ use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Str;
 use Tests\TestCase;
 
 class ProvisioningInternalExecutorTest extends TestCase
@@ -168,6 +169,218 @@ class ProvisioningInternalExecutorTest extends TestCase
             ->where('action', 'provider_lifecycle_lookup')
             ->where('status', 'success')
             ->count());
+    }
+
+    public function test_internal_executor_runs_cloudmini_v3_with_route_fallback_and_operation_polling(): void
+    {
+        config(['services.internal_provisioning.token' => 'secret-token']);
+        $user = User::factory()->create();
+        ProvisioningProviderAccount::create([
+            'slug' => 'sandbox',
+            'name' => 'Sandbox Provisioning',
+            'driver' => 'sandbox',
+            'auth_type' => 'none',
+            'enabled' => true,
+            'timeout_seconds' => 15,
+            'request_template' => [],
+            'response_external_id_path' => 'external_id',
+            'response_status_path' => 'status',
+        ]);
+        $primaryAccount = ProvisioningProviderAccount::create([
+            'slug' => 'cloudmini-prod-1',
+            'name' => 'Cloudmini Prod 1',
+            'driver' => 'cloudmini_v3',
+            'base_url' => 'https://cloudmini-prod-1.example.test',
+            'auth_type' => 'header',
+            'auth_header_name' => 'X-API-Key',
+            'api_key' => 'cloudmini-secret-1111',
+            'api_key_last_four' => '1111',
+            'enabled' => true,
+            'timeout_seconds' => 15,
+            'request_template' => [],
+            'response_external_id_path' => 'resource_snapshot.id',
+            'response_status_path' => 'state',
+        ]);
+        $fallbackAccount = ProvisioningProviderAccount::create([
+            'slug' => 'cloudmini-prod-2',
+            'name' => 'Cloudmini Prod 2',
+            'driver' => 'cloudmini_v3',
+            'base_url' => 'https://cloudmini-prod-2.example.test',
+            'auth_type' => 'header',
+            'auth_header_name' => 'X-API-Key',
+            'api_key' => 'cloudmini-secret-2222',
+            'api_key_last_four' => '2222',
+            'enabled' => true,
+            'timeout_seconds' => 15,
+            'request_template' => [],
+            'response_external_id_path' => 'resource_snapshot.id',
+            'response_status_path' => 'state',
+        ]);
+        $product = Product::factory()->create([
+            'code' => 'cloudmini-res-30d',
+            'name' => 'Cloudmini Residential 30 Days',
+            'type' => 'proxy',
+            'status' => 'active',
+            'provider_options' => [
+                'kind' => 'residential',
+                'protocol' => 'socks5',
+                'speed_limit_mbps' => 20,
+                'bandwidth_limit_mb' => 0,
+                'reserve_capacity' => false,
+            ],
+        ]);
+        $order = Order::factory()->for($user)->create();
+        $item = OrderItem::factory()->for($order)->for($product)->create([
+            'product_code' => $product->code,
+            'product_name' => $product->name,
+            'product_type' => $product->type,
+        ]);
+        $service = Service::factory()->for($user)->for($order)->for($item, 'orderItem')->for($product)->create([
+            'product_code' => $product->code,
+            'product_name' => $product->name,
+            'product_type' => $product->type,
+        ]);
+        $job = ProvisioningJob::create([
+            'order_id' => $order->id,
+            'service_id' => $service->id,
+            'user_id' => $user->id,
+            'type' => 'provision_service',
+            'status' => 'processing',
+            'attempts' => 1,
+            'idempotency_key' => "service-provision:{$service->id}",
+            'payload' => [
+                'action' => 'provision',
+                'order_id' => $order->id,
+                'service_id' => $service->id,
+                'user_id' => $user->id,
+                'product' => [
+                    'id' => $product->id,
+                    'code' => $product->code,
+                    'name' => $product->name,
+                    'type' => $product->type,
+                    'duration_days' => $product->duration_days,
+                    'config' => [],
+                    'lifecycle_policy' => ['source' => 'local_policy'],
+                    'provider' => [
+                        'driver' => 'cloudmini_v3',
+                        'options' => $product->provider_options,
+                        'routes' => [
+                            [
+                                'provider_account_id' => $primaryAccount->id,
+                                'account_slug' => $primaryAccount->slug,
+                                'priority' => 10,
+                                'weight' => 100,
+                                'billing_group_id' => 'vn-residential',
+                                'node_selector_type' => 'auto',
+                                'node_name' => null,
+                                'options' => [],
+                            ],
+                            [
+                                'provider_account_id' => $fallbackAccount->id,
+                                'account_slug' => $fallbackAccount->slug,
+                                'priority' => 20,
+                                'weight' => 100,
+                                'billing_group_id' => 'vn-residential',
+                                'node_selector_type' => 'auto',
+                                'node_name' => null,
+                                'options' => [],
+                            ],
+                        ],
+                    ],
+                ],
+            ],
+            'available_at' => now(),
+        ]);
+
+        Http::fake([
+            'https://cloudmini-prod-1.example.test/api/v3/inventory/groups?kind=residential' => Http::response([
+                'success' => true,
+                'data' => [[
+                    'id' => (string) Str::uuid(),
+                    'billing_group_id' => 'vn-residential',
+                    'sell_state' => 'exhausted',
+                    'allocatable_units' => 0,
+                    'free_ip_count' => 0,
+                ]],
+            ]),
+            'https://cloudmini-prod-2.example.test/api/v3/inventory/groups?kind=residential' => Http::response([
+                'success' => true,
+                'data' => [[
+                    'id' => '00000000-0000-4000-8000-000000000002',
+                    'billing_group_id' => 'vn-residential',
+                    'sell_state' => 'sellable',
+                    'allocatable_units' => 3,
+                    'free_ip_count' => 3,
+                ]],
+            ]),
+            'https://cloudmini-prod-2.example.test/api/v3/inventory/nodes?kind=residential&group_id=00000000-0000-4000-8000-000000000002' => Http::response([
+                'success' => true,
+                'data' => [[
+                    'id' => '00000000-0000-4000-8000-000000000102',
+                    'group_id' => '00000000-0000-4000-8000-000000000002',
+                    'name' => 'node-hcm-02',
+                    'sell_state' => 'sellable',
+                    'allocatable_units' => 2,
+                    'free_ip_count' => 2,
+                ]],
+            ]),
+            'https://cloudmini-prod-2.example.test/api/v3/proxies' => Http::response([
+                'success' => true,
+                'data' => [
+                    'resource' => ['id' => 'proxy-2', 'status' => 'provisioning'],
+                    'operation' => ['id' => 'operation-2', 'state' => 'accepted', 'resource_id' => 'proxy-2'],
+                ],
+            ], 202),
+            'https://cloudmini-prod-2.example.test/api/v3/operations/operation-2' => Http::response([
+                'success' => true,
+                'data' => [
+                    'id' => 'operation-2',
+                    'state' => 'succeeded',
+                    'resource_id' => 'proxy-2',
+                    'resource_snapshot' => [
+                        'id' => 'proxy-2',
+                        'status' => 'running',
+                        'host' => '103.28.32.78',
+                        'port_socks' => 14496,
+                        'username' => 'u_proxy',
+                        'password' => 'generated-password',
+                        'connection_uri' => 'socks5://u_proxy:generated-password@103.28.32.78:14496',
+                    ],
+                ],
+            ]),
+        ]);
+
+        $this->postJson("/internal/provisioning/jobs/{$job->id}/execute", [], [
+            'Authorization' => 'Bearer secret-token',
+        ])
+            ->assertOk()
+            ->assertJson([
+                'status' => 'processed',
+                'external_id' => 'proxy-2',
+                'config' => [
+                    'id' => 'proxy-2',
+                    'status' => 'running',
+                    'host' => '103.28.32.78',
+                    'port_socks' => 14496,
+                    'username' => 'u_proxy',
+                    'password' => 'generated-password',
+                    'connection_uri' => 'socks5://u_proxy:generated-password@103.28.32.78:14496',
+                ],
+            ]);
+
+        Http::assertSent(function ($request) use ($service): bool {
+            $payload = $request->data();
+
+            return $request->url() === 'https://cloudmini-prod-2.example.test/api/v3/proxies'
+                && $request->hasHeader('X-API-Key', 'cloudmini-secret-2222')
+                && $request->hasHeader('Idempotency-Key', "service-provision:{$service->id}")
+                && $payload['kind'] === 'residential'
+                && $payload['group_id'] === '00000000-0000-4000-8000-000000000002'
+                && $payload['node_id'] === '00000000-0000-4000-8000-000000000102'
+                && $payload['protocol'] === 'socks5'
+                && $payload['speed_limit_mbps'] === 20
+                && $payload['external_ref'] === $service->id;
+        });
     }
 
     private function provisioningJobForProvider(array $providerOverrides, array $productOverrides = []): ProvisioningJob

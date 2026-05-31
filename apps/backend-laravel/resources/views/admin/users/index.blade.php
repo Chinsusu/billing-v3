@@ -1,20 +1,24 @@
 @extends('layouts.admin', ['title' => 'Admin Users'])
 @section('content')
-<div class="panel">
-    <h1>Users &amp; Roles</h1>
-    <p>
+<x-page-header title="Users & Roles" eyebrow="Security">
+    <x-slot:actions>
         @can('users.manage')
             <a class="button" href="/admin/users/create">Create User</a>
         @endcan
         <a class="button secondary" href="/admin/roles">Roles</a>
-    </p>
-    <form method="GET" action="/admin/users">
-        <div class="grid">
-            <label>Search
-                <input name="search" value="{{ $filters['search'] }}" placeholder="Email or name">
+    </x-slot:actions>
+</x-page-header>
+
+<div class="panel invoice-filter-panel admin-user-filter-panel">
+    <form class="invoice-filter-form" method="GET" action="/admin/users">
+        <div class="invoice-filter-fields admin-filter-fields--2">
+            <label class="invoice-filter-field" for="admin-user-search">
+                <span>Search</span>
+                <input id="admin-user-search" name="search" value="{{ $filters['search'] }}" placeholder="Search user" list="admin-user-search-options" autocomplete="off">
             </label>
-            <label>Role
-                <select name="role">
+            <label class="invoice-filter-field" for="admin-user-role">
+                <span>Role</span>
+                <select id="admin-user-role" name="role">
                     <option value="">All roles</option>
                     @foreach ($roles as $role)
                         <option value="{{ $role->name }}" @selected($filters['role'] === $role->name)>{{ $role->name }}</option>
@@ -22,8 +26,15 @@
                 </select>
             </label>
         </div>
-        <button type="submit">Filter</button>
-        <a href="/admin/users">Clear</a>
+        <div class="invoice-filter-actions">
+            <button type="submit">Filter</button>
+            <a class="button secondary button-soft" href="/admin/users">Clear</a>
+        </div>
+        <datalist id="admin-user-search-options">
+            @foreach ($userSearchOptions as $userOption)
+                <option value="{{ $userOption['value'] }}" label="{{ $userOption['label'] }}"></option>
+            @endforeach
+        </datalist>
     </form>
 </div>
 

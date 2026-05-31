@@ -4,6 +4,7 @@ namespace Tests\Feature;
 
 use App\Models\Order;
 use App\Models\OrderItem;
+use App\Models\Invoice;
 use App\Models\Product;
 use App\Models\ProviderActionJob;
 use App\Models\ProvisioningExecutionLog;
@@ -25,8 +26,19 @@ class ServiceRunbookTest extends TestCase
         $service = $this->serviceFor($customer, [
             'status' => 'active',
             'external_id' => 'provider-service-runbook',
+            'config' => [
+                'host' => '103.28.32.78',
+                'username' => 'proxy-user',
+                'password' => 'proxy-password',
+                'port_socks' => 14496,
+            ],
             'provisioned_at' => now(),
             'expires_at' => now()->addDays(10),
+        ]);
+        Invoice::factory()->for($customer)->create([
+            'invoice_number' => 'INV-SERVICE-CUSTOMER',
+            'status' => 'paid',
+            'total_amount' => 100000,
         ]);
         $provisioningJob = $this->provisioningJob($service, ['status' => 'processed']);
         $providerActionJob = $this->providerActionJob($service, [
@@ -53,11 +65,16 @@ class ServiceRunbookTest extends TestCase
         $this->actingAs($admin)
             ->get("/admin/services/{$service->id}")
             ->assertOk()
-            ->assertSee('Service Runbook')
+            ->assertSee('Service Detail')
             ->assertSee('runbook-customer@example.test')
+            ->assertSee('103.28.32.78')
+            ->assertSee('proxy-user')
+            ->assertSee('14496')
             ->assertSee($service->product_name)
             ->assertSee($service->external_id)
             ->assertSee($service->order->order_number)
+            ->assertSee($service->order_id)
+            ->assertSee('INV-SERVICE-CUSTOMER')
             ->assertSee($provisioningJob->idempotency_key)
             ->assertSee($providerActionJob->idempotency_key)
             ->assertSee('Provider sync failed.')

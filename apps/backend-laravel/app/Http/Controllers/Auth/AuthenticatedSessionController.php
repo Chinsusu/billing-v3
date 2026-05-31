@@ -78,7 +78,7 @@ class AuthenticatedSessionController extends Controller
             return redirect('/mfa/setup');
         }
 
-        return redirect()->intended('/dashboard');
+        return redirect()->intended($this->homePathFor($user));
     }
 
     public function destroy(Request $request): RedirectResponse
@@ -88,5 +88,10 @@ class AuthenticatedSessionController extends Controller
         $request->session()->regenerateToken();
 
         return redirect('/login');
+    }
+
+    private function homePathFor(User $user): string
+    {
+        return $user->can('admin.access') ? '/admin' : '/dashboard';
     }
 }

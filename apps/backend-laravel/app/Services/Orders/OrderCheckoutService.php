@@ -25,7 +25,7 @@ class OrderCheckoutService
     public function checkout(User $user, Product $product): Order
     {
         return DB::transaction(function () use ($user, $product): Order {
-            $product->loadMissing('providerAccount');
+            $product->loadMissing('providerAccount', 'providerRoutes.providerAccount');
             $providerAccount = $product->providerAccount ?: ProvisioningProviderAccount::where('slug', 'sandbox')->first();
             $lifecyclePolicy = $this->lifecyclePolicy->forProduct($product);
             $providerSnapshot = $this->providerSnapshot($product, $providerAccount);
@@ -129,6 +129,42 @@ class OrderCheckoutService
 
     private function providerSnapshot(Product $product, ?ProvisioningProviderAccount $providerAccount): array
     {
+        $routes = $product->providerRoutes
+            ->filter(fn ($route): bool => $route->enabled && $route->providerAccount?->driver === 'cloudmini_v3')
+            ->sortBy([
+                ['priority', 'asc'],
+                ['id', 'asc'],
+            ])
+            ->map(fn ($route): array => [
+                'provider_account_id' => $route->provider_account_id,
+                'account_slug' => $route->providerAccount?->slug,
+                'priority' => $route->priority,
+                'weight' => $route->weight,
+                'billing_group_id' => $route->billing_group_id,
+                'node_selector_type' => $route->node_selector_type,
+                'node_name' => $route->node_name,
+                'options' => $route->options ?? [],
+            ])
+            ->values()
+            ->all();
+
+        if ($routes !== []) {
+            return [
+                'account_id' => null,
+                'account_slug' => null,
+                'driver' => 'cloudmini_v3',
+                'plan_code' => $product->provider_plan_code,
+                'region' => $product->provider_region,
+                'provision_path' => null,
+                'renew_path' => null,
+                'suspend_path' => null,
+                'cancel_path' => null,
+                'sync_path' => null,
+                'options' => $product->provider_options ?? [],
+                'routes' => $routes,
+            ];
+        }
+
         return [
             'account_id' => $providerAccount?->id,
             'account_slug' => $providerAccount?->slug ?? 'sandbox',

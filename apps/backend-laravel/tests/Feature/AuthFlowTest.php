@@ -49,6 +49,22 @@ class AuthFlowTest extends TestCase
         $this->assertGuest();
     }
 
+    public function test_admin_login_defaults_to_admin_dashboard(): void
+    {
+        $this->seed(RolesAndPermissionsSeeder::class);
+        $admin = User::factory()->create([
+            'email' => 'admin-login@example.test',
+            'password' => Hash::make('Password123!'),
+        ]);
+        $admin->assignRole('super_admin');
+
+        $this->post('/login', [
+            'email' => 'admin-login@example.test',
+            'password' => 'Password123!',
+        ])->assertRedirect('/admin');
+        $this->assertAuthenticatedAs($admin);
+    }
+
     public function test_guest_is_redirected_from_dashboard(): void
     {
         $this->get('/dashboard')->assertRedirect('/login');

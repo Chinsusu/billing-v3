@@ -3,6 +3,8 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Models\Invoice;
+use App\Models\LedgerEntry;
 use App\Models\Service;
 use App\Services\Services\ServiceAutoRenewalPolicy;
 use Illuminate\View\View;
@@ -12,7 +14,7 @@ class ServiceController extends Controller
     public function index(): View
     {
         return view('admin.services.index', [
-            'services' => Service::with(['user', 'product', 'autoRenewalAttempts' => fn ($query) => $query->latest()])
+            'services' => Service::with(['user', 'order', 'orderItem', 'product', 'autoRenewalAttempts' => fn ($query) => $query->latest()])
                 ->latest()
                 ->paginate(20),
         ]);
@@ -33,9 +35,31 @@ class ServiceController extends Controller
             'autoRenewalAttempts' => fn ($query) => $query->latest(),
         ]);
 
+        $ledgerEntries = LedgerEntry::query()
+            ->where(fn ($query) => $query
+                ->where('source_type', 'order')
+                ->where('source_id', $service->order_id))
+            ->orWhere(fn ($query) => $query
+                ->where('source_type', 'service')
+                ->where('source_id', $service->id))
+            ->orWhere(fn ($query) => $query
+                ->where('user_id', $service->user_id)
+                ->where('meta->service_id', $service->id))
+            ->latest()
+            ->limit(10)
+            ->get();
+
+        $relatedInvoices = Invoice::query()
+            ->where('user_id', $service->user_id)
+            ->latest()
+            ->limit(10)
+            ->get();
+
         return view('admin.services.show', [
             'service' => $service,
             'autoRenewalPolicy' => $renewalPolicy->forService($service),
+            'ledgerEntries' => $ledgerEntries,
+            'relatedInvoices' => $relatedInvoices,
         ]);
     }
 }

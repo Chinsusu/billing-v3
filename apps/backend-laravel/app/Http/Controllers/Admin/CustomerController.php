@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\LedgerEntry;
 use App\Models\User;
+use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
 
@@ -21,29 +22,97 @@ class CustomerController extends Controller
                         ->orWhere('name', 'like', "%{$search}%");
                 });
             })
-            ->withCount(['invoices', 'orders', 'services'])
+            ->with(['wallets' => fn ($query) => $query->orderBy('currency')])
+            ->withCount([
+                'invoices',
+                'orders',
+                'services as active_services_count' => fn ($query) => $query->where('status', 'active'),
+                'services as suspended_services_count' => fn ($query) => $query->where('status', 'suspended'),
+                'services as cancelled_services_count' => fn ($query) => $query->where('status', 'cancelled'),
+            ])
             ->latest()
             ->paginate(20)
             ->withQueryString();
 
+        $customerOptions = User::role('customer')
+            ->when($search !== '', function ($query) use ($search): void {
+                $query->where(function ($query) use ($search): void {
+                    $query->where('email', 'like', "%{$search}%")
+                        ->orWhere('name', 'like', "%{$search}%");
+                });
+            })
+            ->orderBy('email')
+            ->limit(120)
+            ->get(['email', 'name'])
+            ->map(fn (User $user): array => [
+                'value' => $user->email,
+                'label' => $user->name,
+            ])
+            ->all();
+
         return view('admin.customers.index', [
             'customers' => $customers,
             'search' => $search,
+            'customerOptions' => $customerOptions,
         ]);
     }
 
-    public function show(User $user): View
+    public function show(Request $request, User $user): View
     {
         $user->load('reseller');
+        $activityPerPage = 10;
+        $activeCustomerTab = $this->activeCustomerTab($request);
 
         return view('admin.customers.show', [
             'customer' => $user,
+            'activeCustomerTab' => $activeCustomerTab,
             'resellers' => User::role('reseller')->orderBy('email')->get(),
             'wallets' => $user->wallets()->latest()->get(),
-            'ledgerEntries' => LedgerEntry::where('user_id', $user->id)->latest()->limit(20)->get(),
-            'invoices' => $user->invoices()->latest()->limit(10)->get(),
-            'orders' => $user->orders()->latest()->limit(10)->get(),
-            'services' => $user->services()->latest()->limit(10)->get(),
+            'ledgerEntries' => $this->activityPaginator(
+                LedgerEntry::where('user_id', $user->id)->latest(),
+                $request,
+                'ledger_page',
+                'ledger',
+                $activityPerPage,
+            ),
+            'invoices' => $this->activityPaginator(
+                $user->invoices()->latest(),
+                $request,
+                'invoices_page',
+                'invoices',
+                $activityPerPage,
+            ),
+            'orders' => $this->activityPaginator(
+                $user->orders()->latest(),
+                $request,
+                'orders_page',
+                'orders',
+                $activityPerPage,
+            ),
+            'services' => $this->activityPaginator(
+                $user->services()->latest(),
+                $request,
+                'services_page',
+                'services',
+                $activityPerPage,
+            ),
         ]);
+    }
+
+    private function activeCustomerTab(Request $request): string
+    {
+        $tab = (string) $request->query('activity_tab', 'details');
+
+        return in_array($tab, ['details', 'ledger', 'invoices', 'orders', 'services'], true) ? $tab : 'details';
+    }
+
+    private function activityPaginator($query, Request $request, string $pageName, string $tab, int $perPage): LengthAwarePaginator
+    {
+        return $query
+            ->paginate($perPage, ['*'], $pageName)
+            ->appends(array_merge(
+                $request->except(['activity_tab', 'ledger_page', 'invoices_page', 'orders_page', 'services_page']),
+                ['activity_tab' => $tab],
+            ));
     }
 }

@@ -38,10 +38,27 @@ class UserController extends Controller
             ->paginate(20)
             ->withQueryString();
 
+        $userSearchOptions = User::query()
+            ->when($search !== '', function ($query) use ($search): void {
+                $query->where(function ($query) use ($search): void {
+                    $query->where('email', 'like', "%{$search}%")
+                        ->orWhere('name', 'like', "%{$search}%");
+                });
+            })
+            ->orderBy('email')
+            ->limit(120)
+            ->get(['email', 'name'])
+            ->map(fn (User $user): array => [
+                'value' => $user->email,
+                'label' => $user->name,
+            ])
+            ->all();
+
         return view('admin.users.index', [
             'users' => $users,
             'roles' => Role::orderBy('name')->get(),
             'filters' => ['search' => $search, 'role' => $role],
+            'userSearchOptions' => $userSearchOptions,
         ]);
     }
 
